@@ -9,9 +9,18 @@ class GridMap {
     constructor(w, l) {        
         this.w = w
         this.l = l
+        /** @type {?PositionedNode[]} */
+        this.nodes = Array(l * l)
     }
     get cw() {
         return this.w / this.l
+    }
+    /**
+     * 
+     * @param {PositionedNode} n 
+     */
+    addNode(n) {
+        this.nodes[n.x + n.y * this.l] = n
     }
     display(ctx) {
         ctx.scale(this.cw, this.cw)
@@ -25,6 +34,15 @@ class GridMap {
         }
         ctx.lineWidth = 2 / this.cw
         ctx.stroke()
+    }
+    /**
+     * 
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {?PositionedNode}
+     */
+    nodeAt(x, y) {
+        return this.nodes[x + y * this.l]
     }
 }
 
@@ -49,35 +67,44 @@ class PositionedNode {
     }
 }
 
-var c = document.getElementById("grid")
-if(c instanceof HTMLCanvasElement) {
-    var ctx = c.getContext("2d")
+class GridTest {
+    init() {
+        let c = document.getElementById("grid")
+        if(c instanceof HTMLCanvasElement) {
+            var ctx = c.getContext("2d")
 
-    let map = new GridMap(500, 10)
-    map.display(ctx)
+            let map = new GridMap(500, 10)
+            map.display(ctx)
 
-    let obstructions = []
-    for(let i = 0; i < 31; i++) {
-        obstructions.push(new PositionedNode(
-            Math.floor(Math.random() * 10),
-            Math.floor(Math.random() * 10),
-            "red"
-        ))
+            let obstructions = []
+            for(let i = 0; i < 31; i++) {
+                obstructions.push(new PositionedNode(
+                    Math.floor(Math.random() * 10),
+                    Math.floor(Math.random() * 10),
+                    "red"
+                ))
+            }
+
+            let start = new PositionedNode(
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10),
+                "green"
+            )
+            let finish = new PositionedNode(
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10),
+                "blue"
+            )
+            obstructions.forEach(o => map.addNode(o))
+            map.addNode(start) 
+            map.addNode(finish) 
+            obstructions.forEach(o => o.display(ctx))    
+            start.display(ctx)
+            finish.display(ctx)
+
+            this.map = map
+        } else {
+            console.log("Well, that's the wrong element type")
+        }
     }
-
-    let start = new PositionedNode(
-        Math.floor(Math.random() * 10),
-        Math.floor(Math.random() * 10),
-        "green"
-    )
-    let finish = new PositionedNode(
-        Math.floor(Math.random() * 10),
-        Math.floor(Math.random() * 10),
-        "blue"
-    )
-    obstructions.forEach(o => o.display(ctx))    
-    start.display(ctx)
-    finish.display(ctx)
-} else {
-    console.log("Well, that's the wrong element type")
 }
