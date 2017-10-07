@@ -84,56 +84,51 @@ class PositionedNode {
      */
     stepOut(ctx) {
         if(!this.routes) {
-            this.routes = [[this]]
+            this.routes = [this]
         }
         let new_routes = []
         let steps_taken = 0
         this.routes.forEach(path => {
-            /*
-            [1, -1].forEach(x => {
-                [1, -1].forEach(y => {
-                    if(!this.map.nodeAt(x + path[0].x, y + path[0].y)) {
-                        let p = new PositionedNode(x + path[0].x, y + path[0].y, "black")
-                        this.map.addNode(p)
-                        p.display(ctx)
-                        new_routes.push(
-                            [p].concat(path)
-                        )
-                    }
-                })
-            })
-            */
             [1, -1].forEach(x => {
                 if(
-                    this.map.validAddress(x + path[0].x, path[0].y) &&
-                    !this.map.nodeAt(x + path[0].x, path[0].y)
+                    this.map.validAddress(x + path.x, path.y) &&
+                    !this.map.nodeAt(x + path.x, path.y)
                 ) {
                     steps_taken++
-                    let p = new PositionedNode(x + path[0].x, path[0].y, "black")
+                    let p = new PathNode(x + path.x, path.y, path)
                     this.map.addNode(p)
                     p.display(ctx)
-                    new_routes.push(
-                        [p].concat(path)
-                    )
+                    new_routes.push(p)                    
                 }
             });
             [1, -1].forEach(y => {
                 if(
-                    this.map.validAddress(path[0].x, y + path[0].y) &&
-                    !this.map.nodeAt(path[0].x, y + path[0].y)
+                    this.map.validAddress(path.x, y + path.y) &&
+                    !this.map.nodeAt(path.x, y + path.y)
                 ) {
                     steps_taken++                    
-                    let p = new PositionedNode(path[0].x, y + path[0].y, "black")
+                    let p = new PathNode(path.x, y + path.y, path)
                     this.map.addNode(p)
                     p.display(ctx)
-                    new_routes.push(
-                        [p].concat(path)
-                    )
+                    new_routes.push(p)
                 }
             })
         })
         this.routes = new_routes
         return steps_taken
+    }
+}
+
+class PathNode extends PositionedNode {
+    /**
+     * 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {PositionedNode} from_node
+     */
+    constructor(x, y, from_node) {
+        super(x, y, "black")
+        this.from = from_node
     }
 }
 
