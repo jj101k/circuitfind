@@ -21,6 +21,7 @@ class GridMap {
      */
     addNode(n) {
         this.nodes[n.x + n.y * this.l] = n
+        n.map = this
     }
     display(ctx) {
         ctx.scale(this.cw, this.cw)
@@ -44,6 +45,15 @@ class GridMap {
     nodeAt(x, y) {
         return this.nodes[x + y * this.l]
     }
+    /**
+     * 
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {?boolean}
+     */
+    validAddress(x, y) {
+        return x >= 0 && y >= 0 && x < this.l && y < this.l
+    }
 }
 
 class PositionedNode {
@@ -57,6 +67,8 @@ class PositionedNode {
         this.x = x
         this.y = y
         this.colour = colour
+        /** @type {GridMap} */
+        this.map = null
     }
     display(ctx) {
         ctx.save()
@@ -64,6 +76,64 @@ class PositionedNode {
         ctx.fillStyle = this.colour
         ctx.fillRect(0.1, 0.1, 0.8, 0.8)
         ctx.restore()
+    }
+    /**
+     * 
+     * @param {*} ctx 
+     * @returns {number}
+     */
+    stepOut(ctx) {
+        if(!this.routes) {
+            this.routes = [[this]]
+        }
+        let new_routes = []
+        let steps_taken = 0
+        this.routes.forEach(path => {
+            /*
+            [1, -1].forEach(x => {
+                [1, -1].forEach(y => {
+                    if(!this.map.nodeAt(x + path[0].x, y + path[0].y)) {
+                        let p = new PositionedNode(x + path[0].x, y + path[0].y, "black")
+                        this.map.addNode(p)
+                        p.display(ctx)
+                        new_routes.push(
+                            [p].concat(path)
+                        )
+                    }
+                })
+            })
+            */
+            [1, -1].forEach(x => {
+                if(
+                    this.map.validAddress(x + path[0].x, path[0].y) &&
+                    !this.map.nodeAt(x + path[0].x, path[0].y)
+                ) {
+                    steps_taken++
+                    let p = new PositionedNode(x + path[0].x, path[0].y, "black")
+                    this.map.addNode(p)
+                    p.display(ctx)
+                    new_routes.push(
+                        [p].concat(path)
+                    )
+                }
+            });
+            [1, -1].forEach(y => {
+                if(
+                    this.map.validAddress(path[0].x, y + path[0].y) &&
+                    !this.map.nodeAt(path[0].x, y + path[0].y)
+                ) {
+                    steps_taken++                    
+                    let p = new PositionedNode(path[0].x, y + path[0].y, "black")
+                    this.map.addNode(p)
+                    p.display(ctx)
+                    new_routes.push(
+                        [p].concat(path)
+                    )
+                }
+            })
+        })
+        this.routes = new_routes
+        return steps_taken
     }
 }
 
@@ -101,6 +171,16 @@ class GridTest {
             obstructions.forEach(o => o.display(ctx))    
             start.display(ctx)
             finish.display(ctx)
+
+            start.stepOut(ctx)
+            finish.stepOut(ctx)
+
+            let i = setInterval(() => {
+                if(!start.stepOut(ctx) && !finish.stepOut(ctx)) {
+                    clearTimeout(i)
+                    console.log("done")
+                }
+            }, 1000)
 
             this.map = map
         } else {
