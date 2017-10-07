@@ -176,7 +176,7 @@ class GridTest {
             finish.stepOut(ctx)
 
             let i = setInterval(() => {
-                if(!start.stepOut(ctx) && !finish.stepOut(ctx)) {
+                if(start.stepOut(ctx) + finish.stepOut(ctx) == 0) {
                     clearTimeout(i)
                     console.log("done")
                 }
