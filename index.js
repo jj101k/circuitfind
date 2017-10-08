@@ -203,7 +203,7 @@ class GridTest {
                     clearTimeout(i)
                     console.log("done")
                 }
-            }, 1000)
+            }, 100)
 
             this.map = map
         } else {
