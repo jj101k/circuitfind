@@ -108,6 +108,7 @@ class PositionedNode {
                         return true
                     }
                 }
+                return false
             })
             if(found_on_this_route) {
                 return found_on_this_route
