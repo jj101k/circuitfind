@@ -215,6 +215,11 @@ class GridTest {
                     }
                     clearTimeout(i)
                     console.log("done")
+                    console.log(JSON.stringify({
+                        start: start.position,
+                        finish: finish.position,
+                        obstructions: obstructions.map(o => o.position)
+                    }))
                 }
             }, 100)
 
