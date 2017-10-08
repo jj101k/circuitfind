@@ -156,7 +156,7 @@ class GridTest {
         if(c instanceof HTMLCanvasElement) {
             var ctx = c.getContext("2d")
 
-            let map = new GridMap(500, 10)
+            let map = new GridMap(250, 10)
             map.display(ctx)
 
             let obstructions = []
