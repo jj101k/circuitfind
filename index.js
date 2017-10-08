@@ -88,34 +88,57 @@ class PositionedNode {
         }
         let new_routes = []
         let steps_taken = 0
-        this.routes.forEach(path => {
-            [1, -1].forEach(x => {
-                if(
-                    this.map.validAddress(x + path.x, path.y) &&
-                    !this.map.nodeAt(x + path.x, path.y)
-                ) {
-                    steps_taken++
-                    let p = new PathNode(x + path.x, path.y, path)
-                    this.map.addNode(p)
-                    p.display(ctx)
-                    new_routes.push(p)                    
+        let route_found = this.routes.some(path => {
+            let found_on_this_route
+            found_on_this_route = [1, -1].some(x => {
+                if(this.map.validAddress(x + path.x, path.y)) {
+                    let existing_node = this.map.nodeAt(x + path.x, path.y)
+                    if(!existing_node) {
+                        steps_taken++
+                        let p = new PathNode(x + path.x, path.y, path)
+                        this.map.addNode(p)
+                        p.display(ctx)
+                        new_routes.push(p)
+                    } else if(
+                        existing_node instanceof PathNode && (
+                            (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
+                            (!(this instanceof PathNode) && existing_node.ownedBy !== this)
+                        )
+                    ) {
+                        return true
+                    }
                 }
-            });
-            [1, -1].forEach(y => {
-                if(
-                    this.map.validAddress(path.x, y + path.y) &&
-                    !this.map.nodeAt(path.x, y + path.y)
-                ) {
-                    steps_taken++                    
-                    let p = new PathNode(path.x, y + path.y, path)
-                    this.map.addNode(p)
-                    p.display(ctx)
-                    new_routes.push(p)
+            })
+            if(found_on_this_route) {
+                return found_on_this_route
+            }
+            return [1, -1].forEach(y => {
+                if(this.map.validAddress(path.x, y + path.y)) {
+                    let existing_node = this.map.nodeAt(path.x, y + path.y)
+                    if(!existing_node) {
+                        steps_taken++                    
+                        let p = new PathNode(path.x, y + path.y, path)
+                        this.map.addNode(p)
+                        p.display(ctx)
+                        new_routes.push(p)
+                    } else if(
+                        existing_node instanceof PathNode && (
+                            (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
+                            (!(this instanceof PathNode) && existing_node.ownedBy !== this)
+                        )
+                    ) {
+                        return true                     
+                    }
                 }
             })
         })
         this.routes = new_routes
-        return steps_taken
+        if(route_found) {
+            console.log("Route found")
+            return -1000000
+        } else {
+            return steps_taken
+        }
     }
 }
 
@@ -129,6 +152,11 @@ class PathNode extends PositionedNode {
     constructor(x, y, from_node) {
         super(x, y, "black")
         this.from = from_node
+        if(this.from instanceof PathNode) {
+            this.ownedBy = this.from.ownedBy
+        } else {
+            this.ownedBy = this.from
+        }
     }
 }
 
@@ -171,7 +199,7 @@ class GridTest {
             finish.stepOut(ctx)
 
             let i = setInterval(() => {
-                if(start.stepOut(ctx) + finish.stepOut(ctx) == 0) {
+                if(start.stepOut(ctx) <= 0 || finish.stepOut(ctx) <= 0) {
                     clearTimeout(i)
                     console.log("done")
                 }
