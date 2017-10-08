@@ -25,11 +25,11 @@ class GridMap {
     }
     display(ctx) {
         ctx.scale(this.cw, this.cw)
-        for(let x = 1; x < 10; x++) {
+        for(let x = 0; x <= 10; x++) {
             ctx.moveTo(x, 0)
             ctx.lineTo(x, this.l)
         }
-        for(let y = 1; y < 10; y++) {
+        for(let y = 0; y <= 10; y++) {
             ctx.moveTo(0, y)
             ctx.lineTo(this.l, y)
         }
