@@ -75,6 +75,9 @@ class PositionedNode {
             [1, -1].map(y => ({x: this.x, y: y + this.y}))
         )
     }
+    get position() {
+        return {x: this.x, y: this.y}
+    }
     display(ctx) {
         ctx.save()
         ctx.translate(this.x, this.y)
@@ -170,11 +173,18 @@ class GridTest {
                 Math.floor(Math.random() * 10),
                 "green"
             )
-            let finish = new PositionedNode(
-                Math.floor(Math.random() * 10),
-                Math.floor(Math.random() * 10),
-                "blue"
+            let finish
+            do {
+                finish = new PositionedNode(
+                    Math.floor(Math.random() * 10),
+                    Math.floor(Math.random() * 10),
+                    "blue"
+                )
+            } while(
+                finish.position.x == start.position.x &&
+                finish.position.y == start.position.y
             )
+
             obstructions.forEach(o => map.addNode(o))
             map.addNode(start) 
             map.addNode(finish) 
