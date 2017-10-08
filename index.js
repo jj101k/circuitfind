@@ -70,6 +70,11 @@ class PositionedNode {
         /** @type {GridMap} */
         this.map = null
     }
+    get nextSteps() {
+        return [1, -1].map(x => ({x: x + this.x, y: this.y})).concat(
+            [1, -1].map(y => ({x: this.x, y: y + this.y}))
+        )
+    }
     display(ctx) {
         ctx.save()
         ctx.translate(this.x, this.y)
@@ -80,7 +85,7 @@ class PositionedNode {
     /**
      * 
      * @param {*} ctx 
-     * @returns {number}
+     * @returns {?PositionedNode[]}
      */
     stepOut(ctx) {
         if(!this.routes) {
@@ -88,11 +93,9 @@ class PositionedNode {
         }
         let new_routes = []
         let steps_taken = 0
+        let route
         let route_found = this.routes.some(path => {
-            let next_steps = [1, -1].map(x => ({x: x + path.x, y: path.y})).concat(
-                [1, -1].map(y => ({x: path.x, y: y + path.y}))
-            )
-            return next_steps.some(step => {
+            return path.nextSteps.some(step => {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
@@ -107,6 +110,7 @@ class PositionedNode {
                             (!(this instanceof PathNode) && existing_node.ownedBy !== this)
                         )
                     ) {
+                        route = [path, existing_node]
                         return true
                     }
                 }
@@ -116,9 +120,11 @@ class PositionedNode {
         this.routes = new_routes
         if(route_found) {
             console.log("Route found")
-            return -1000000
+            return route
+        } else if(steps_taken > 0) {
+            return null
         } else {
-            return steps_taken
+            return []
         }
     }
 }
@@ -180,7 +186,8 @@ class GridTest {
             finish.stepOut(ctx)
 
             let i = setInterval(() => {
-                if(start.stepOut(ctx) <= 0 || finish.stepOut(ctx) <= 0) {
+                let route = start.stepOut(ctx) || finish.stepOut(ctx)
+                if(route) {
                     clearTimeout(i)
                     console.log("done")
                 }
