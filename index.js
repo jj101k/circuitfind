@@ -89,13 +89,15 @@ class PositionedNode {
         let new_routes = []
         let steps_taken = 0
         let route_found = this.routes.some(path => {
-            let found_on_this_route
-            found_on_this_route = [1, -1].some(x => {
-                if(this.map.validAddress(x + path.x, path.y)) {
-                    let existing_node = this.map.nodeAt(x + path.x, path.y)
+            let next_steps = [1, -1].map(x => ({x: x + path.x, y: path.y})).concat(
+                [1, -1].map(y => ({x: path.x, y: y + path.y}))
+            )
+            return next_steps.some(step => {
+                if(this.map.validAddress(step.x, step.y)) {
+                    let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
                         steps_taken++
-                        let p = new PathNode(x + path.x, path.y, path)
+                        let p = new PathNode(step.x, step.y, path)
                         this.map.addNode(p)
                         p.display(ctx)
                         new_routes.push(p)
@@ -109,28 +111,6 @@ class PositionedNode {
                     }
                 }
                 return false
-            })
-            if(found_on_this_route) {
-                return found_on_this_route
-            }
-            return [1, -1].forEach(y => {
-                if(this.map.validAddress(path.x, y + path.y)) {
-                    let existing_node = this.map.nodeAt(path.x, y + path.y)
-                    if(!existing_node) {
-                        steps_taken++                    
-                        let p = new PathNode(path.x, y + path.y, path)
-                        this.map.addNode(p)
-                        p.display(ctx)
-                        new_routes.push(p)
-                    } else if(
-                        existing_node instanceof PathNode && (
-                            (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
-                            (!(this instanceof PathNode) && existing_node.ownedBy !== this)
-                        )
-                    ) {
-                        return true                     
-                    }
-                }
             })
         })
         this.routes = new_routes
