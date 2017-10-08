@@ -188,6 +188,21 @@ class GridTest {
             let i = setInterval(() => {
                 let route = start.stepOut(ctx) || finish.stepOut(ctx)
                 if(route) {
+                    if(route.length) {
+                        let [a, b] = route
+                        while(a instanceof PathNode) {
+                            a.colour = "orange"
+                            a.display(ctx)
+                            a = a.from
+                        }
+                        while(b instanceof PathNode) {
+                            b.colour = "orange"
+                            b.display(ctx)
+                            b = b.from
+                        }
+                    } else {
+                        console.log("No route found")
+                    }
                     clearTimeout(i)
                     console.log("done")
                 }
