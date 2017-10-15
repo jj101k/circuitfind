@@ -71,9 +71,15 @@ class PositionedNode {
         this.map = null
     }
     get nextSteps() {
-        return [1, -1].map(x => ({x: x + this.x, y: this.y})).concat(
-            [1, -1].map(y => ({x: this.x, y: y + this.y}))
-        )
+        let steps = [];
+        [-1, 0, 1].forEach(x => {
+            [-1, 0, 1].forEach(y => {
+                if(y || x) {
+                    steps.push({x: x + this.x, y: y + this.y})
+                }
+            })
+        })
+        return steps
     }
     get position() {
         return {x: this.x, y: this.y}
