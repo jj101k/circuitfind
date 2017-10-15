@@ -71,14 +71,17 @@ class PositionedNode {
         this.map = null
     }
     get nextSteps() {
-        let steps = [];
+        let steps = {
+            cheap: [],
+            expensive: [],
+        };
         [-1, 1].forEach(o => {
-            steps.push({x: o + this.x, y: this.y})
-            steps.push({x: this.x, y: o + this.y})
+            steps.cheap.push({x: o + this.x, y: this.y})
+            steps.cheap.push({x: this.x, y: o + this.y})
         });
         [-1, 1].forEach(x => {
             [-1, 1].forEach(y => {
-                steps.push({x: x + this.x, y: y + this.y})
+                steps.expensive.push({x: x + this.x, y: y + this.y})
             })
         })
         return steps
@@ -97,14 +100,16 @@ class PositionedNode {
      * 
      * @param {*} ctx
      * @param {PositionedNode} target
+     * @param {boolean} cheap
      * @returns {?PositionedNode[]}
      */
-    stepOut(ctx, target) {
+    stepOut(ctx, target, cheap) {
         if(!this.routes) {
             this.routes = {
                 0: [this],
                 2: [],
                 4: [],
+                6: [],
             }
         }
         let new_routes = {
@@ -112,8 +117,10 @@ class PositionedNode {
             6: [],
         }
         let route
+
+        let step_type = cheap ? "cheap" : "expensive"
         let route_found = this.routes[0].some(path => {
-            return path.nextSteps.some(step => {
+            return path.nextSteps[step_type].some(step => {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
@@ -137,11 +144,11 @@ class PositionedNode {
                 return false
             })
         })
-        this.routes[0].forEach(path => {if(path !== this) path.display(ctx, "black")})
         this.routes = {
-            0: this.routes[2],
-            2: this.routes[4].concat(new_routes[4]),
-            4: new_routes[6],
+            0: this.routes[0],
+            2: this.routes[2],
+            4: this.routes[4].concat(new_routes[4]),
+            6: this.routes[6].concat(new_routes[6]),
         }
         if(route_found) {
             console.log("Route found")
@@ -150,6 +157,15 @@ class PositionedNode {
             return null
         } else {
             return []
+        }
+    }
+    stepRoutes(ctx) {
+        this.routes[0].forEach(path => {if(path !== this) path.display(ctx, "black")})
+        this.routes = {
+            0: this.routes[2],
+            2: this.routes[4],
+            4: this.routes[6],
+            6: [],
         }
     }
 }
@@ -283,8 +299,10 @@ class GridTest {
         this.runInterval = setInterval(() => this.step(), 100)
     }
     step() {
-        let route = this.start.stepOut(this.ctx, this.finish) ||
-            this.finish.stepOut(this.ctx, this.start)
+        let route = this.start.stepOut(this.ctx, this.finish, true) ||
+            this.finish.stepOut(this.ctx, this.start, true) ||
+            this.start.stepOut(this.ctx, this.finish, false) ||
+            this.finish.stepOut(this.ctx, this.start, false)
         if(route) {
             if(route.length) {
                 let [a, b] = route
