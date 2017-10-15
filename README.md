@@ -17,9 +17,11 @@ is unclear, but a minority of 48KB should be fine.
 
 CPU: 3.5MHz, no particular caching.
 
-Available time: say 1s for 10 AI units.
+Available time: Up to say 0.5s per AI unit (they run one at a time).
 
 Note: The route required may extend far beyond the unit's move range, and in principle could extend to a little over half the map.
+
+Pointer size: 2 bytes
 
 # The algorithm
 
@@ -37,8 +39,6 @@ an address; technically these only require 13b but it's not practical to use
 less than 16 each, so 200b for those. That puts the RAM scale at 2700 bytes,
 which is eminently usable.
 
-(or, in fact, 2b for 4 directions at the moment; 3b if diagonal is supported)
-
 Existing routes count as impediments, which prevents the production of overly
 long routes, but results in a noticeable bias.
 
@@ -49,6 +49,19 @@ time is negligible. If each read or write is 10 cycles, that's 300,000 cycles of
 3,500,000 so about 1/11 of a second.
 
 # Room for improvement
+
+Pragmatic RAM usage is likely to be higher, since you want to know if a target
+cell is owned by the current path or its counterpart; there's some wastage here
+since blocked cells ignore three bits. The possible states for a cell are:
+path1[8] + path2[8] + is_block[1], which is never going to fit comfortably into
+a binary number, and there's no dancing around that. For all practical purposes,
+there are only 7 possible directions since one of them was the source, but
+that's awkward to traverse since you need to examine 1 <= n <= 4 nodes to
+determine if the node is +1 or not. If we do have 7+7+1, that would conveniently
+enable a final null value to indicate an empty node, perhaps with 0000 as null
+and 1000 as blockage. You could save a bit more data (literally, one bit) by
+traversing each encountered route when found, but that's going to end up O(n^2)
+for reads - far worse than the existing 8n.
 
 In principle the minimum for the worst case for this kind of algorithm would be
 on the order of 5,000 writes and 5,000 reads, which is around 1/3 the scale, and
@@ -64,33 +77,22 @@ around 750,000 reads in total for the corner-to-corner case.
 
 # Diagonal
 
-At the moment this only considers orthogonal movement; if diagonal movement is
-supported, the movement cost becomes a factor as does the question of what
-constitutes an obstruction.
+The Laser Squad movement system supports diagonal movement at a 6:4 ratio (no
+doubt this came from a board game, as 7:5 is much more accurate but harder to
+calculate in your head). Where this is the case, actual movement cost becomes a
+factor. Fortunately, with the exact values presented here there are exactly
+three sets of "times" after a step: +6 (just done a diagonal move); +4 (just
+done an orthogonal move, or did a diagonal move 1 step ago); +2 (did a diagonal
+move 2 steps ago or an orthogonal move 1 step ago). This makes it relatively
+simple to step through, where otherwise we might have to find the minimum
+expression of a + b * sqrt(2) in the list. In terms of usage, maintaining three
+lists would need two extra pointers (16 + 16 bits, at the time) whereas storing
+the offset would need at least two extra bits each, for a maximum of around 100.
 
-When moving diagonally, an object in the destination cell will obviously block
-movement, but objects in both adjacent cells may also do so, and even an object
-in a single adjacent cell might do so. For route collision it would only be
-blocked if the exact cell is occupied.
-
-Where cost(d) = 2 * cost(o), ie. diagonal isn't cheaper but looks nicer, more or
-less the original route can be used - in fact, if obstruction for diagonal
-movement is just "two adjacent cells, or destination" then an orthogonal route
-will work fine with simple lookahead to see if skipping the next cell makes
-sense.
-
-Where cost(d) = cost(o), you would just do all 8 directions in each pass. This
-increases the read cost of course. This makes diagonal movement exceptionally
-cheap, but it's helpful if you want diagonal to be preferred where possible.
-
-Where cost(d) = sqrt(2) * cost(o), for some possible approximation like 7/5,
-there would have to be a certain amount of complexity to the order, essentially
-you'd have to find the minimum of 7 * (d + 1) and 5 * (o + 1) when deciding
-which type to try next; you may also step exactly 1 each time and do diagonal
-first on the steps where that would be exceeded (ie, !1; 2 >= 1.4; 3 >= 2.8; !4;
-5 >= 4.4; 6 >= 5.6; 7 >= 7). These are broadly equivalent and the cost in CPU
-time isn't particularly meaningful. This applies equally to bad approximations
-like cost(d) = 3/2 * cost(o).
+In terms of obstruction, only an object in the destination cell blocks; this is
+slightly unintuitive since squeezing between a slightly larger gap seems
+improbable, but it is easy for a player to understand since the rule is
+extremely simple.
 
 # NOTES
 
@@ -112,3 +114,10 @@ path left or right around the blockage until it's clear; unfortunately while
 this may be a reasonable approximation of how humans think, it's still of
 variable cost and has no particular support for dealing with cases where you
 have to start by going backwards. Basically it's garbage for mazes.
+
+Since there's no native malloc involved, all memory is essentially static modulo
+manual memory management - in other words, memory structures in general have a
+fixed size regardless of whether it might be avantageous in context to use less.
+Linked lists are viable and may be used if there's some use in reordering a
+list, but in general it makes more sense to have a flat array; in fact, for
+static storage this wouldn't even need a head pointer.
