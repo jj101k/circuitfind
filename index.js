@@ -95,10 +95,11 @@ class PositionedNode {
     }
     /**
      * 
-     * @param {*} ctx 
+     * @param {*} ctx
+     * @param {PositionedNode} target
      * @returns {?PositionedNode[]}
      */
-    stepOut(ctx) {
+    stepOut(ctx, target) {
         if(!this.routes) {
             this.routes = {
                 0: [this],
@@ -122,9 +123,11 @@ class PositionedNode {
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
                         new_routes[cost].push(p)
                     } else if(
-                        existing_node instanceof PathNode && (
-                            (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
-                            (!(this instanceof PathNode) && existing_node.ownedBy !== this)
+                        existing_node === target || (
+                            existing_node instanceof PathNode && (
+                                (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
+                                (!(this instanceof PathNode) && existing_node.ownedBy !== this)
+                            )
                         )
                     ) {
                         route = [path, existing_node]
@@ -169,81 +172,129 @@ class PathNode extends PositionedNode {
 }
 
 class GridTest {
+    constructor() {
+        this.tests = []
+        this.nextTestNumber = 0
+    }
     init() {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             var ctx = c.getContext("2d")
 
-            let map = new GridMap(250, 10)
-            map.display(ctx)
-
-            let obstructions = []
+            this.obstructions = []
             for(let i = 0; i < 31; i++) {
-                obstructions.push(new PositionedNode(
+                this.obstructions.push(new PositionedNode(
                     Math.floor(Math.random() * 10),
                     Math.floor(Math.random() * 10),
                     "red"
                 ))
             }
 
-            let start = new PositionedNode(
+            this.start = new PositionedNode(
                 Math.floor(Math.random() * 10),
                 Math.floor(Math.random() * 10),
                 "green"
             )
-            let finish
             do {
-                finish = new PositionedNode(
+                this.finish = new PositionedNode(
                     Math.floor(Math.random() * 10),
                     Math.floor(Math.random() * 10),
                     "blue"
                 )
             } while(
-                finish.position.x == start.position.x &&
-                finish.position.y == start.position.y
+                this.finish.position.x == this.start.position.x &&
+                this.finish.position.y == this.start.position.y
             )
 
-            obstructions.forEach(o => map.addNode(o))
-            map.addNode(start) 
-            map.addNode(finish) 
-            obstructions.forEach(o => o.display(ctx))    
-            start.display(ctx)
-            finish.display(ctx)
+            this.ctx = ctx
+            ctx.save()
 
-            start.stepOut(ctx)
-            finish.stepOut(ctx)
+            let map = new GridMap(250, 10)
+            map.display(this.ctx)
 
-            let i = setInterval(() => {
-                let route = start.stepOut(ctx) || finish.stepOut(ctx)
-                if(route) {
-                    if(route.length) {
-                        let [a, b] = route
-                        while(a instanceof PathNode) {
-                            a.colour = "orange"
-                            a.display(ctx)
-                            a = a.from
-                        }
-                        while(b instanceof PathNode) {
-                            b.colour = "orange"
-                            b.display(ctx)
-                            b = b.from
-                        }
-                    } else {
-                        console.log("No route found")
-                    }
-                    clearTimeout(i)
-                    console.log("done")
-                    console.log(JSON.stringify({
-                        start: start.position,
-                        finish: finish.position,
-                        obstructions: obstructions.map(o => o.position)
-                    }))
-                }
-            }, 100)
+            this.obstructions.forEach(o => map.addNode(o))
+            map.addNode(this.start) 
+            map.addNode(this.finish) 
 
             this.map = map
+            this.obstructions.forEach(o => o.display(this.ctx))    
+            this.start.display(this.ctx)
+            this.finish.display(this.ctx)
         } else {
             console.log("Well, that's the wrong element type")
         }
+    }
+    /**
+     * 
+     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[]}} test 
+     */
+    initForTest(test) {
+        this.start = new PositionedNode(
+            test.start.x,
+            test.start.y,
+            "green"
+        )
+        this.finish = new PositionedNode(
+            test.finish.x,
+            test.finish.y,
+            "blue"
+        )
+        this.obstructions = test.obstructions.map(pos => new PositionedNode(
+            pos.x,
+            pos.y,
+            "red"
+        ))
+        let map = new GridMap(250, 10)
+        this.ctx.restore()
+        this.ctx.fillStyle = "white"
+        this.ctx.fillRect(0, 0, 250, 250)
+        this.ctx.save()
+        map.display(this.ctx)
+
+        this.obstructions.forEach(o => map.addNode(o))
+        map.addNode(this.start) 
+        map.addNode(this.finish) 
+
+        this.map = map
+        this.obstructions.forEach(o => o.display(this.ctx))    
+        this.start.display(this.ctx)
+        this.finish.display(this.ctx)
+    }
+    nextTest() {
+        this.initForTest(this.tests[this.nextTestNumber])
+        this.run()
+        this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
+    }
+    run() {
+        this.start.stepOut(this.ctx, this.finish)
+        this.finish.stepOut(this.ctx, this.start)
+
+        let i = setInterval(() => {
+            let route = this.start.stepOut(this.ctx, this.finish) || this.finish.stepOut(this.ctx, this.start)
+            if(route) {
+                if(route.length) {
+                    let [a, b] = route
+                    while(a instanceof PathNode) {
+                        a.colour = "orange"
+                        a.display(this.ctx)
+                        a = a.from
+                    }
+                    while(b instanceof PathNode) {
+                        b.colour = "orange"
+                        b.display(this.ctx)
+                        b = b.from
+                    }
+                } else {
+                    console.log("No route found")
+                }
+                clearTimeout(i)
+                console.log("done")
+                console.log(JSON.stringify({
+                    start: this.start.position,
+                    finish: this.finish.position,
+                    obstructions: this.obstructions.map(o => o.position)
+                }))
+            }
+        }, 100)
     }
 }
