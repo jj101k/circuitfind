@@ -100,11 +100,18 @@ class PositionedNode {
      */
     stepOut(ctx) {
         if(!this.routes) {
-            this.routes = [this]
+            this.routes = {
+                0: [this],
+                2: [],
+                4: [],
+            }
         }
-        let new_routes = []
+        let new_routes = {
+            4: [],
+            6: [],
+        }
         let route
-        let route_found = this.routes.some(path => {
+        let route_found = this.routes[0].some(path => {
             return path.nextSteps.some(step => {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
@@ -112,7 +119,8 @@ class PositionedNode {
                         let p = new PathNode(step.x, step.y, path)
                         this.map.addNode(p)
                         p.display(ctx)
-                        new_routes.push(p)
+                        let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
+                        new_routes[cost].push(p)
                     } else if(
                         existing_node instanceof PathNode && (
                             (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
@@ -126,11 +134,15 @@ class PositionedNode {
                 return false
             })
         })
-        this.routes = new_routes
+        this.routes = {
+            0: this.routes[2],
+            2: this.routes[4].concat(new_routes[4]),
+            4: new_routes[6],
+        }
         if(route_found) {
             console.log("Route found")
             return route
-        } else if(this.routes.length > 0) {
+        } else if(Object.keys(this.routes).some(r => this.routes[r].length > 0)) {
             return null
         } else {
             return []
