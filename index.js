@@ -272,9 +272,6 @@ class GridTest {
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
     }
     run() {
-        this.start.stepOut(this.ctx, this.finish)
-        this.finish.stepOut(this.ctx, this.start)
-
         let i = setInterval(() => {
             let route = this.start.stepOut(this.ctx, this.finish) || this.finish.stepOut(this.ctx, this.start)
             if(route) {
