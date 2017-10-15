@@ -220,6 +220,8 @@ class GridTest {
             this.obstructions.forEach(o => o.display(this.ctx))    
             this.start.display(this.ctx)
             this.finish.display(this.ctx)
+
+            document.querySelector("p#test-name").textContent = "Random test"
         } else {
             console.log("Well, that's the wrong element type")
         }
@@ -262,6 +264,10 @@ class GridTest {
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
+        document.querySelector("p#test-name").textContent =
+            this.tests[this.nextTestNumber].passed ?
+                `Test ${this.nextTestNumber} (previously passed)` :
+                `Test ${this.nextTestNumber}`
         this.run()
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
     }

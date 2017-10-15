@@ -5,20 +5,15 @@
     </head>
     <body>
         <canvas id="grid" width="250" height="250" style="border: 1px solid black"></canvas>
-        <p><input type="file" id="test-file"/><button type="button" onclick="t.nextTest()">Next test</button></p>
+        <p id="test-name">?</p>
+        <p><button type="button" onclick="t.nextTest()">Next test</button></p>
         <script src="index.js"></script>
+        <script src="test.js"></script>
         <script>
             let t = new GridTest()
+            t.tests = PathTests
             t.init()
             t.run()
-
-            document.querySelector("#test-file").onchange = evt => {
-                let fr = new FileReader()
-                fr.onload = evt => {
-                    console.log(t.tests = JSON.parse(evt.target.result))
-                }
-                fr.readAsText(evt.target.files[0])
-            }
         </script>
     </body>
 </html>
