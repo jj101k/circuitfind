@@ -72,11 +72,13 @@ class PositionedNode {
     }
     get nextSteps() {
         let steps = [];
-        [-1, 0, 1].forEach(x => {
-            [-1, 0, 1].forEach(y => {
-                if(y || x) {
-                    steps.push({x: x + this.x, y: y + this.y})
-                }
+        [-1, 1].forEach(o => {
+            steps.push({x: o + this.x, y: this.y})
+            steps.push({x: this.x, y: o + this.y})
+        });
+        [-1, 1].forEach(x => {
+            [-1, 1].forEach(y => {
+                steps.push({x: x + this.x, y: y + this.y})
             })
         })
         return steps
