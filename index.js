@@ -86,10 +86,10 @@ class PositionedNode {
     get position() {
         return {x: this.x, y: this.y}
     }
-    display(ctx) {
+    display(ctx, colour = null) {
         ctx.save()
         ctx.translate(this.x, this.y)
-        ctx.fillStyle = this.colour
+        ctx.fillStyle = colour || this.colour
         ctx.fillRect(0.1, 0.1, 0.8, 0.8)
         ctx.restore()
     }
@@ -117,7 +117,7 @@ class PositionedNode {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
-                        let p = new PathNode(step.x, step.y, path)
+                        let p = new PathNode(step.x, step.y, path, "light" + this.colour)
                         this.map.addNode(p)
                         p.display(ctx)
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
@@ -137,6 +137,7 @@ class PositionedNode {
                 return false
             })
         })
+        this.routes[0].forEach(path => {if(path !== this) path.display(ctx, "black")})
         this.routes = {
             0: this.routes[2],
             2: this.routes[4].concat(new_routes[4]),
@@ -159,9 +160,10 @@ class PathNode extends PositionedNode {
      * @param {number} x 
      * @param {number} y 
      * @param {PositionedNode} from_node
+     * @param {string} hint_colour
      */
-    constructor(x, y, from_node) {
-        super(x, y, "black")
+    constructor(x, y, from_node, hint_colour) {
+        super(x, y, hint_colour)
         this.from = from_node
         if(this.from instanceof PathNode) {
             this.ownedBy = this.from.ownedBy
