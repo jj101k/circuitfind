@@ -101,14 +101,12 @@ class PositionedNode {
             this.routes = [this]
         }
         let new_routes = []
-        let steps_taken = 0
         let route
         let route_found = this.routes.some(path => {
             return path.nextSteps.some(step => {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
-                        steps_taken++
                         let p = new PathNode(step.x, step.y, path)
                         this.map.addNode(p)
                         p.display(ctx)
@@ -130,7 +128,7 @@ class PositionedNode {
         if(route_found) {
             console.log("Route found")
             return route
-        } else if(steps_taken > 0) {
+        } else if(this.routes.length > 0) {
             return null
         } else {
             return []
