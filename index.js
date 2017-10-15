@@ -175,6 +175,7 @@ class GridTest {
     constructor() {
         this.tests = []
         this.nextTestNumber = 0
+        this.paused = false
     }
     init() {
         let c = document.getElementById("grid")
@@ -268,36 +269,49 @@ class GridTest {
             this.tests[this.nextTestNumber].passed ?
                 `Test ${this.nextTestNumber} (previously passed)` :
                 `Test ${this.nextTestNumber}`
-        this.run()
+        if(!this.paused) {
+            this.run()
+        }
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
     }
     run() {
-        let i = setInterval(() => {
-            let route = this.start.stepOut(this.ctx, this.finish) || this.finish.stepOut(this.ctx, this.start)
-            if(route) {
-                if(route.length) {
-                    let [a, b] = route
-                    while(a instanceof PathNode) {
-                        a.colour = "orange"
-                        a.display(this.ctx)
-                        a = a.from
-                    }
-                    while(b instanceof PathNode) {
-                        b.colour = "orange"
-                        b.display(this.ctx)
-                        b = b.from
-                    }
-                } else {
-                    console.log("No route found")
+        if(this.runInterval) {
+            clearInterval(this.runInterval)
+        }
+        this.runInterval = setInterval(() => this.step(), 100)
+    }
+    step() {
+        let route = this.start.stepOut(this.ctx, this.finish) ||
+            this.finish.stepOut(this.ctx, this.start)
+        if(route) {
+            if(route.length) {
+                let [a, b] = route
+                while(a instanceof PathNode) {
+                    a.colour = "orange"
+                    a.display(this.ctx)
+                    a = a.from
                 }
-                clearTimeout(i)
-                console.log("done")
-                console.log(JSON.stringify({
-                    start: this.start.position,
-                    finish: this.finish.position,
-                    obstructions: this.obstructions.map(o => o.position)
-                }))
+                while(b instanceof PathNode) {
+                    b.colour = "orange"
+                    b.display(this.ctx)
+                    b = b.from
+                }
+            } else {
+                console.log("No route found")
             }
-        }, 100)
+            if(this.runInterval) {
+                clearTimeout(this.runInterval)
+                this.runInterval = null
+            }
+            console.log("done")
+            console.log(JSON.stringify({
+                start: this.start.position,
+                finish: this.finish.position,
+                obstructions: this.obstructions.map(o => o.position)
+            }))
+        } else {
+            this.start.stepRoutes(this.ctx)
+            this.finish.stepRoutes(this.ctx)
+        }
     }
 }

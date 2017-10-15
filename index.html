@@ -6,7 +6,11 @@
     <body>
         <canvas id="grid" width="250" height="250" style="border: 1px solid black"></canvas>
         <p id="test-name">?</p>
-        <p><button type="button" onclick="t.nextTest()">Next test</button></p>
+        <p><label><input type="checkbox" onchange="t.paused = this.value">Pause</label></p>
+        <p>
+            <button type="button" onclick="t.step()">Step</button>
+            <button type="button" onclick="t.nextTest()">Next test</button>
+        </p>
         <script src="index.js"></script>
         <script src="test.js"></script>
         <script>
