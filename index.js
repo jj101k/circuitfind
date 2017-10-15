@@ -199,51 +199,55 @@ class GridTest {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             var ctx = c.getContext("2d")
-
-            this.obstructions = []
-            for(let i = 0; i < 31; i++) {
-                this.obstructions.push(new PositionedNode(
-                    Math.floor(Math.random() * 10),
-                    Math.floor(Math.random() * 10),
-                    "red"
-                ))
-            }
-
-            this.start = new PositionedNode(
-                Math.floor(Math.random() * 10),
-                Math.floor(Math.random() * 10),
-                "green"
-            )
-            do {
-                this.finish = new PositionedNode(
-                    Math.floor(Math.random() * 10),
-                    Math.floor(Math.random() * 10),
-                    "blue"
-                )
-            } while(
-                this.finish.position.x == this.start.position.x &&
-                this.finish.position.y == this.start.position.y
-            )
-
             this.ctx = ctx
-            ctx.save()
-
-            let map = new GridMap(250, 10)
-            map.display(this.ctx)
-
-            this.obstructions.forEach(o => map.addNode(o))
-            map.addNode(this.start) 
-            map.addNode(this.finish) 
-
-            this.map = map
-            this.obstructions.forEach(o => o.display(this.ctx))    
-            this.start.display(this.ctx)
-            this.finish.display(this.ctx)
-
-            document.querySelector("p#test-name").textContent = "Random test"
         } else {
             console.log("Well, that's the wrong element type")
         }
+    }
+    initForRandom() {
+        this.obstructions = []
+        for(let i = 0; i < 31; i++) {
+            this.obstructions.push(new PositionedNode(
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10),
+                "red"
+            ))
+        }
+
+        this.start = new PositionedNode(
+            Math.floor(Math.random() * 10),
+            Math.floor(Math.random() * 10),
+            "green"
+        )
+        do {
+            this.finish = new PositionedNode(
+                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * 10),
+                "blue"
+            )
+        } while(
+            this.finish.position.x == this.start.position.x &&
+            this.finish.position.y == this.start.position.y
+        )
+
+        this.ctx.restore()
+        this.ctx.fillStyle = "white"
+        this.ctx.fillRect(0, 0, 250, 250)
+        this.ctx.save()
+
+        let map = new GridMap(250, 10)
+        map.display(this.ctx)
+
+        this.obstructions.forEach(o => map.addNode(o))
+        map.addNode(this.start)
+        map.addNode(this.finish)
+
+        this.map = map
+        this.obstructions.forEach(o => o.display(this.ctx))
+        this.start.display(this.ctx)
+        this.finish.display(this.ctx)
+
+        document.querySelector("p#test-name").textContent = "Random test"
     }
     /**
      * 
@@ -291,6 +295,13 @@ class GridTest {
             this.run()
         }
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
+    }
+    randomTest() {
+        this.initForRandom()
+        document.querySelector("p#test-name").textContent = `Random test`
+        if(!this.paused) {
+            this.run()
+        }
     }
     run() {
         if(this.runInterval) {

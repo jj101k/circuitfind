@@ -10,6 +10,7 @@
         <p>
             <button type="button" onclick="t.step()">Step</button>
             <button type="button" onclick="t.nextTest()">Next test</button>
+            <button type="button" onclick="t.randomTest()">Random test</button>
         </p>
         <script src="index.js"></script>
         <script src="test.js"></script>
@@ -17,7 +18,7 @@
             let t = new GridTest()
             t.tests = PathTests
             t.init()
-            t.run()
+            t.randomTest()
         </script>
     </body>
 </html>
