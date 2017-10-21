@@ -2,11 +2,11 @@
 
 class GridMap {
     /**
-     * 
-     * @param {number} w 
-     * @param {number} l 
+     *
+     * @param {number} w
+     * @param {number} l
      */
-    constructor(w, l) {        
+    constructor(w, l) {
         this.w = w
         this.l = l
         /** @type {?PositionedNode[]} */
@@ -16,8 +16,8 @@ class GridMap {
         return this.w / this.l
     }
     /**
-     * 
-     * @param {PositionedNode} n 
+     *
+     * @param {PositionedNode} n
      */
     addNode(n) {
         this.nodes[n.x + n.y * this.l] = n
@@ -37,18 +37,18 @@ class GridMap {
         ctx.stroke()
     }
     /**
-     * 
-     * @param {number} x 
-     * @param {number} y 
+     *
+     * @param {number} x
+     * @param {number} y
      * @returns {?PositionedNode}
      */
     nodeAt(x, y) {
         return this.nodes[x + y * this.l]
     }
     /**
-     * 
-     * @param {number} x 
-     * @param {number} y 
+     *
+     * @param {number} x
+     * @param {number} y
      * @returns {?boolean}
      */
     validAddress(x, y) {
@@ -58,9 +58,9 @@ class GridMap {
 
 class PositionedNode {
     /**
-     * 
-     * @param {number} x 
-     * @param {number} y 
+     *
+     * @param {number} x
+     * @param {number} y
      * @param {?string} [colour]
      */
     constructor(x, y, colour = null) {
@@ -97,7 +97,7 @@ class PositionedNode {
         ctx.restore()
     }
     /**
-     * 
+     *
      * @param {*} ctx
      * @param {PositionedNode} target
      * @param {boolean} cheap
@@ -172,9 +172,9 @@ class PositionedNode {
 
 class PathNode extends PositionedNode {
     /**
-     * 
-     * @param {number} x 
-     * @param {number} y 
+     *
+     * @param {number} x
+     * @param {number} y
      * @param {PositionedNode} from_node
      * @param {string} hint_colour
      */
@@ -250,8 +250,8 @@ class GridTest {
         document.querySelector("p#test-name").textContent = "Random test"
     }
     /**
-     * 
-     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[]}} test 
+     *
+     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[]}} test
      */
     initForTest(test) {
         this.start = new PositionedNode(
@@ -277,11 +277,11 @@ class GridTest {
         map.display(this.ctx)
 
         this.obstructions.forEach(o => map.addNode(o))
-        map.addNode(this.start) 
-        map.addNode(this.finish) 
+        map.addNode(this.start)
+        map.addNode(this.finish)
 
         this.map = map
-        this.obstructions.forEach(o => o.display(this.ctx))    
+        this.obstructions.forEach(o => o.display(this.ctx))
         this.start.display(this.ctx)
         this.finish.display(this.ctx)
     }
