@@ -69,6 +69,10 @@ class PositionedNode {
         this.colour = colour
         /** @type {GridMap} */
         this.map = null
+        this.newRoutes = {
+            4: [],
+            6: [],
+        }
     }
     get nextSteps() {
         let steps = {
@@ -112,10 +116,6 @@ class PositionedNode {
                 6: [],
             }
         }
-        let new_routes = {
-            4: [],
-            6: [],
-        }
         let route
 
         let step_type = cheap ? "cheap" : "expensive"
@@ -125,10 +125,8 @@ class PositionedNode {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
                         let p = new PathNode(step.x, step.y, path, "light" + this.colour)
-                        this.map.addNode(p)
-                        p.display(ctx)
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
-                        new_routes[cost].push(p)
+                        this.newRoutes[cost].push(p)
                     } else if(
                         existing_node === target || (
                             existing_node instanceof PathNode && (
@@ -144,27 +142,36 @@ class PositionedNode {
                 return false
             })
         })
-        this.routes = {
-            0: this.routes[0],
-            2: this.routes[2],
-            4: this.routes[4].concat(new_routes[4]),
-            6: this.routes[6].concat(new_routes[6]),
-        }
         if(route_found) {
             console.log("Route found")
             return route
-        } else if(Object.keys(this.routes).some(r => this.routes[r].length > 0)) {
+        } else if(
+            Object.keys(this.newRoutes).some(r => this.newRoutes[r].length > 0) ||
+            Object.keys(this.routes).some(r => this.routes[r].length > 0)
+        ) {
             return null
         } else {
             return []
         }
     }
     stepRoutes(ctx) {
-        this.routes[0].forEach(path => {if(path !== this) path.display(ctx, "black")})
+        this.routes[0].forEach(path => {
+            if(path !== this) path.display(ctx, "black")
+        })
+        Object.keys(this.newRoutes).forEach(cost => {
+            this.newRoutes[cost].forEach(p => {
+                this.map.addNode(p)
+                p.display(ctx)
+            })
+        })
         this.routes = {
             0: this.routes[2],
-            2: this.routes[4],
-            4: this.routes[6],
+            2: this.routes[4].concat(this.newRoutes[4]),
+            4: this.routes[6].concat(this.newRoutes[6]),
+            6: [],
+        }
+        this.newRoutes = {
+            4: [],
             6: [],
         }
     }
