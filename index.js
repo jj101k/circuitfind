@@ -325,16 +325,33 @@ class GridTest {
             this.start.stepOut(this.ctx, this.finish, false) ||
             this.finish.stepOut(this.ctx, this.start, false)
         if(route) {
+            let cost = null
             if(route.length) {
                 let [a, b] = route
+                cost = 0
+                if(a.x == b.x || a.y == b.y) {
+                    cost += 4
+                } else {
+                    cost += 6
+                }
                 while(a instanceof PathNode) {
                     a.colour = "orange"
                     a.display(this.ctx)
+                    if(a.from.x == a.x || a.from.y == a.y) {
+                        cost += 4
+                    } else {
+                        cost += 6
+                    }
                     a = a.from
                 }
                 while(b instanceof PathNode) {
                     b.colour = "orange"
                     b.display(this.ctx)
+                    if(b.from.x == b.x || b.from.y == b.y) {
+                        cost += 4
+                    } else {
+                        cost += 6
+                    }
                     b = b.from
                 }
             } else {
@@ -350,6 +367,16 @@ class GridTest {
                 finish: this.finish.position,
                 obstructions: this.obstructions.map(o => o.position)
             }))
+            let tr = document.createElement("tr")
+            let td = document.createElement("td")
+            td.textContent = "test"
+            tr.appendChild(td)
+            td = document.createElement("td")
+            td.textContent = cost === null ? "miss" : "" + cost
+            tr.appendChild(td)
+            document.querySelector("#test-results").appendChild(
+                tr
+            )
         } else {
             this.start.stepRoutes(this.ctx)
             this.finish.stepRoutes(this.ctx)
