@@ -254,7 +254,7 @@ class GridTest {
         this.start.display(this.ctx)
         this.finish.display(this.ctx)
 
-        document.querySelector("p#test-name").textContent = "Random test"
+        document.querySelector("input#test-number").value = ""
     }
     /**
      *
@@ -294,10 +294,7 @@ class GridTest {
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
-        document.querySelector("p#test-name").textContent =
-            this.tests[this.nextTestNumber].passed ?
-                `Test ${this.nextTestNumber} (previously passed)` :
-                `Test ${this.nextTestNumber}`
+        document.querySelector("input#test-number").value = this.nextTestNumber
         if(!this.paused) {
             this.run()
         }
@@ -305,7 +302,7 @@ class GridTest {
     }
     randomTest() {
         this.initForRandom()
-        document.querySelector("p#test-name").textContent = `Random test`
+        document.querySelector("input#test-number").value = ""
         if(!this.paused) {
             this.run()
         }
@@ -315,6 +312,12 @@ class GridTest {
             clearInterval(this.runInterval)
         }
         this.runInterval = setInterval(() => this.step(), 100)
+    }
+    selectTest(n) {
+        this.initForTest(this.tests[n])
+        if(!this.paused) {
+            this.run()
+        }
     }
     step() {
         let route = this.start.stepOut(this.ctx, this.finish, true) ||
