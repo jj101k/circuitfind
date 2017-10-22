@@ -105,7 +105,7 @@ class PositionedNode {
      * @param {*} ctx
      * @param {PositionedNode} target
      * @param {boolean} cheap
-     * @returns {?PositionedNode[]}
+     * @returns {?Route}
      */
     stepOut(ctx, target, cheap) {
         if(!this.routes) {
@@ -135,7 +135,7 @@ class PositionedNode {
                             )
                         )
                     ) {
-                        route = [path, existing_node]
+                        route = new Route(path, existing_node)
                         return true
                     }
                 }
@@ -151,7 +151,7 @@ class PositionedNode {
         ) {
             return null
         } else {
-            return []
+            return new Route(null, null)
         }
     }
     stepRoutes(ctx) {
@@ -193,6 +193,40 @@ class PathNode extends PositionedNode {
         } else {
             this.ownedBy = this.from
         }
+    }
+}
+
+class Route {
+    constructor(left, right) {
+        this.left = left
+        this.right = right
+    }
+    get cost() {
+        if(!this.left) return Infinity
+        let [a, b] = [this.left, this.right]
+        let cost = 0
+        if(a.x == b.x || a.y == b.y) {
+            cost += 4
+        } else {
+            cost += 6
+        }
+        while(a instanceof PathNode) {
+            if(a.from.x == a.x || a.from.y == a.y) {
+                cost += 4
+            } else {
+                cost += 6
+            }
+            a = a.from
+        }
+        while(b instanceof PathNode) {
+            if(b.from.x == b.x || b.from.y == b.y) {
+                cost += 4
+            } else {
+                cost += 6
+            }
+            b = b.from
+        }
+        return cost
     }
 }
 
@@ -352,14 +386,18 @@ class GridTest {
         }
     }
     step() {
-        let route = this.start.stepOut(this.ctx, this.finish, true) ||
-            this.finish.stepOut(this.ctx, this.start, true) ||
-            this.start.stepOut(this.ctx, this.finish, false) ||
-            this.finish.stepOut(this.ctx, this.start, false)
+        let possible_routes = [
+            this.start.stepOut(this.ctx, this.finish, true),
+            this.finish.stepOut(this.ctx, this.start, true),
+            this.start.stepOut(this.ctx, this.finish, false),
+            this.finish.stepOut(this.ctx, this.start, false),
+        ].filter(route => route)
+        console.log(possible_routes)
+        let route = possible_routes.sort((a, b) => a.cost - b.cost)[0]
         if(route) {
             let cost = null
-            if(route.length) {
-                let [a, b] = route
+            if(route.left) {
+                let [a, b] = [route.left, route.right]
                 cost = 0
                 if(a.x == b.x || a.y == b.y) {
                     cost += 4
