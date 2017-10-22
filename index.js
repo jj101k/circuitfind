@@ -346,6 +346,7 @@ class GridTest {
     }
     selectTest(n) {
         this.initForTest(this.tests[n])
+        this.testNumber = n
         if(!this.paused) {
             this.run()
         }
