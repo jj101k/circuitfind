@@ -201,6 +201,7 @@ class GridTest {
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
+        this.currentTest = null
     }
     get testNumber() {
         return this._testNumber
@@ -221,6 +222,7 @@ class GridTest {
         }
     }
     initForRandom() {
+        this.currentTest = null
         this.obstructions = []
         for(let i = 0; i < 31; i++) {
             this.obstructions.push(new PositionedNode(
@@ -267,9 +269,10 @@ class GridTest {
     }
     /**
      *
-     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[]}} test
+     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[], passed: boolean, correctLength: number}} test
      */
     initForTest(test) {
+        this.currentTest = test
         this.start = new PositionedNode(
             test.start.x,
             test.start.y,
@@ -385,6 +388,15 @@ class GridTest {
             td = document.createElement("td")
             td.textContent = cost === null ? "miss" : "" + cost
             tr.appendChild(td)
+            td = document.createElement("td")
+            td.textContent = this.testNumber === null ?
+                "N/A" :
+                "" + this.currentTest.correctLength
+            tr.appendChild(td)
+
+            if(this.currentTest && this.currentTest.correctLength < cost) {
+                tr.style.color = "red"
+            }
             document.querySelector("#test-results").appendChild(
                 tr
             )
