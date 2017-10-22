@@ -202,6 +202,8 @@ class GridTest {
         this.nextTestNumber = 0
         this.paused = false
         this.currentTest = null
+        this.rejectPromise = null
+        this.resolvePromise = null
     }
     get testNumber() {
         return this._testNumber
@@ -323,7 +325,24 @@ class GridTest {
         if(this.runInterval) {
             clearInterval(this.runInterval)
         }
-        this.runInterval = setInterval(() => this.step(), 100)
+        if(this.rejectPromise) {
+            this.rejectPromise()
+        }
+        return new Promise((resolve, reject) => {
+            this.resolvePromise = resolve
+            this.rejectPromise = reject
+            this.runInterval = setInterval(() => this.step(), 100)
+        })
+    }
+    runAll() {
+        return this.tests.reduce(
+            (carry, test, i) => carry.then(() => {
+                this.initForTest(test)
+                this.testNumber = i
+                return this.run()
+            }),
+            new Promise(resolve => resolve())
+        )
     }
     selectTest(n) {
         this.initForTest(this.tests[n])
@@ -400,6 +419,9 @@ class GridTest {
             document.querySelector("#test-results").appendChild(
                 tr
             )
+            if(this.resolvePromise) {
+                this.resolvePromise()
+            }
         } else {
             this.start.stepRoutes(this.ctx)
             this.finish.stepRoutes(this.ctx)
