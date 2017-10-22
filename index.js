@@ -202,6 +202,15 @@ class GridTest {
         this.nextTestNumber = 0
         this.paused = false
     }
+    get testNumber() {
+        return this._testNumber
+    }
+    /** @param {?number} v */
+    set testNumber(v) {
+        this._testNumber = v
+        document.querySelector("input#test-number").value =
+            (v === null) ? "" : v
+    }
     init() {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
@@ -254,7 +263,7 @@ class GridTest {
         this.start.display(this.ctx)
         this.finish.display(this.ctx)
 
-        document.querySelector("input#test-number").value = ""
+        this.testNumber = null
     }
     /**
      *
@@ -294,7 +303,7 @@ class GridTest {
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
-        document.querySelector("input#test-number").value = this.nextTestNumber
+        this.testNumber = this.nextTestNumber
         if(!this.paused) {
             this.run()
         }
@@ -302,7 +311,7 @@ class GridTest {
     }
     randomTest() {
         this.initForRandom()
-        document.querySelector("input#test-number").value = ""
+        this.testNumber = null
         if(!this.paused) {
             this.run()
         }
@@ -369,7 +378,9 @@ class GridTest {
             }))
             let tr = document.createElement("tr")
             let td = document.createElement("td")
-            td.textContent = "test"
+            td.textContent = this.testNumber === null ?
+                "Random test" :
+                `Test ${this.testNumber}`
             tr.appendChild(td)
             td = document.createElement("td")
             td.textContent = cost === null ? "miss" : "" + cost
