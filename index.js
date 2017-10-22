@@ -321,7 +321,7 @@ class GridTest {
             this.run()
         }
     }
-    run() {
+    run(interval_ms = 100) {
         if(this.runInterval) {
             clearInterval(this.runInterval)
         }
@@ -331,7 +331,7 @@ class GridTest {
         return new Promise((resolve, reject) => {
             this.resolvePromise = resolve
             this.rejectPromise = reject
-            this.runInterval = setInterval(() => this.step(), 100)
+            this.runInterval = setInterval(() => this.step(), interval_ms)
         })
     }
     runAll() {
@@ -339,7 +339,7 @@ class GridTest {
             (carry, test, i) => carry.then(() => {
                 this.initForTest(test)
                 this.testNumber = i
-                return this.run()
+                return this.run(10)
             }),
             new Promise(resolve => resolve())
         )
