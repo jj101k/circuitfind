@@ -405,7 +405,7 @@ class GridTest {
             this.start.stepOut(this.ctx, this.finish, false),
             this.finish.stepOut(this.ctx, this.start, false),
         ].filter(route => route)
-        console.log(possible_routes)
+
         let route = possible_routes.sort((a, b) => a.cost - b.cost)[0]
         if(route) {
             if(route.left) {
