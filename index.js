@@ -61,12 +61,10 @@ class PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {?string} [colour]
      */
-    constructor(x, y, colour = null) {
+    constructor(x, y) {
         this.x = x
         this.y = y
-        this.colour = colour
         /** @type {GridMap} */
         this.map = null
         this.newRoutes = {
@@ -93,12 +91,30 @@ class PositionedNode {
     get position() {
         return {x: this.x, y: this.y}
     }
-    display(ctx, colour = null) {
+    /**
+     *
+     * @param {*} ctx
+     * @param {string} colour
+     */
+    display(ctx, colour) {
         ctx.save()
         ctx.translate(this.x, this.y)
-        ctx.fillStyle = colour || this.colour
+        ctx.fillStyle = colour
         ctx.fillRect(0.1, 0.1, 0.8, 0.8)
         ctx.restore()
+    }
+}
+
+class StartNode extends PositionedNode {
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {string} hint_colour
+     */
+    constructor(x, y, hint_colour) {
+        super(x, y)
+        this.colour = hint_colour
     }
     /**
      *
@@ -124,7 +140,7 @@ class PositionedNode {
                 if(this.map.validAddress(step.x, step.y)) {
                     let existing_node = this.map.nodeAt(step.x, step.y)
                     if(!existing_node) {
-                        let p = new PathNode(step.x, step.y, path, "light" + this.colour)
+                        let p = new PathNode(step.x, step.y, path)
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
@@ -161,7 +177,7 @@ class PositionedNode {
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
                 this.map.addNode(p)
-                p.display(ctx)
+                p.display(ctx, "light" + this.colour)
             })
         })
         this.routes = {
@@ -183,10 +199,9 @@ class PathNode extends PositionedNode {
      * @param {number} x
      * @param {number} y
      * @param {PositionedNode} from_node
-     * @param {string} hint_colour
      */
-    constructor(x, y, from_node, hint_colour) {
-        super(x, y, hint_colour)
+    constructor(x, y, from_node) {
+        super(x, y)
         this.from = from_node
         if(this.from instanceof PathNode) {
             this.ownedBy = this.from.ownedBy
@@ -231,13 +246,11 @@ class Route {
     display(ctx) {
         let [a, b] = [this.left, this.right]
         while(a instanceof PathNode) {
-            a.colour = "orange"
-            a.display(ctx)
+            a.display(ctx, "orange")
             a = a.from
         }
         while(b instanceof PathNode) {
-            b.colour = "orange"
-            b.display(ctx)
+            b.display(ctx, "orange")
             b = b.from
         }
     }
@@ -276,18 +289,17 @@ class GridTest {
         for(let i = 0; i < 31; i++) {
             this.obstructions.push(new PositionedNode(
                 Math.floor(Math.random() * 10),
-                Math.floor(Math.random() * 10),
-                "red"
+                Math.floor(Math.random() * 10)
             ))
         }
 
-        this.start = new PositionedNode(
+        this.start = new StartNode(
             Math.floor(Math.random() * 10),
             Math.floor(Math.random() * 10),
             "green"
         )
         do {
-            this.finish = new PositionedNode(
+            this.finish = new StartNode(
                 Math.floor(Math.random() * 10),
                 Math.floor(Math.random() * 10),
                 "blue"
@@ -310,9 +322,9 @@ class GridTest {
         map.addNode(this.finish)
 
         this.map = map
-        this.obstructions.forEach(o => o.display(this.ctx))
-        this.start.display(this.ctx)
-        this.finish.display(this.ctx)
+        this.obstructions.forEach(o => o.display(this.ctx, "red"))
+        this.start.display(this.ctx, "green")
+        this.finish.display(this.ctx, "blue")
 
         this.testNumber = null
     }
@@ -322,20 +334,19 @@ class GridTest {
      */
     initForTest(test) {
         this.currentTest = test
-        this.start = new PositionedNode(
+        this.start = new StartNode(
             test.start.x,
             test.start.y,
             "green"
         )
-        this.finish = new PositionedNode(
+        this.finish = new StartNode(
             test.finish.x,
             test.finish.y,
             "blue"
         )
         this.obstructions = test.obstructions.map(pos => new PositionedNode(
             pos.x,
-            pos.y,
-            "red"
+            pos.y
         ))
         let map = new GridMap(250, 10)
         this.ctx.restore()
@@ -349,9 +360,9 @@ class GridTest {
         map.addNode(this.finish)
 
         this.map = map
-        this.obstructions.forEach(o => o.display(this.ctx))
-        this.start.display(this.ctx)
-        this.finish.display(this.ctx)
+        this.obstructions.forEach(o => o.display(this.ctx, "red"))
+        this.start.display(this.ctx, "green")
+        this.finish.display(this.ctx, "blue")
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
