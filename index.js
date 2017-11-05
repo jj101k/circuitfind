@@ -21,7 +21,7 @@ class GridMap {
      */
     addNode(n) {
         this.nodes[n.x + n.y * this.l] = n
-        n.map = this
+        n.gridMap = this
     }
     display(ctx) {
         ctx.scale(this.cw, this.cw)
@@ -66,7 +66,7 @@ class PositionedNode {
         this.x = x
         this.y = y
         /** @type {GridMap} */
-        this.map = null
+        this.gridMap = null
         this.newRoutes = {
             4: [],
             6: [],
@@ -137,8 +137,8 @@ class StartNode extends PositionedNode {
         let step_type = cheap ? "cheap" : "expensive"
         let route_found = this.routes[0].some(path => {
             return path.nextSteps[step_type].some(step => {
-                if(this.map.validAddress(step.x, step.y)) {
-                    let existing_node = this.map.nodeAt(step.x, step.y)
+                if(this.gridMap.validAddress(step.x, step.y)) {
+                    let existing_node = this.gridMap.nodeAt(step.x, step.y)
                     if(!existing_node) {
                         let p = new PathNode(step.x, step.y, path)
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
@@ -176,7 +176,7 @@ class StartNode extends PositionedNode {
         })
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
-                this.map.addNode(p)
+                this.gridMap.addNode(p)
                 p.display(ctx, "light" + this.colour)
             })
         })
@@ -316,14 +316,14 @@ class GridTest {
         this.ctx.fillRect(0, 0, 250, 250)
         this.ctx.save()
 
-        let map = new GridMap(250, 10)
-        map.display(this.ctx)
+        let grid_map = new GridMap(250, 10)
+        grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => map.addNode(o))
-        map.addNode(this.start)
-        map.addNode(this.finish)
+        this.obstructions.forEach(o => grid_map.addNode(o))
+        grid_map.addNode(this.start)
+        grid_map.addNode(this.finish)
 
-        this.map = map
+        this.gridMap = grid_map
         this.obstructions.forEach(o => o.display(this.ctx, "red"))
         this.start.display(this.ctx, "green")
         this.finish.display(this.ctx, "blue")
@@ -350,18 +350,18 @@ class GridTest {
             pos.x,
             pos.y
         ))
-        let map = new GridMap(250, 10)
+        let grid_map = new GridMap(250, 10)
         this.ctx.restore()
         this.ctx.fillStyle = "white"
         this.ctx.fillRect(0, 0, 250, 250)
         this.ctx.save()
-        map.display(this.ctx)
+        grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => map.addNode(o))
-        map.addNode(this.start)
-        map.addNode(this.finish)
+        this.obstructions.forEach(o => grid_map.addNode(o))
+        grid_map.addNode(this.start)
+        grid_map.addNode(this.finish)
 
-        this.map = map
+        this.gridMap = grid_map
         this.obstructions.forEach(o => o.display(this.ctx, "red"))
         this.start.display(this.ctx, "green")
         this.finish.display(this.ctx, "blue")
