@@ -121,9 +121,10 @@ class StartNode extends PositionedNode {
      * @param {*} ctx
      * @param {PositionedNode} target
      * @param {boolean} cheap
+     * @param {GridMap} grid_map
      * @returns {?Route}
      */
-    stepOut(ctx, target, cheap) {
+    stepOut(ctx, target, cheap, grid_map) {
         if(!this.routes) {
             this.routes = {
                 0: [this],
@@ -151,7 +152,7 @@ class StartNode extends PositionedNode {
                             )
                         )
                     ) {
-                        route = new Route(path, existing_node)
+                        route = new Route(path, existing_node, grid_map)
                         return true
                     }
                 }
@@ -167,7 +168,7 @@ class StartNode extends PositionedNode {
         ) {
             return null
         } else {
-            return new Route(null, null)
+            return new Route()
         }
     }
     stepRoutes(ctx) {
@@ -203,18 +204,51 @@ class PathNode extends PositionedNode {
     constructor(x, y, from_node) {
         super(x, y)
         this.from = from_node
+        let dx = this.x - from_node.x
+        let dy = this.y - from_node.y
+        if(Math.abs(dx) - Math.abs(dy) == 0) {
+            // diagonal
+            this.fromDirection = 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
+        } else {
+            // straight
+            this.fromDirection = Math.abs(dx) + dx + dy + 1
+        }
         if(this.from instanceof PathNode) {
             this.ownedBy = this.from.ownedBy
         } else {
             this.ownedBy = this.from
         }
     }
+    get fromPosition() {
+        if(this.fromDirection >= 4) {
+            let t = this.fromDirection - 4
+            let dx = t & 2 - 1
+            let dy = (t % 2) * 2 - 1
+            return {x: this.x - dx, y: this.y - dy}
+        } else {
+            let t = this.fromDirection - 1
+            if(t % 2) {
+                // -1, 1
+                return {x: this.x, y: this.y - t}
+            } else {
+                // 0, 2
+                return {x: this.x - t + 1, y: this.y}
+            }
+        }
+    }
 }
 
 class Route {
-    constructor(left, right) {
+    /**
+     *
+     * @param {PositionedNode} left
+     * @param {PositionedNode} right
+     * @param {GridMap} grid_map
+     */
+    constructor(left = null, right = null, grid_map = null) {
         this.left = left
         this.right = right
+        this.gridMap = grid_map
     }
     get cost() {
         if(!this.left) return Infinity
@@ -413,10 +447,10 @@ class GridTest {
     }
     step() {
         let possible_routes = [
-            this.start.stepOut(this.ctx, this.finish, true),
-            this.finish.stepOut(this.ctx, this.start, true),
-            this.start.stepOut(this.ctx, this.finish, false),
-            this.finish.stepOut(this.ctx, this.start, false),
+            this.start.stepOut(this.ctx, this.finish, true, this.gridMap),
+            this.finish.stepOut(this.ctx, this.start, true, this.gridMap),
+            this.start.stepOut(this.ctx, this.finish, false, this.gridMap),
+            this.finish.stepOut(this.ctx, this.start, false, this.gridMap),
         ].filter(route => route)
 
         if(possible_routes.length) {
