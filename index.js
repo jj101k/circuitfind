@@ -271,8 +271,10 @@ class GridTest {
     /** @param {?number} v */
     set testNumber(v) {
         this._testNumber = v
-        document.querySelector("input#test-number").value =
-            (v === null) ? "" : v
+        let input = document.querySelector("input#test-number")
+        if(input instanceof HTMLInputElement) {
+            input.value = (v === null) ? "" : ("" + v)
+        }
     }
     init() {
         let c = document.getElementById("grid")
