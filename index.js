@@ -23,6 +23,10 @@ class GridMap {
         this.nodes[n.x + n.y * this.l] = n
         n.gridMap = this
     }
+    /**
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
     display(ctx) {
         ctx.scale(this.cw, this.cw)
         for(let x = 0; x <= 10; x++) {
@@ -93,7 +97,7 @@ class PositionedNode {
     }
     /**
      *
-     * @param {*} ctx
+     * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
     display(ctx, colour) {
@@ -118,7 +122,7 @@ class StartNode extends PositionedNode {
     }
     /**
      *
-     * @param {*} ctx
+     * @param {CanvasRenderingContext2D} ctx
      * @param {PositionedNode} target
      * @param {boolean} cheap
      * @param {GridMap} grid_map
@@ -284,6 +288,10 @@ class Route {
         }
         return cost
     }
+    /**
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
     display(ctx) {
         let [a, b] = [this.left, this.right]
         while(a instanceof PathNode) {
