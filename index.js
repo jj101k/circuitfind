@@ -42,6 +42,18 @@ class GridMap {
     }
     /**
      *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {PositionedNode} node
+     * @param {function(): void} action
+     */
+    displayNode(ctx, node, action) {
+        ctx.save()
+        ctx.translate(node.x, node.y)
+        action()
+        ctx.restore()
+    }
+    /**
+     *
      * @param {number} x
      * @param {number} y
      * @returns {?PositionedNode}
@@ -101,11 +113,10 @@ class PositionedNode {
      * @param {string} colour
      */
     display(ctx, colour) {
-        ctx.save()
-        ctx.translate(this.x, this.y)
-        ctx.fillStyle = colour
-        ctx.fillRect(0.1, 0.1, 0.8, 0.8)
-        ctx.restore()
+        this.gridMap.displayNode(ctx, this, () => {
+            ctx.fillStyle = colour
+            ctx.fillRect(0.1, 0.1, 0.8, 0.8)
+        })
     }
 }
 
@@ -246,6 +257,20 @@ class PathNode extends PositionedNode {
                 return {x: this.x - t + 1, y: this.y}
             }
         }
+    }
+    /**
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {string} colour
+     */
+    display(ctx, colour) {
+        super.display(ctx, colour)
+        this.gridMap.displayNode(ctx, this, () => {
+            ctx.scale(0.1, 0.1)
+            ctx.font = "8px Arial"
+            ctx.fillStyle = "#888"
+            ctx.fillText("" + this.fromDirection, 1, 9)
+        })
     }
 }
 
