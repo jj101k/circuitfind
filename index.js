@@ -309,7 +309,7 @@ class Route {
             cost += 6
         }
         this.nodes.forEach(n => {
-            if(n.fromPosition.x == a.x || n.fromPosition.y == a.y) {
+            if(n.fromPosition.x == n.x || n.fromPosition.y == n.y) {
                 cost += 4
             } else {
                 cost += 6
