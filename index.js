@@ -308,38 +308,36 @@ class Route {
         } else {
             cost += 6
         }
-        while(a instanceof PathNode) {
-            if(a.from.x == a.x || a.from.y == a.y) {
+        this.nodes.forEach(n => {
+            if(n.fromPosition.x == a.x || n.fromPosition.y == a.y) {
                 cost += 4
             } else {
                 cost += 6
             }
-            a = a.from
+        })
+        return cost
+    }
+    get nodes() {
+        let [a, b] = [this.left, this.right]
+        let nodes = []
+        while(a instanceof PathNode) {
+            nodes.push(a)
+            a = this.gridMap.nodeAt(a.fromPosition.x, a.fromPosition.y)
         }
         while(b instanceof PathNode) {
-            if(b.from.x == b.x || b.from.y == b.y) {
-                cost += 4
-            } else {
-                cost += 6
-            }
-            b = b.from
+            nodes.unshift(b)
+            b = this.gridMap.nodeAt(b.fromPosition.x, b.fromPosition.y)
         }
-        return cost
+        return nodes
     }
     /**
      *
      * @param {CanvasRenderingContext2D} ctx
      */
     display(ctx) {
-        let [a, b] = [this.left, this.right]
-        while(a instanceof PathNode) {
-            a.display(ctx, "orange")
-            a = a.from
-        }
-        while(b instanceof PathNode) {
-            b.display(ctx, "orange")
-            b = b.from
-        }
+        this.nodes.forEach(n => {
+            n.display(ctx, "orange")
+        })
     }
 }
 
