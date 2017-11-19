@@ -257,7 +257,7 @@ class PathNode extends PositionedNode {
     get fromPosition() {
         if(this.fromDirection >= 4) {
             let t = this.fromDirection - 4
-            let dx = t & 2 - 1
+            let dx = (t & 2) - 1
             let dy = (t % 2) * 2 - 1
             return {x: this.x - dx, y: this.y - dy}
         } else {
