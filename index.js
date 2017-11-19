@@ -219,6 +219,13 @@ class PathNode extends PositionedNode {
             this.ownedBy = this.from
         }
     }
+    /**
+     * The position this node came from.
+     *
+     * 7 2 5
+     * 3   1
+     * 6 0 4
+     */
     get fromPosition() {
         if(this.fromDirection >= 4) {
             let t = this.fromDirection - 4
