@@ -317,6 +317,13 @@ class GridTest {
             input.value = (v === null) ? "" : ("" + v)
         }
     }
+    dumpGeneratedState() {
+        console.log(JSON.stringify({
+            start: this.start.position,
+            finish: this.finish.position,
+            obstructions: this.obstructions.map(o => o.position)
+        }))
+    }
     init() {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
@@ -472,11 +479,7 @@ class GridTest {
                 this.runInterval = null
             }
             console.log("done")
-            console.log(JSON.stringify({
-                start: this.start.position,
-                finish: this.finish.position,
-                obstructions: this.obstructions.map(o => o.position)
-            }))
+            this.dumpGeneratedState()
             let tr = document.createElement("tr")
             let td = document.createElement("td")
             td.textContent = this.testNumber === null ?
