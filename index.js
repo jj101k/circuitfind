@@ -18,10 +18,21 @@ class GridMap {
     /**
      *
      * @param {PositionedNode} n
+     * @param {boolean} overwrite
+     * @returns {boolean}
      */
-    addNode(n) {
-        this.nodes[n.x + n.y * this.l] = n
-        n.gridMap = this
+    addNode(n, overwrite = false) {
+        let existing_node = this.nodes[n.x + n.y * this.l]
+        if(overwrite || !existing_node) {
+            this.nodes[n.x + n.y * this.l] = n
+            n.gridMap = this
+            if(existing_node) {
+                existing_node.gridMap = null
+            }
+            return true
+        } else {
+            return false
+        }
     }
     /**
      *
@@ -187,13 +198,15 @@ class StartNode extends PositionedNode {
         }
     }
     stepRoutes(ctx) {
+        this.routes[0] = this.routes[0].filter(p => p.gridMap)
         this.routes[0].forEach(path => {
             if(path !== this) path.display(ctx, "black")
         })
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
-                this.gridMap.addNode(p)
-                p.display(ctx, "light" + this.colour)
+                if(this.gridMap.addNode(p)) {
+                    p.display(ctx, "light" + this.colour)
+                }
             })
         })
         this.routes = {
@@ -400,9 +413,13 @@ class GridTest {
         let grid_map = new GridMap(250, 10)
         grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => grid_map.addNode(o))
-        grid_map.addNode(this.start)
-        grid_map.addNode(this.finish)
+        this.obstructions.forEach(o => grid_map.addNode(o, true))
+        grid_map.addNode(this.start, true)
+        grid_map.addNode(this.finish, true)
+
+        this.obstructions = this.obstructions.filter(
+            o => o.gridMap
+        )
 
         this.gridMap = grid_map
         this.obstructions.forEach(o => o.display(this.ctx, "red"))
@@ -438,9 +455,13 @@ class GridTest {
         this.ctx.save()
         grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => grid_map.addNode(o))
-        grid_map.addNode(this.start)
-        grid_map.addNode(this.finish)
+        this.obstructions.forEach(o => grid_map.addNode(o, true))
+        grid_map.addNode(this.start, true)
+        grid_map.addNode(this.finish, true)
+
+        this.obstructions = this.obstructions.filter(
+            o => o.gridMap
+        )
 
         this.gridMap = grid_map
         this.obstructions.forEach(o => o.display(this.ctx, "red"))
