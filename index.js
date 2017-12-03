@@ -94,10 +94,6 @@ class PositionedNode {
         this.y = y
         /** @type {GridMap} */
         this.gridMap = null
-        this.newRoutes = {
-            4: [],
-            6: [],
-        }
     }
     get nextSteps() {
         let steps = {
@@ -141,6 +137,10 @@ class StartNode extends PositionedNode {
     constructor(x, y, hint_colour) {
         super(x, y)
         this.colour = hint_colour
+        this.newRoutes = {
+            4: [],
+            6: [],
+        }
     }
     /**
      *
