@@ -262,6 +262,7 @@ class RouteStepper {
                             existing_node.content == target.content
                         ) || (
                             existing_node instanceof PathNode &&
+                            existing_node.isLeafNode(grid_map) &&
                             existing_node.getOwner(grid_map).content != this.startNode.content
                         )
                     ) {
@@ -434,6 +435,30 @@ class PathNode extends PositionedNode {
     inMap(grid_map) {
         let n = grid_map.nodeAt(this.x, this.y)
         return n instanceof PathNode && n.fromDirection == this.fromDirection
+    }
+    /**
+     * True if this is a leaf node, ie a non-target.
+     *
+     * @param {GridMap} grid_map
+     * @returns {boolean}
+     */
+    isLeafNode(grid_map) {
+        for(let x = -1; x <= 1; x++) {
+            for(let y = -1; y <= 1; y++) {
+                if(x || y) {
+                    let c = grid_map.contentAt(this.x + x, this.y + y)
+                    if(c & 0b1000) {
+                        let pos = PathNode.getFromPosition(
+                            this.x + x,
+                            this.y + y,
+                            c
+                        )
+                        if(pos.x == this.x && pos.y == this.y) return false
+                    }
+                }
+            }
+        }
+        return true
     }
 }
 
