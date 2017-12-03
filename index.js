@@ -144,8 +144,6 @@ class StartNode extends PositionedNode {
         this.colour = hint_colour
         /** @type {{[x: number]: (PathNode|StartNode)[]}} */
         this.newRoutes = {
-            0: [this],
-            2: [],
             4: [],
             6: [],
         }
