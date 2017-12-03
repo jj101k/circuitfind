@@ -43,6 +43,20 @@ class GridMap {
     }
     /**
      *
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
+    contentAt(x, y) {
+        let address = x + y * this.l
+        let offset = Math.floor(address / 2)
+        let bottom = address % 2
+        return bottom ?
+            (this.nodes[offset] & 0b1111) :
+            (this.nodes[offset] >> 4)
+    }
+    /**
+     *
      * @param {CanvasRenderingContext2D} ctx
      */
     display(ctx) {
@@ -83,15 +97,10 @@ class GridMap {
      * @returns {?PositionedNode}
      */
     nodeAt(x, y) {
-        let address = x + y * this.l
-        let offset = Math.floor(address / 2)
-        let bottom = address % 2
         return PositionedNode.nodeFor(
             x,
             y,
-            bottom ?
-                (this.nodes[offset] & 0b1111) :
-                (this.nodes[offset] >> 4)
+            this.contentAt(x, y)
         )
     }
     /**
@@ -327,6 +336,34 @@ class PathNode extends PositionedNode {
         }
     }
     /**
+     * The position a node came from.
+     *
+     * 7 2 5
+     * 3   1
+     * 6 0 4
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} from_direction
+     */
+    static getFromPosition(x, y, from_direction) {
+        if(from_direction >= 4) {
+            let t = from_direction - 4
+            let dx = (t & 2) - 1
+            let dy = (t % 2) * 2 - 1
+            return {x: x - dx, y: y - dy}
+        } else {
+            let t = from_direction - 1
+            if(t % 2) {
+                // -1, 1
+                return {x: x, y: y - t}
+            } else {
+                // 0, 2
+                return {x: x - t + 1, y: y}
+            }
+        }
+    }
+    /**
      *
      * @param {number} x
      * @param {number} y
@@ -340,27 +377,9 @@ class PathNode extends PositionedNode {
     }
     /**
      * The position this node came from.
-     *
-     * 7 2 5
-     * 3   1
-     * 6 0 4
      */
     get fromPosition() {
-        if(this.fromDirection >= 4) {
-            let t = this.fromDirection - 4
-            let dx = (t & 2) - 1
-            let dy = (t % 2) * 2 - 1
-            return {x: this.x - dx, y: this.y - dy}
-        } else {
-            let t = this.fromDirection - 1
-            if(t % 2) {
-                // -1, 1
-                return {x: this.x, y: this.y - t}
-            } else {
-                // 0, 2
-                return {x: this.x - t + 1, y: this.y}
-            }
-        }
+        return PathNode.getFromPosition(this.x, this.y, this.fromDirection)
     }
     /**
      *
@@ -383,9 +402,15 @@ class PathNode extends PositionedNode {
      * @returns {StartNode}
      */
     getOwner(grid_map) {
-        let p
-        for(p = this; !(p instanceof StartNode); p = p.getPreviousNode(grid_map)) ;
-        return p
+        let c, position
+        for(
+            c = this.content, position = {x: this.x, y: this.y};
+            c & 0b1000;
+            position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
+            c = grid_map.contentAt(position.x, position.y)
+        ) ;
+        // @ts-ignore
+        return grid_map.nodeAt(position.x, position.y)
     }
     /**
      *
