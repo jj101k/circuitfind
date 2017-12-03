@@ -660,7 +660,7 @@ class GridTest {
                 "" + this.currentTest.correctLength
             tr.appendChild(td)
 
-            if(this.currentTest && this.currentTest.correctLength < route.getCost(this.gridMap)) {
+            if(this.currentTest && this.currentTest.correctLength != route.getCost(this.gridMap)) {
                 tr.style.color = "red"
             }
             document.querySelector("#test-results").appendChild(
