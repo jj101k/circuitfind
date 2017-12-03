@@ -85,10 +85,12 @@ class PositionedNode {
      *
      * @param {number} x
      * @param {number} y
+     * @param {number} content 0-15
      */
-    constructor(x, y) {
+    constructor(x, y, content) {
         this.x = x
         this.y = y
+        this.content = content
     }
     get nextSteps() {
         let steps = {
@@ -132,16 +134,26 @@ class PositionedNode {
     }
 }
 
+class ObstructionNode extends PositionedNode {
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     */
+    constructor(x, y) {
+        super(x, y, 0b1111)
+    }
+}
+
 class StartNode extends PositionedNode {
     /**
      *
      * @param {number} x
      * @param {number} y
-     * @param {string} hint_colour
+     * @param {number} index 0-6 or 8+(0-6)
      */
-    constructor(x, y, hint_colour) {
-        super(x, y)
-        this.colour = hint_colour
+    constructor(x, y, index) {
+        super(x, y, 0b1000 | index)
         /** @type {{[x: number]: (PathNode|StartNode)[]}} */
         this.newRoutes = {
             4: [],
@@ -154,6 +166,9 @@ class StartNode extends PositionedNode {
             4: [],
             6: [],
         }
+    }
+    get colour() {
+        return this.content & 1 ? "blue" : "green"
     }
     /**
      *
@@ -172,7 +187,11 @@ class StartNode extends PositionedNode {
                 if(grid_map.validAddress(step.x, step.y)) {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
                     if(!existing_node) {
-                        let p = new PathNode(step.x, step.y, path)
+                        let p = new PathNode(
+                            step.x,
+                            step.y,
+                            PathNode.fromDirection(step.x, step.y, path)
+                        )
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
@@ -239,17 +258,28 @@ class PathNode extends PositionedNode {
      * @param {number} y
      * @param {PositionedNode} from_node
      */
-    constructor(x, y, from_node) {
-        super(x, y)
-        let dx = this.x - from_node.x
-        let dy = this.y - from_node.y
+    static fromDirection(x, y, from_node) {
+        let dx = x - from_node.x
+        let dy = y - from_node.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
-            this.fromDirection = 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
+            return 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
         } else {
             // straight
-            this.fromDirection = Math.abs(dx) + dx + dy + 1
+            return Math.abs(dx) + dx + dy + 1
         }
+    }
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} fromDirection 0-7
+     */
+    constructor(x, y, fromDirection) {
+        super(x, y, fromDirection)
+    }
+    get fromDirection() {
+        return this.content & 0b111
     }
     /**
      * The position this node came from.
@@ -447,10 +477,10 @@ class GridTest {
     }
     initForRandom() {
         this.currentTest = null
-        /** @type {PositionedNode[]} */
+        /** @type {ObstructionNode[]} */
         this.obstructions = []
         for(let i = 0; i < 31; i++) {
-            this.obstructions.push(new PositionedNode(
+            this.obstructions.push(new ObstructionNode(
                 Math.floor(Math.random() * 10),
                 Math.floor(Math.random() * 10)
             ))
@@ -459,13 +489,13 @@ class GridTest {
         this.start = new StartNode(
             Math.floor(Math.random() * 10),
             Math.floor(Math.random() * 10),
-            "green"
+            0
         )
         do {
             this.finish = new StartNode(
                 Math.floor(Math.random() * 10),
                 Math.floor(Math.random() * 10),
-                "blue"
+                1
             )
         } while(
             this.finish.position.x == this.start.position.x &&
@@ -504,14 +534,14 @@ class GridTest {
         this.start = new StartNode(
             test.start.x,
             test.start.y,
-            "green"
+            0
         )
         this.finish = new StartNode(
             test.finish.x,
             test.finish.y,
-            "blue"
+            1
         )
-        this.obstructions = test.obstructions.map(pos => new PositionedNode(
+        this.obstructions = test.obstructions.map(pos => new ObstructionNode(
             pos.x,
             pos.y
         ))
