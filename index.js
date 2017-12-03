@@ -250,7 +250,6 @@ class PathNode extends PositionedNode {
      */
     constructor(x, y, from_node) {
         super(x, y)
-        this.from = from_node
         let dx = this.x - from_node.x
         let dy = this.y - from_node.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
@@ -260,10 +259,10 @@ class PathNode extends PositionedNode {
             // straight
             this.fromDirection = Math.abs(dx) + dx + dy + 1
         }
-        if(this.from instanceof PathNode) {
-            this.ownedBy = this.from.ownedBy
+        if(from_node instanceof PathNode) {
+            this.ownedBy = from_node.ownedBy
         } else {
-            this.ownedBy = this.from
+            this.ownedBy = from_node
         }
     }
     /**
