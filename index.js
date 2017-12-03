@@ -645,7 +645,7 @@ class GridTest {
         this.initForRandom(s)
         this.testNumber = null
         if(!this.paused) {
-            this.run()
+            this.run(10000 / (s * s))
         }
     }
     run(interval_ms = 100) {
