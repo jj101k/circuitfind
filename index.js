@@ -127,7 +127,8 @@ class PositionedNode {
      * @returns {boolean}
      */
     inMap(grid_map) {
-        return grid_map.nodeAt(this.x, this.y) === this
+        let n = grid_map.nodeAt(this.x, this.y)
+        return n instanceof this.constructor
     }
 }
 
@@ -322,6 +323,15 @@ class PathNode extends PositionedNode {
         } else {
             throw new Error("Bad previous node")
         }
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @returns {boolean}
+     */
+    inMap(grid_map) {
+        let n = grid_map.nodeAt(this.x, this.y)
+        return n instanceof PathNode && n.fromDirection == this.fromDirection
     }
 }
 
