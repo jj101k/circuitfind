@@ -9,7 +9,7 @@ class GridMap {
     constructor(w, l) {
         this.w = w
         this.l = l
-        /** @type {?PositionedNode[]} */
+        /** @type {?number[]} */
         this.nodes = Array(l * l)
     }
     get cw() {
@@ -24,7 +24,7 @@ class GridMap {
     addNode(n, overwrite = false) {
         let existing_node = this.nodes[n.x + n.y * this.l]
         if(overwrite || !existing_node) {
-            this.nodes[n.x + n.y * this.l] = n
+            this.nodes[n.x + n.y * this.l] = n.content
             return true
         } else {
             return false
@@ -67,7 +67,11 @@ class GridMap {
      * @returns {?PositionedNode}
      */
     nodeAt(x, y) {
-        return this.nodes[x + y * this.l]
+        return PositionedNode.nodeFor(
+            x,
+            y,
+            this.nodes[x + y * this.l]
+        )
     }
     /**
      *
@@ -81,6 +85,24 @@ class GridMap {
 }
 
 class PositionedNode {
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {?number} content 0-15
+     * @returns {?PositionedNode}
+     */
+    static nodeFor(x, y, content) {
+        if(content === null || content === undefined) {
+            return null
+        } else if(content == 0b1111) {
+            return new ObstructionNode(x, y)
+        } else if(content & 0b1000) {
+            return new StartNode(x, y, content)
+        } else {
+            return new PathNode(x, y, content)
+        }
+    }
     /**
      *
      * @param {number} x
@@ -205,10 +227,13 @@ class RouteStepper {
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
-                        existing_node === target || (
+                        (
+                            existing_node instanceof StartNode &&
+                            existing_node.content == target.content
+                        ) || (
                             existing_node instanceof PathNode && (
-                                (this instanceof PathNode && existing_node.getOwner(grid_map) !== this.getOwner(grid_map)) ||
-                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map) !== this.startNode)
+                                (this instanceof PathNode && existing_node.getOwner(grid_map).content != this.getOwner(grid_map).content) ||
+                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map).content != this.startNode.content)
                             )
                         )
                     ) {
@@ -239,7 +264,7 @@ class RouteStepper {
     stepRoutes(grid_map, ctx) {
         this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         this.routes[0].forEach(path => {
-            if(path !== this.startNode) path.display(grid_map, ctx, "black")
+            if(path instanceof PathNode) path.display(grid_map, ctx, "black")
         })
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
@@ -382,9 +407,9 @@ class Route {
      */
     display(grid_map, ctx) {
         this.getNodes(grid_map).forEach(n => {
-            if(n === this.left) {
+            if(n.position.x == this.left.x && n.position.y == this.left.y) {
                 n.display(grid_map, ctx, "pink")
-            } else if(n === this.right) {
+            } else if(n.position.x == this.right.x && n.position.y == this.right.y) {
                 n.display(grid_map, ctx, "yellow")
             } else {
                 n.display(grid_map, ctx, "orange")
