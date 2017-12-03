@@ -9,8 +9,8 @@ class GridMap {
     constructor(w, l) {
         this.w = w
         this.l = l
-        /** @type {?number[]} */
-        this.nodes = Array(l * l)
+        /** @type {number[]} */
+        this.nodes = Array(l * l).map(v => 0)
     }
     get cw() {
         return this.w / this.l
