@@ -546,7 +546,7 @@ class GridTest {
         /** @type {ObstructionNode[]} */
         this.obstructions = []
         this.size = s
-        let m = Math.floor(s * Math.sqrt(s))
+        let m = Math.floor(s * s / 2)
         for(let i = 0; i < m; i++) {
             this.obstructions.push(new ObstructionNode(
                 Math.floor(Math.random() * s),
