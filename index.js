@@ -336,7 +336,13 @@ class Route {
      */
     display(ctx) {
         this.nodes.forEach(n => {
-            n.display(ctx, "orange")
+            if(n === this.left) {
+                n.display(ctx, "pink")
+            } else if(n === this.right) {
+                n.display(ctx, "yellow")
+            } else {
+                n.display(ctx, "orange")
+            }
         })
     }
 }
