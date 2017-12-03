@@ -677,9 +677,12 @@ class GridTest {
             if(this.blind) {
                 let running = true
                 setTimeout(() => {
+                    let start = new Date().valueOf()
                     while(running) {
                         running = this.step()
                     }
+                    let end = new Date().valueOf()
+                    console.log(`Took ${end - start} ms`)
                 }, 100)
             } else {
                 this.run(10000 / (s * s))
