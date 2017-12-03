@@ -47,11 +47,11 @@ class GridMap {
      */
     display(ctx) {
         ctx.scale(this.cw, this.cw)
-        for(let x = 0; x <= 10; x++) {
+        for(let x = 0; x <= this.l; x++) {
             ctx.moveTo(x, 0)
             ctx.lineTo(x, this.l)
         }
-        for(let y = 0; y <= 10; y++) {
+        for(let y = 0; y <= this.l; y++) {
             ctx.moveTo(0, y)
             ctx.lineTo(this.l, y)
         }
@@ -526,27 +526,32 @@ class GridTest {
             console.log("Well, that's the wrong element type")
         }
     }
-    initForRandom() {
+    /**
+     *
+     * @param {number} [s]
+     */
+    initForRandom(s = 10) {
         this.currentTest = null
         /** @type {ObstructionNode[]} */
         this.obstructions = []
-        for(let i = 0; i < 31; i++) {
+        let m = Math.floor(s * Math.sqrt(s))
+        for(let i = 0; i < m; i++) {
             this.obstructions.push(new ObstructionNode(
-                Math.floor(Math.random() * 10),
-                Math.floor(Math.random() * 10)
+                Math.floor(Math.random() * s),
+                Math.floor(Math.random() * s)
             ))
         }
 
         this.start = new StartNode(
-            Math.floor(Math.random() * 10),
-            Math.floor(Math.random() * 10),
+            Math.floor(Math.random() * s),
+            Math.floor(Math.random() * s),
             1
         )
         this.routeStart = new RouteStepper(this.start)
         do {
             this.finish = new StartNode(
-                Math.floor(Math.random() * 10),
-                Math.floor(Math.random() * 10),
+                Math.floor(Math.random() * s),
+                Math.floor(Math.random() * s),
                 2
             )
         } while(
@@ -560,7 +565,7 @@ class GridTest {
         this.ctx.fillRect(0, 0, 250, 250)
         this.ctx.save()
 
-        let grid_map = new GridMap(250, 10)
+        let grid_map = new GridMap(250, s)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
@@ -628,8 +633,12 @@ class GridTest {
         }
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
     }
-    randomTest() {
-        this.initForRandom()
+    /**
+     *
+     * @param {number} [s]
+     */
+    randomTest(s = 10) {
+        this.initForRandom(s)
         this.testNumber = null
         if(!this.paused) {
             this.run()
