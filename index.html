@@ -17,7 +17,8 @@
             </tbody>
         </table>
         <canvas id="grid" width="250" height="250" style="border: 1px solid black"></canvas>
-        <p><input id="test-number" type="number" value=""/></p>
+        <p><label>Random size <input id="test-size" type="number" value="10"/></label></p>
+        <p><label>Test <input id="test-number" type="number" value=""/></label></p>
         <p><label><input type="checkbox" onchange="t.paused = this.value">Pause</label></p>
         <p>
             <button type="button" onclick="t.step()">Step</button>
@@ -34,6 +35,9 @@
             t.randomTest(size)
             document.querySelector("#test-number").onchange = function() {
                 t.selectTest(this.value)
+            }
+            document.querySelector("#test-size").onchange = function() {
+                size = this.value
             }
         </script>
     </body>
