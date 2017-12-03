@@ -739,7 +739,6 @@ class GridTest {
                 this.runInterval = null
             }
             console.log("done")
-            this.dumpGeneratedState()
             let tr = document.createElement("tr")
             let td = document.createElement("td")
             td.textContent = this.testNumber === null ?
