@@ -10,7 +10,7 @@ class GridMap {
         this.w = w
         this.l = l
         /** @type {number[]} */
-        this.nodes = Array(l * l).map(v => 0)
+        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
     }
     get cw() {
         return this.w / this.l
@@ -22,9 +22,20 @@ class GridMap {
      * @returns {boolean}
      */
     addNode(n, overwrite = false) {
-        let existing_node = this.nodes[n.x + n.y * this.l]
+        let address = n.x + n.y * this.l
+        let offset = Math.floor(address / 2)
+        let bottom = address % 2
+        let existing_node = bottom ?
+            (this.nodes[offset] & 0b1111) :
+            (this.nodes[offset] >> 4)
         if(overwrite || !existing_node) {
-            this.nodes[n.x + n.y * this.l] = n.content
+            if(bottom) {
+                this.nodes[offset] =
+                    (this.nodes[offset] & 0b11110000) + (n.content & 0b1111)
+            } else {
+                this.nodes[offset] =
+                    ((n.content & 0b1111) << 4) + (this.nodes[offset] & 0b1111)
+            }
             return true
         } else {
             return false
@@ -67,10 +78,15 @@ class GridMap {
      * @returns {?PositionedNode}
      */
     nodeAt(x, y) {
+        let address = x + y * this.l
+        let offset = Math.floor(address / 2)
+        let bottom = address % 2
         return PositionedNode.nodeFor(
             x,
             y,
-            this.nodes[x + y * this.l] || 0
+            bottom ?
+                (this.nodes[offset] & 0b1111) :
+                (this.nodes[offset] >> 4)
         )
     }
     /**
