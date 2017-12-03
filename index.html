@@ -19,7 +19,8 @@
         <canvas id="grid" width="250" height="250" style="border: 1px solid black"></canvas>
         <p><label>Random size <input id="test-size" type="number" value="10"/></label></p>
         <p><label>Test <input id="test-number" type="number" value=""/></label></p>
-        <p><label><input type="checkbox" onchange="t.paused = this.value">Pause</label></p>
+        <p><label><input type="checkbox" onchange="t.paused = this.checked">Pause</label></p>
+        <p><label><input type="checkbox" onchange="t.blind = this.checked">Disable display updates</label></p>
         <p>
             <button type="button" onclick="t.step()">Step</button>
             <button type="button" onclick="t.nextTest()">Next test</button>
