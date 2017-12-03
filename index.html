@@ -30,7 +30,6 @@
         <script>
             let t = new GridTest()
             t.tests = PathTests
-            t.init()
             t.randomTest()
             document.querySelector("#test-number").onchange = function() {
                 t.selectTest(this.value)

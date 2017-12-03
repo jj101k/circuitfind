@@ -46,7 +46,6 @@ class GridMap {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(ctx) {
-        ctx.scale(this.cw, this.cw)
         ctx.fillStyle = "white"
         ctx.fillRect(0, 0, this.l, this.l)
         ctx.beginPath()
@@ -524,10 +523,13 @@ class GridTest {
     dumpGeneratedState() {
         console.log(JSON.stringify(this.generatedState))
     }
-    init() {
+    buildContext(w = 250, l = 10) {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             var ctx = c.getContext("2d")
+            ctx.restore()
+            ctx.save()
+            ctx.scale(w / l, w / l)
             this.ctx = ctx
         } else {
             console.log("Well, that's the wrong element type")
@@ -569,6 +571,7 @@ class GridTest {
         this.routeFinish = new RouteStepper(this.finish)
 
         let grid_map = new GridMap(250, s)
+        this.buildContext(250, s)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
@@ -610,6 +613,7 @@ class GridTest {
         ))
         this.size = test.size || 10
         let grid_map = new GridMap(250, this.size)
+        this.buildContext(250, this.size)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
