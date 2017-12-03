@@ -367,12 +367,12 @@ class PathNode extends PositionedNode {
      */
     display(grid_map, ctx, colour) {
         super.display(grid_map, ctx, colour)
-        grid_map.displayNode(grid_map, ctx, this, () => {
+        grid_map.displayNode(grid_map, ctx, this, grid_map.cw > 10 ? () => {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
             ctx.fillText("" + this.fromDirection, 1, 9)
-        })
+        } : () => {})
     }
     /**
      *
