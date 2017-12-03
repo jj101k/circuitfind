@@ -47,6 +47,7 @@ class GridMap {
      */
     display(ctx) {
         ctx.scale(this.cw, this.cw)
+        ctx.beginPath()
         for(let x = 0; x <= this.l; x++) {
             ctx.moveTo(x, 0)
             ctx.lineTo(x, this.l)
