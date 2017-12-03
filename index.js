@@ -49,8 +49,8 @@ class GridMap {
      */
     contentAt(x, y) {
         let address = x + y * this.l
-        let offset = Math.floor(address / 2)
-        let bottom = address % 2
+        let offset = address >> 1
+        let bottom = address & 1
         return bottom ?
             (this.nodes[offset] & 0b1111) :
             (this.nodes[offset] >> 4)
