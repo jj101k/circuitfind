@@ -486,6 +486,7 @@ class Route {
  * @property {{x: number, y: number}[]} obstructions
  * @property {?boolean} passed
  * @property {?number} correctLength
+ * @property {?number} size
  */
 
 class GridTest {
@@ -496,6 +497,7 @@ class GridTest {
         this.currentTest = null
         this.rejectPromise = null
         this.resolvePromise = null
+        this.size = null
     }
     /** @type {testSignature} */
     get generatedState() {
@@ -505,6 +507,7 @@ class GridTest {
             obstructions: this.obstructions.map(o => o.position),
             passed: null,
             correctLength: null,
+            size: this.size,
         }
     }
     get testNumber() {
@@ -538,6 +541,7 @@ class GridTest {
         this.currentTest = null
         /** @type {ObstructionNode[]} */
         this.obstructions = []
+        this.size = s
         let m = Math.floor(s * Math.sqrt(s))
         for(let i = 0; i < m; i++) {
             this.obstructions.push(new ObstructionNode(
@@ -604,7 +608,8 @@ class GridTest {
             pos.x,
             pos.y
         ))
-        let grid_map = new GridMap(250, 10)
+        this.size = test.size || 10
+        let grid_map = new GridMap(250, this.size)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
