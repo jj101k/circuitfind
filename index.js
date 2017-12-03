@@ -25,10 +25,6 @@ class GridMap {
         let existing_node = this.nodes[n.x + n.y * this.l]
         if(overwrite || !existing_node) {
             this.nodes[n.x + n.y * this.l] = n
-            n.gridMap = this
-            if(existing_node) {
-                existing_node.gridMap = null
-            }
             return true
         } else {
             return false
@@ -53,11 +49,12 @@ class GridMap {
     }
     /**
      *
+     * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {PositionedNode} node
      * @param {function(): void} action
      */
-    displayNode(ctx, node, action) {
+    displayNode(grid_map, ctx, node, action) {
         ctx.save()
         ctx.translate(node.x, node.y)
         action()
@@ -92,8 +89,6 @@ class PositionedNode {
     constructor(x, y) {
         this.x = x
         this.y = y
-        /** @type {GridMap} */
-        this.gridMap = null
     }
     get nextSteps() {
         let steps = {
@@ -116,14 +111,23 @@ class PositionedNode {
     }
     /**
      *
+     * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
-    display(ctx, colour) {
-        this.gridMap.displayNode(ctx, this, () => {
+    display(grid_map, ctx, colour) {
+        grid_map.displayNode(grid_map, ctx, this, () => {
             ctx.fillStyle = colour
             ctx.fillRect(0.1, 0.1, 0.8, 0.8)
         })
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @returns {boolean}
+     */
+    inMap(grid_map) {
+        return grid_map.nodeAt(this.x, this.y) === this
     }
 }
 
@@ -137,7 +141,17 @@ class StartNode extends PositionedNode {
     constructor(x, y, hint_colour) {
         super(x, y)
         this.colour = hint_colour
+        /** @type {{[x: number]: (PathNode|StartNode)[]}} */
         this.newRoutes = {
+            0: [this],
+            2: [],
+            4: [],
+            6: [],
+        }
+        /** @type {{[x: number]: (PathNode|StartNode)[]}} */
+        this.routes = {
+            0: [this],
+            2: [],
             4: [],
             6: [],
         }
@@ -164,8 +178,8 @@ class StartNode extends PositionedNode {
         let step_type = cheap ? "cheap" : "expensive"
         let route_found = this.routes[0].some(path => {
             return path.nextSteps[step_type].some(step => {
-                if(this.gridMap.validAddress(step.x, step.y)) {
-                    let existing_node = this.gridMap.nodeAt(step.x, step.y)
+                if(grid_map.validAddress(step.x, step.y)) {
+                    let existing_node = grid_map.nodeAt(step.x, step.y)
                     if(!existing_node) {
                         let p = new PathNode(step.x, step.y, path)
                         let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
@@ -178,7 +192,7 @@ class StartNode extends PositionedNode {
                             )
                         )
                     ) {
-                        route = new Route(path, existing_node, grid_map)
+                        route = new Route(path, existing_node)
                         return true
                     }
                 }
@@ -197,15 +211,20 @@ class StartNode extends PositionedNode {
             return new Route()
         }
     }
-    stepRoutes(ctx) {
-        this.routes[0] = this.routes[0].filter(p => p.gridMap)
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    stepRoutes(grid_map, ctx) {
+        this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         this.routes[0].forEach(path => {
-            if(path !== this) path.display(ctx, "black")
+            if(path !== this) path.display(grid_map, ctx, "black")
         })
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
-                if(this.gridMap.addNode(p)) {
-                    p.display(ctx, "light" + this.colour)
+                if(grid_map.addNode(p)) {
+                    p.display(grid_map, ctx, "light" + this.colour)
                 }
             })
         })
@@ -273,12 +292,13 @@ class PathNode extends PositionedNode {
     }
     /**
      *
+     * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
-    display(ctx, colour) {
-        super.display(ctx, colour)
-        this.gridMap.displayNode(ctx, this, () => {
+    display(grid_map, ctx, colour) {
+        super.display(grid_map, ctx, colour)
+        grid_map.displayNode(grid_map, ctx, this, () => {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
@@ -292,14 +312,33 @@ class Route {
      *
      * @param {PositionedNode} left
      * @param {PositionedNode} right
-     * @param {GridMap} grid_map
      */
-    constructor(left = null, right = null, grid_map = null) {
+    constructor(left = null, right = null) {
         this.left = left
         this.right = right
-        this.gridMap = grid_map
     }
-    get cost() {
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    display(grid_map, ctx) {
+        this.getNodes(grid_map).forEach(n => {
+            if(n === this.left) {
+                n.display(grid_map, ctx, "pink")
+            } else if(n === this.right) {
+                n.display(grid_map, ctx, "yellow")
+            } else {
+                n.display(grid_map, ctx, "orange")
+            }
+        })
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @returns {number}
+     */
+    getCost(grid_map) {
         if(!this.left) return Infinity
         let [a, b] = [this.left, this.right]
         let cost = 0
@@ -308,7 +347,7 @@ class Route {
         } else {
             cost += 6
         }
-        this.nodes.forEach(n => {
+        this.getNodes(grid_map).forEach(n => {
             if(n.fromPosition.x == n.x || n.fromPosition.y == n.y) {
                 cost += 4
             } else {
@@ -317,33 +356,23 @@ class Route {
         })
         return cost
     }
-    get nodes() {
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @return {PathNode[]}
+     */
+    getNodes(grid_map) {
         let [a, b] = [this.left, this.right]
         let nodes = []
         while(a instanceof PathNode) {
             nodes.push(a)
-            a = this.gridMap.nodeAt(a.fromPosition.x, a.fromPosition.y)
+            a = grid_map.nodeAt(a.fromPosition.x, a.fromPosition.y)
         }
         while(b instanceof PathNode) {
             nodes.unshift(b)
-            b = this.gridMap.nodeAt(b.fromPosition.x, b.fromPosition.y)
+            b = grid_map.nodeAt(b.fromPosition.x, b.fromPosition.y)
         }
         return nodes
-    }
-    /**
-     *
-     * @param {CanvasRenderingContext2D} ctx
-     */
-    display(ctx) {
-        this.nodes.forEach(n => {
-            if(n === this.left) {
-                n.display(ctx, "pink")
-            } else if(n === this.right) {
-                n.display(ctx, "yellow")
-            } else {
-                n.display(ctx, "orange")
-            }
-        })
     }
 }
 
@@ -385,6 +414,7 @@ class GridTest {
     }
     initForRandom() {
         this.currentTest = null
+        /** @type {PositionedNode[]} */
         this.obstructions = []
         for(let i = 0; i < 31; i++) {
             this.obstructions.push(new PositionedNode(
@@ -422,13 +452,13 @@ class GridTest {
         grid_map.addNode(this.finish, true)
 
         this.obstructions = this.obstructions.filter(
-            o => o.gridMap
+            o => o.inMap(grid_map)
         )
 
         this.gridMap = grid_map
-        this.obstructions.forEach(o => o.display(this.ctx, "red"))
-        this.start.display(this.ctx, "green")
-        this.finish.display(this.ctx, "blue")
+        this.obstructions.forEach(o => o.display(grid_map, this.ctx, "red"))
+        this.start.display(grid_map, this.ctx, "green")
+        this.finish.display(grid_map, this.ctx, "blue")
 
         this.testNumber = null
     }
@@ -464,13 +494,13 @@ class GridTest {
         grid_map.addNode(this.finish, true)
 
         this.obstructions = this.obstructions.filter(
-            o => o.gridMap
+            o => o.inMap(grid_map)
         )
 
         this.gridMap = grid_map
-        this.obstructions.forEach(o => o.display(this.ctx, "red"))
-        this.start.display(this.ctx, "green")
-        this.finish.display(this.ctx, "blue")
+        this.obstructions.forEach(o => o.display(grid_map, this.ctx, "red"))
+        this.start.display(grid_map, this.ctx, "green")
+        this.finish.display(grid_map, this.ctx, "blue")
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
@@ -526,9 +556,9 @@ class GridTest {
         ].filter(route => route)
 
         if(possible_routes.length) {
-            let route = possible_routes.sort((a, b) => a.cost - b.cost)[0]
+            let route = possible_routes.sort((a, b) => a.getCost(this.gridMap) - b.getCost(this.gridMap))[0]
             if(route.left) {
-                route.display(this.ctx)
+                route.display(this.gridMap, this.ctx)
             } else {
                 console.log("No route found")
             }
@@ -545,7 +575,7 @@ class GridTest {
                 `Test ${this.testNumber}`
             tr.appendChild(td)
             td = document.createElement("td")
-            td.textContent = route.cost === Infinity ? "miss" : "" + route.cost
+            td.textContent = route.getCost(this.gridMap) === Infinity ? "miss" : "" + route.getCost(this.gridMap)
             tr.appendChild(td)
             td = document.createElement("td")
             td.textContent = this.testNumber === null ?
@@ -553,7 +583,7 @@ class GridTest {
                 "" + this.currentTest.correctLength
             tr.appendChild(td)
 
-            if(this.currentTest && this.currentTest.correctLength < route.cost) {
+            if(this.currentTest && this.currentTest.correctLength < route.getCost(this.gridMap)) {
                 tr.style.color = "red"
             }
             document.querySelector("#test-results").appendChild(
@@ -563,8 +593,8 @@ class GridTest {
                 this.resolvePromise()
             }
         } else {
-            this.start.stepRoutes(this.ctx)
-            this.finish.stepRoutes(this.ctx)
+            this.start.stepRoutes(this.gridMap, this.ctx)
+            this.finish.stepRoutes(this.gridMap, this.ctx)
         }
     }
 }
