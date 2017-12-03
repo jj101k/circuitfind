@@ -252,10 +252,8 @@ class RouteStepper {
                             existing_node instanceof StartNode &&
                             existing_node.content == target.content
                         ) || (
-                            existing_node instanceof PathNode && (
-                                (this instanceof PathNode && existing_node.getOwner(grid_map).content != this.getOwner(grid_map).content) ||
-                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map).content != this.startNode.content)
-                            )
+                            existing_node instanceof PathNode &&
+                            existing_node.getOwner(grid_map).content != this.startNode.content
                         )
                     ) {
                         route = new Route(path, existing_node)
