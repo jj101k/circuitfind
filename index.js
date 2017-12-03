@@ -50,16 +50,18 @@ class GridMap {
         ctx.fillRect(0, 0, this.l, this.l)
         ctx.beginPath()
         ctx.strokeStyle = "black"
-        for(let x = 0; x <= this.l; x++) {
-            ctx.moveTo(x, 0)
-            ctx.lineTo(x, this.l)
+        if(this.cw >= 3) {
+            for(let x = 0; x <= this.l; x++) {
+                ctx.moveTo(x, 0)
+                ctx.lineTo(x, this.l)
+            }
+            for(let y = 0; y <= this.l; y++) {
+                ctx.moveTo(0, y)
+                ctx.lineTo(this.l, y)
+            }
+            ctx.lineWidth = 2 / this.cw
+            ctx.stroke()
         }
-        for(let y = 0; y <= this.l; y++) {
-            ctx.moveTo(0, y)
-            ctx.lineTo(this.l, y)
-        }
-        ctx.lineWidth = 2 / this.cw
-        ctx.stroke()
     }
     /**
      *
