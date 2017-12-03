@@ -685,7 +685,7 @@ class GridTest {
                     console.log(`Took ${end - start} ms`)
                 }, 100)
             } else {
-                this.run(10000 / (s * s))
+                this.run(0)
             }
         }
     }
