@@ -164,14 +164,6 @@ class StartNode extends PositionedNode {
      * @returns {?Route}
      */
     stepOut(ctx, target, cheap, grid_map) {
-        if(!this.routes) {
-            this.routes = {
-                0: [this],
-                2: [],
-                4: [],
-                6: [],
-            }
-        }
         let route
 
         let step_type = cheap ? "cheap" : "expensive"
