@@ -187,8 +187,8 @@ class StartNode extends PositionedNode {
                     } else if(
                         existing_node === target || (
                             existing_node instanceof PathNode && (
-                                (this instanceof PathNode && existing_node.ownedBy !== this.ownedBy) ||
-                                (!(this instanceof PathNode) && existing_node.ownedBy !== this)
+                                (this instanceof PathNode && existing_node.getOwner(grid_map) !== this.getOwner(grid_map)) ||
+                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map) !== this)
                             )
                         )
                     ) {
@@ -259,11 +259,6 @@ class PathNode extends PositionedNode {
             // straight
             this.fromDirection = Math.abs(dx) + dx + dy + 1
         }
-        if(from_node instanceof PathNode) {
-            this.ownedBy = from_node.ownedBy
-        } else {
-            this.ownedBy = from_node
-        }
     }
     /**
      * The position this node came from.
@@ -303,6 +298,30 @@ class PathNode extends PositionedNode {
             ctx.fillStyle = "#888"
             ctx.fillText("" + this.fromDirection, 1, 9)
         })
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @returns {StartNode}
+     */
+    getOwner(grid_map) {
+        let p
+        for(p = this; !(p instanceof StartNode); p = p.getPreviousNode(grid_map)) ;
+        return p
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @returns {StartNode | PathNode}
+     */
+    getPreviousNode(grid_map) {
+        let position = this.fromPosition
+        let n = grid_map.nodeAt(position.x, position.y)
+        if(n instanceof PathNode || n instanceof StartNode) {
+            return n
+        } else {
+            throw new Error("Bad previous node")
+        }
     }
 }
 
