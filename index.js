@@ -376,6 +376,15 @@ class Route {
     }
 }
 
+/**
+ * @typedef testSignature
+ * @property {{x: number, y: number}} start
+ * @property {{x: number, y: number}} finish
+ * @property {{x: number, y: number}[]} obstructions
+ * @property {?boolean} passed
+ * @property {?number} correctLength
+ */
+
 class GridTest {
     constructor() {
         this.tests = []
@@ -384,6 +393,16 @@ class GridTest {
         this.currentTest = null
         this.rejectPromise = null
         this.resolvePromise = null
+    }
+    /** @type {testSignature} */
+    get generatedState() {
+        return {
+            start: this.start.position,
+            finish: this.finish.position,
+            obstructions: this.obstructions.map(o => o.position),
+            passed: null,
+            correctLength: null,
+        }
     }
     get testNumber() {
         return this._testNumber
@@ -397,11 +416,7 @@ class GridTest {
         }
     }
     dumpGeneratedState() {
-        console.log(JSON.stringify({
-            start: this.start.position,
-            finish: this.finish.position,
-            obstructions: this.obstructions.map(o => o.position)
-        }))
+        console.log(JSON.stringify(this.generatedState))
     }
     init() {
         let c = document.getElementById("grid")
@@ -464,7 +479,7 @@ class GridTest {
     }
     /**
      *
-     * @param {{start: {x: number, y: number}, finish: {x: number, y: number}, obstructions: {x: number, y: number}[], passed: boolean, correctLength: number}} test
+     * @param {testSignature} test
      */
     initForTest(test) {
         this.currentTest = test
