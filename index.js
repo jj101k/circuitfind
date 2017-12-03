@@ -70,7 +70,7 @@ class GridMap {
         return PositionedNode.nodeFor(
             x,
             y,
-            this.nodes[x + y * this.l]
+            this.nodes[x + y * this.l] || 0
         )
     }
     /**
@@ -89,18 +89,18 @@ class PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {?number} content 0-15
+     * @param {number} content 0-15
      * @returns {?PositionedNode}
      */
     static nodeFor(x, y, content) {
-        if(content === null || content === undefined) {
-            return null
-        } else if(content == 0b1111) {
+        if(content & 0b1000) {
+            return new PathNode(x, y, content)
+        } else if(content == 0b0111) {
             return new ObstructionNode(x, y)
-        } else if(content & 0b1000) {
+        } else if(content > 0) {
             return new StartNode(x, y, content)
         } else {
-            return new PathNode(x, y, content)
+            return null
         }
     }
     /**
@@ -163,7 +163,7 @@ class ObstructionNode extends PositionedNode {
      * @param {number} y
      */
     constructor(x, y) {
-        super(x, y, 0b1111)
+        super(x, y, 0b111)
     }
 }
 
@@ -172,10 +172,10 @@ class StartNode extends PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {number} index 0-6 or 8+(0-6)
+     * @param {number} index 1-6
      */
     constructor(x, y, index) {
-        super(x, y, 0b1000 | index)
+        super(x, y, index)
     }
     get colour() {
         return this.content & 1 ? "blue" : "green"
@@ -308,10 +308,10 @@ class PathNode extends PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {number} fromDirection 0-7
+     * @param {number} fromDirection 0-7 or 8+(0-7)
      */
     constructor(x, y, fromDirection) {
-        super(x, y, fromDirection)
+        super(x, y, 0b1000 | fromDirection)
     }
     get fromDirection() {
         return this.content & 0b111
@@ -524,14 +524,14 @@ class GridTest {
         this.start = new StartNode(
             Math.floor(Math.random() * 10),
             Math.floor(Math.random() * 10),
-            0
+            1
         )
         this.routeStart = new RouteStepper(this.start)
         do {
             this.finish = new StartNode(
                 Math.floor(Math.random() * 10),
                 Math.floor(Math.random() * 10),
-                1
+                2
             )
         } while(
             this.finish.position.x == this.start.position.x &&
@@ -571,13 +571,13 @@ class GridTest {
         this.start = new StartNode(
             test.start.x,
             test.start.y,
-            0
+            1
         )
         this.routeStart = new RouteStepper(this.start)
         this.finish = new StartNode(
             test.finish.x,
             test.finish.y,
-            1
+            2
         )
         this.routeFinish = new RouteStepper(this.finish)
         this.obstructions = test.obstructions.map(pos => new ObstructionNode(
