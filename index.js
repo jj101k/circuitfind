@@ -154,6 +154,19 @@ class StartNode extends PositionedNode {
      */
     constructor(x, y, index) {
         super(x, y, 0b1000 | index)
+    }
+    get colour() {
+        return this.content & 1 ? "blue" : "green"
+    }
+}
+
+class RouteStepper {
+    /**
+     *
+     * @param {StartNode} start_node
+     */
+    constructor(start_node) {
+        this.startNode = start_node
         /** @type {{[x: number]: (PathNode|StartNode)[]}} */
         this.newRoutes = {
             4: [],
@@ -161,14 +174,11 @@ class StartNode extends PositionedNode {
         }
         /** @type {{[x: number]: (PathNode|StartNode)[]}} */
         this.routes = {
-            0: [this],
+            0: [this.startNode],
             2: [],
             4: [],
             6: [],
         }
-    }
-    get colour() {
-        return this.content & 1 ? "blue" : "green"
     }
     /**
      *
@@ -198,7 +208,7 @@ class StartNode extends PositionedNode {
                         existing_node === target || (
                             existing_node instanceof PathNode && (
                                 (this instanceof PathNode && existing_node.getOwner(grid_map) !== this.getOwner(grid_map)) ||
-                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map) !== this)
+                                (!(this instanceof PathNode) && existing_node.getOwner(grid_map) !== this.startNode)
                             )
                         )
                     ) {
@@ -229,12 +239,12 @@ class StartNode extends PositionedNode {
     stepRoutes(grid_map, ctx) {
         this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         this.routes[0].forEach(path => {
-            if(path !== this) path.display(grid_map, ctx, "black")
+            if(path !== this.startNode) path.display(grid_map, ctx, "black")
         })
         Object.keys(this.newRoutes).forEach(cost => {
             this.newRoutes[cost].forEach(p => {
                 if(grid_map.addNode(p)) {
-                    p.display(grid_map, ctx, "light" + this.colour)
+                    p.display(grid_map, ctx, "light" + this.startNode.colour)
                 }
             })
         })
@@ -491,6 +501,7 @@ class GridTest {
             Math.floor(Math.random() * 10),
             0
         )
+        this.routeStart = new RouteStepper(this.start)
         do {
             this.finish = new StartNode(
                 Math.floor(Math.random() * 10),
@@ -501,6 +512,7 @@ class GridTest {
             this.finish.position.x == this.start.position.x &&
             this.finish.position.y == this.start.position.y
         )
+        this.routeFinish = new RouteStepper(this.finish)
 
         this.ctx.restore()
         this.ctx.fillStyle = "white"
@@ -536,11 +548,13 @@ class GridTest {
             test.start.y,
             0
         )
+        this.routeStart = new RouteStepper(this.start)
         this.finish = new StartNode(
             test.finish.x,
             test.finish.y,
             1
         )
+        this.routeFinish = new RouteStepper(this.finish)
         this.obstructions = test.obstructions.map(pos => new ObstructionNode(
             pos.x,
             pos.y
@@ -612,10 +626,10 @@ class GridTest {
     }
     step() {
         let possible_routes = [
-            this.start.stepOut(this.ctx, this.finish, true, this.gridMap),
-            this.finish.stepOut(this.ctx, this.start, true, this.gridMap),
-            this.start.stepOut(this.ctx, this.finish, false, this.gridMap),
-            this.finish.stepOut(this.ctx, this.start, false, this.gridMap),
+            this.routeStart.stepOut(this.ctx, this.finish, true, this.gridMap),
+            this.routeFinish.stepOut(this.ctx, this.start, true, this.gridMap),
+            this.routeStart.stepOut(this.ctx, this.finish, false, this.gridMap),
+            this.routeFinish.stepOut(this.ctx, this.start, false, this.gridMap),
         ].filter(route => route)
 
         if(possible_routes.length) {
@@ -656,8 +670,8 @@ class GridTest {
                 this.resolvePromise()
             }
         } else {
-            this.start.stepRoutes(this.gridMap, this.ctx)
-            this.finish.stepRoutes(this.gridMap, this.ctx)
+            this.routeStart.stepRoutes(this.gridMap, this.ctx)
+            this.routeFinish.stepRoutes(this.gridMap, this.ctx)
         }
     }
 }
