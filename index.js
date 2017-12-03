@@ -47,6 +47,8 @@ class GridMap {
      */
     display(ctx) {
         ctx.scale(this.cw, this.cw)
+        ctx.fillStyle = "white"
+        ctx.fillRect(0, 0, this.l, this.l)
         ctx.beginPath()
         ctx.strokeStyle = "black"
         for(let x = 0; x <= this.l; x++) {
@@ -562,11 +564,6 @@ class GridTest {
         )
         this.routeFinish = new RouteStepper(this.finish)
 
-        this.ctx.restore()
-        this.ctx.fillStyle = "white"
-        this.ctx.fillRect(0, 0, 250, 250)
-        this.ctx.save()
-
         let grid_map = new GridMap(250, s)
         grid_map.display(this.ctx)
 
@@ -608,10 +605,6 @@ class GridTest {
             pos.y
         ))
         let grid_map = new GridMap(250, 10)
-        this.ctx.restore()
-        this.ctx.fillStyle = "white"
-        this.ctx.fillRect(0, 0, 250, 250)
-        this.ctx.save()
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
