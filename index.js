@@ -60,7 +60,7 @@ class GridMap {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(ctx) {
-        ctx.fillStyle = "white"
+        ctx.fillStyle = "#888"
         ctx.fillRect(0, 0, this.l, this.l)
         ctx.beginPath()
         ctx.strokeStyle = "black"
@@ -172,7 +172,7 @@ class PositionedNode {
     display(grid_map, ctx, colour) {
         grid_map.displayNode(grid_map, ctx, this, () => {
             ctx.fillStyle = colour
-            ctx.fillRect(0.1, 0.1, 0.8, 0.8)
+            ctx.fillRect(0.125, 0.125, 0.75, 0.75)
         })
     }
     /**
@@ -577,14 +577,16 @@ class GridTest {
     dumpGeneratedState() {
         console.log(JSON.stringify(this.generatedState))
     }
-    buildContext(w = 250, l = 10) {
+    buildContext(w = null, l = 10) {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
+            if(!w) w = c.width
             var ctx = c.getContext("2d")
             ctx.restore()
             ctx.save()
             ctx.scale(w / l, w / l)
             this.ctx = ctx
+            return w
         } else {
             console.log("Well, that's the wrong element type")
         }
@@ -624,8 +626,8 @@ class GridTest {
         )
         this.routeFinish = new RouteStepper(this.finish)
 
-        let grid_map = new GridMap(250, s)
-        this.buildContext(250, s)
+        let w = this.buildContext(null, s)
+        let grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))

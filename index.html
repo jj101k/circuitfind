@@ -16,8 +16,8 @@
 
             </tbody>
         </table>
-        <canvas id="grid" width="250" height="250" style="border: 1px solid black"></canvas>
-        <p><label>Random size <input id="test-size" type="number" value="10"/></label></p>
+        <canvas id="grid" width="400" height="400" style="border: 1px solid black"></canvas>
+        <p><label>Random size <input id="test-size" type="number" value="70"/></label></p>
         <p><label>Test <input id="test-number" type="number" value=""/></label></p>
         <p><label><input type="checkbox" onchange="t.paused = this.checked">Pause</label></p>
         <p><label><input type="checkbox" onchange="t.blind = this.checked">Disable display updates</label></p>
@@ -31,7 +31,7 @@
         <script src="test.js"></script>
         <script>
             let t = new GridTest()
-            let size = 10
+            let size = document.querySelector("#test-size").value
             t.tests = PathTests
             t.randomTest(size)
             document.querySelector("#test-number").onchange = function() {
