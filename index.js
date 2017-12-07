@@ -244,10 +244,16 @@ class RouteStepper {
         let route
 
         let step_type = cheap ? "cheap" : "expensive"
+        /** @type {number[]} */
+        let leaf_uids = Object.keys(this.routes).reduce(
+            (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
+            []
+        )
         let route_found = this.routes[0].some(path => {
             return path.nextSteps[step_type].some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
+                    let step_uid = step.x + grid_map.l * step.y
                     if(!existing_node) {
                         let p = new PathNode(
                             step.x,
@@ -258,11 +264,13 @@ class RouteStepper {
                         this.newRoutes[cost].push(p)
                     } else if(
                         (
-                            existing_node instanceof StartNode &&
                             existing_node.content == target.content
                         ) || (
+                            existing_node.content & 0b1000 &&
+                            (existing_node = grid_map.nodeAt(step.x, step.y)) &&
                             existing_node instanceof PathNode &&
                             existing_node.isLeafNode(grid_map) &&
+                            !leaf_uids.some(uid => uid == step_uid) &&
                             existing_node.getOwner(grid_map).content != this.startNode.content
                         )
                     ) {
