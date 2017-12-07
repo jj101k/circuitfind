@@ -290,25 +290,32 @@ class RouteStepper {
      * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {boolean} blind
+     * @param {number} cost
+     */
+    linkRoutes(grid_map, ctx, blind, cost) {
+        this.newRoutes[cost].forEach(p => {
+            if(grid_map.addNode(p) && !blind) {
+                p.display(grid_map, ctx, "light" + this.startNode.colour)
+            }
+        })
+    }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {boolean} blind
      */
     stepRoutes(grid_map, ctx, blind) {
-        this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
+        // this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         if(!blind) {
             this.routes[0].forEach(path => {
                 if(path instanceof PathNode) path.display(grid_map, ctx, "black")
             })
         }
-        Object.keys(this.newRoutes).forEach(cost => {
-            this.newRoutes[cost].forEach(p => {
-                if(grid_map.addNode(p) && !blind) {
-                    p.display(grid_map, ctx, "light" + this.startNode.colour)
-                }
-            })
-        })
         this.routes = {
             0: this.routes[2],
-            2: this.routes[4].concat(this.newRoutes[4]),
-            4: this.routes[6].concat(this.newRoutes[6]),
+            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map))),
+            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map))),
             6: [],
         }
         this.newRoutes = {
@@ -792,6 +799,10 @@ class GridTest {
             }
             return false
         } else {
+            this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
+            this.routeFinish.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
+            this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 6)
+            this.routeFinish.linkRoutes(this.gridMap, this.ctx, this.blind, 6)
             this.routeStart.stepRoutes(this.gridMap, this.ctx, this.blind)
             this.routeFinish.stepRoutes(this.gridMap, this.ctx, this.blind)
             return true
