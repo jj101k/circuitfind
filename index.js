@@ -60,7 +60,7 @@ class GridMap {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(ctx) {
-        ctx.fillStyle = "#888"
+        ctx.fillStyle = this.cw > 10 ? "white" : "#888"
         ctx.fillRect(0, 0, this.l, this.l)
         ctx.beginPath()
         ctx.strokeStyle = "black"
@@ -394,7 +394,7 @@ class PathNode extends PositionedNode {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
-            ctx.fillText("" + this.fromDirection, 1, 9)
+            ctx.fillText("" + this.fromDirection, 2, 8)
         } : () => {})
     }
     /**
@@ -668,8 +668,8 @@ class GridTest {
             pos.y
         ))
         this.size = test.size || 10
-        let grid_map = new GridMap(250, this.size)
-        this.buildContext(250, this.size)
+        let w = this.buildContext(null, this.size)
+        let grid_map = new GridMap(w, this.size)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
