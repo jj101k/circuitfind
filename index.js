@@ -595,8 +595,10 @@ class GridTest {
     buildContext(w = null, l = 10) {
         let c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
+            c.width = c.clientWidth * window.devicePixelRatio
+            c.height = c.clientHeight * window.devicePixelRatio
             if(!w) w = c.width
-            var ctx = c.getContext("2d")
+            const ctx = c.getContext("2d")
             ctx.restore()
             ctx.save()
             ctx.scale(w / l, w / l)
