@@ -563,8 +563,6 @@ class GridTest {
         this.nextTestNumber = 0
         this.paused = false
         this.currentTest = null
-        this.rejectPromise = null
-        this.resolvePromise = null
         this.size = null
     }
     /** @type {testSignature} */
@@ -714,47 +712,39 @@ class GridTest {
      *
      * @param {number} [s]
      */
-    randomTest(s = 10) {
+    async randomTest(s = 10) {
         this.initForRandom(s)
         this.testNumber = null
         if(!this.paused) {
             if(this.blind) {
+                await new Promise(resolve => setTimeout(resolve, 100))
+                const start = new Date().valueOf()
                 let running = true
-                setTimeout(() => {
-                    let start = new Date().valueOf()
-                    while(running) {
-                        running = this.step()
-                    }
-                    let end = new Date().valueOf()
-                    console.log(`Took ${end - start} ms`)
-                }, 100)
+                while(running) {
+                    running = this.step()
+                }
+                const end = new Date().valueOf()
+                console.log(`Took ${end - start} ms`)
             } else {
-                this.run(0)
+                await this.run(0)
             }
         }
     }
-    run(interval_ms = 100) {
-        if(this.runInterval) {
-            clearInterval(this.runInterval)
+    async run(interval_ms = 100) {
+        let running = true
+        while(running) {
+            running = this.step()
+            await new Promise(
+                resolve => setTimeout(resolve, interval_ms)
+            )
         }
-        if(this.rejectPromise) {
-            this.rejectPromise()
-        }
-        return new Promise((resolve, reject) => {
-            this.resolvePromise = resolve
-            this.rejectPromise = reject
-            this.runInterval = setInterval(() => this.step(), interval_ms)
-        })
     }
-    runAll() {
-        return this.tests.reduce(
-            (carry, test, i) => carry.then(() => {
-                this.initForTest(test)
-                this.testNumber = i
-                return this.run(10)
-            }),
-            new Promise(resolve => resolve())
-        )
+    async runAll() {
+        for(const [i, test] of Object.entries(this.tests)) {
+            this.initForTest(test)
+            this.testNumber = i
+            await this.run(10)
+        }
     }
     selectTest(n) {
         this.initForTest(this.tests[n])
@@ -778,10 +768,6 @@ class GridTest {
             } else {
                 console.log("No route found")
             }
-            if(this.runInterval) {
-                clearTimeout(this.runInterval)
-                this.runInterval = null
-            }
             console.log("done")
             let tr = document.createElement("tr")
             let td = document.createElement("td")
@@ -804,9 +790,6 @@ class GridTest {
             document.querySelector("#test-results").appendChild(
                 tr
             )
-            if(this.resolvePromise) {
-                this.resolvePromise()
-            }
             return false
         } else {
             this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
