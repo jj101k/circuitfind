@@ -717,7 +717,6 @@ class GridTest {
         this.testNumber = null
         if(!this.paused) {
             if(this.blind) {
-                await new Promise(resolve => setTimeout(resolve, 100))
                 const start = new Date().valueOf()
                 let running = true
                 while(running) {
@@ -732,11 +731,17 @@ class GridTest {
     }
     async run(interval_ms = 100) {
         let running = true
-        while(running) {
-            running = this.step()
-            await new Promise(
-                resolve => setTimeout(resolve, interval_ms)
-            )
+        if(interval_ms) {
+            while(running) {
+                running = this.step()
+                await new Promise(
+                    resolve => setTimeout(resolve, interval_ms)
+                )
+            }
+        } else {
+            while(running) {
+                running = this.step()
+            }
         }
     }
     async runAll() {
