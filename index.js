@@ -22,10 +22,10 @@ class GridMap {
      * @returns {boolean}
      */
     addNode(n, overwrite = false) {
-        let address = n.x + n.y * this.l
-        let offset = Math.floor(address / 2)
-        let bottom = address % 2
-        let existing_node = bottom ?
+        const address = n.x + n.y * this.l
+        const offset = Math.floor(address / 2)
+        const bottom = address % 2
+        const existing_node = bottom ?
             (this.nodes[offset] & 0b1111) :
             (this.nodes[offset] >> 4)
         if(overwrite || !existing_node) {
@@ -48,9 +48,9 @@ class GridMap {
      * @returns {number}
      */
     contentAt(x, y) {
-        let address = x + y * this.l
-        let offset = address >> 1
-        let bottom = address & 1
+        const address = x + y * this.l
+        const offset = address >> 1
+        const bottom = address & 1
         return bottom ?
             (this.nodes[offset] & 0b1111) :
             (this.nodes[offset] >> 4)
@@ -145,7 +145,7 @@ class PositionedNode {
         this.content = content
     }
     get nextSteps() {
-        let steps = {
+        const steps = {
             cheap: [],
             expensive: [],
         };
@@ -181,7 +181,7 @@ class PositionedNode {
      * @returns {boolean}
      */
     inMap(grid_map) {
-        let n = grid_map.nodeAt(this.x, this.y)
+        const n = grid_map.nodeAt(this.x, this.y)
         return n instanceof this.constructor
     }
 }
@@ -243,24 +243,24 @@ class RouteStepper {
     stepOut(ctx, target, cheap, grid_map) {
         let route
 
-        let step_type = cheap ? "cheap" : "expensive"
+        const step_type = cheap ? "cheap" : "expensive"
         /** @type {number[]} */
-        let leaf_uids = Object.keys(this.routes).reduce(
+        const leaf_uids = Object.keys(this.routes).reduce(
             (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
             []
         )
-        let route_found = this.routes[0].some(path => {
+        const route_found = this.routes[0].some(path => {
             return path.nextSteps[step_type].some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
-                    let step_uid = step.x + grid_map.l * step.y
+                    const step_uid = step.x + grid_map.l * step.y
                     if(!existing_node) {
-                        let p = new PathNode(
+                        const p = new PathNode(
                             step.x,
                             step.y,
                             PathNode.fromDirection(step.x, step.y, path)
                         )
-                        let cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
+                        const cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
                         (
@@ -341,8 +341,8 @@ class PathNode extends PositionedNode {
      * @param {PositionedNode} from_node
      */
     static fromDirection(x, y, from_node) {
-        let dx = x - from_node.x
-        let dy = y - from_node.y
+        const dx = x - from_node.x
+        const dy = y - from_node.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
             return 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
@@ -364,12 +364,12 @@ class PathNode extends PositionedNode {
      */
     static getFromPosition(x, y, from_direction) {
         if(from_direction >= 4) {
-            let t = from_direction - 4
-            let dx = (t & 2) - 1
-            let dy = (t % 2) * 2 - 1
+            const t = from_direction - 4
+            const dx = (t & 2) - 1
+            const dy = (t % 2) * 2 - 1
             return {x: x - dx, y: y - dy}
         } else {
-            let t = from_direction - 1
+            const t = from_direction - 1
             if(t % 2) {
                 // -1, 1
                 return {x: x, y: y - t}
@@ -434,8 +434,8 @@ class PathNode extends PositionedNode {
      * @returns {StartNode | PathNode}
      */
     getPreviousNode(grid_map) {
-        let position = this.fromPosition
-        let n = grid_map.nodeAt(position.x, position.y)
+        const position = this.fromPosition
+        const n = grid_map.nodeAt(position.x, position.y)
         if(n instanceof PathNode || n instanceof StartNode) {
             return n
         } else {
@@ -448,7 +448,7 @@ class PathNode extends PositionedNode {
      * @returns {boolean}
      */
     inMap(grid_map) {
-        let n = grid_map.nodeAt(this.x, this.y)
+        const n = grid_map.nodeAt(this.x, this.y)
         return n instanceof PathNode && n.fromDirection == this.fromDirection
     }
     /**
@@ -461,9 +461,9 @@ class PathNode extends PositionedNode {
         for(let x = -1; x <= 1; x++) {
             for(let y = -1; y <= 1; y++) {
                 if(x || y) {
-                    let c = grid_map.contentAt(this.x + x, this.y + y)
+                    const c = grid_map.contentAt(this.x + x, this.y + y)
                     if(c & 0b1000) {
-                        let pos = PathNode.getFromPosition(
+                        const pos = PathNode.getFromPosition(
                             this.x + x,
                             this.y + y,
                             c
@@ -510,7 +510,7 @@ class Route {
      */
     getCost(grid_map) {
         if(!this.left) return Infinity
-        let [a, b] = [this.left, this.right]
+        const [a, b] = [this.left, this.right]
         let cost = 0
         if(a.x == b.x || a.y == b.y) {
             cost += 4
@@ -533,7 +533,7 @@ class Route {
      */
     getNodes(grid_map) {
         let [a, b] = [this.left, this.right]
-        let nodes = []
+        const nodes = []
         while(a instanceof PathNode) {
             nodes.push(a)
             a = grid_map.nodeAt(a.fromPosition.x, a.fromPosition.y)
@@ -582,7 +582,7 @@ class GridTest {
     /** @param {?number} v */
     set testNumber(v) {
         this._testNumber = v
-        let input = document.querySelector("input#test-number")
+        const input = document.querySelector("input#test-number")
         if(input instanceof HTMLInputElement) {
             input.value = (v === null) ? "" : ("" + v)
         }
@@ -591,7 +591,7 @@ class GridTest {
         console.log(JSON.stringify(this.generatedState))
     }
     buildContext(w = null, l = 10) {
-        let c = document.getElementById("grid")
+        const c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             c.width = c.clientWidth * window.devicePixelRatio
             c.height = c.clientHeight * window.devicePixelRatio
@@ -615,7 +615,7 @@ class GridTest {
         /** @type {ObstructionNode[]} */
         this.obstructions = []
         this.size = s
-        let m = Math.floor(s * s / 2)
+        const m = Math.floor(s * s / 2)
         for(let i = 0; i < m; i++) {
             this.obstructions.push(new ObstructionNode(
                 Math.floor(Math.random() * s),
@@ -641,8 +641,8 @@ class GridTest {
         )
         this.routeFinish = new RouteStepper(this.finish)
 
-        let w = this.buildContext(null, s)
-        let grid_map = new GridMap(w, s)
+        const w = this.buildContext(null, s)
+        const grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
@@ -683,8 +683,8 @@ class GridTest {
             pos.y
         ))
         this.size = test.size || 10
-        let w = this.buildContext(null, this.size)
-        let grid_map = new GridMap(w, this.size)
+        const w = this.buildContext(null, this.size)
+        const grid_map = new GridMap(w, this.size)
         grid_map.display(this.ctx)
 
         this.obstructions.forEach(o => grid_map.addNode(o, true))
@@ -759,7 +759,7 @@ class GridTest {
         }
     }
     step() {
-        let possible_routes = [
+        const possible_routes = [
             this.routeStart.stepOut(this.ctx, this.finish, true, this.gridMap),
             this.routeFinish.stepOut(this.ctx, this.start, true, this.gridMap),
             this.routeStart.stepOut(this.ctx, this.finish, false, this.gridMap),
@@ -767,14 +767,14 @@ class GridTest {
         ].filter(route => route)
 
         if(possible_routes.length) {
-            let route = possible_routes.sort((a, b) => a.getCost(this.gridMap) - b.getCost(this.gridMap))[0]
+            const route = possible_routes.sort((a, b) => a.getCost(this.gridMap) - b.getCost(this.gridMap))[0]
             if(route.left) {
                 route.display(this.gridMap, this.ctx)
             } else {
                 console.log("No route found")
             }
             console.log("done")
-            let tr = document.createElement("tr")
+            const tr = document.createElement("tr")
             let td = document.createElement("td")
             td.textContent = this.testNumber === null ?
                 "Random test" :
