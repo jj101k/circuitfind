@@ -79,14 +79,13 @@ class GridMap {
     }
     /**
      *
-     * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
-     * @param {PositionedNode} node
+     * @param {PositionedNode["position"]} position
      * @param {function(): void} action
      */
-    displayNode(grid_map, ctx, node, action) {
+    displayNode(ctx, position, action) {
         ctx.save()
-        ctx.translate(node.position.x, node.position.y)
+        ctx.translate(position.x, position.y)
         action()
         ctx.restore()
     }
@@ -169,7 +168,7 @@ class PositionedNode {
      * @param {string} colour
      */
     display(grid_map, ctx, colour) {
-        grid_map.displayNode(grid_map, ctx, this, () => {
+        grid_map.displayNode(ctx, this.position, () => {
             ctx.fillStyle = colour
             ctx.fillRect(0.125, 0.125, 0.75, 0.75)
         })
@@ -404,7 +403,7 @@ class PathNode extends PositionedNode {
      */
     display(grid_map, ctx, colour) {
         super.display(grid_map, ctx, colour)
-        grid_map.displayNode(grid_map, ctx, this, grid_map.cw > 10 ? () => {
+        grid_map.displayNode(ctx, this.position, grid_map.cw > 10 ? () => {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
