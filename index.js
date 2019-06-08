@@ -273,7 +273,7 @@ class RouteStepper {
                             existing_node.getOwner(grid_map).content != this.startNode.content
                         )
                     ) {
-                        route = new Route(path, existing_node)
+                        route = new Route(path.position, existing_node.position)
                         return true
                     }
                 }
@@ -479,8 +479,8 @@ class PathNode extends PositionedNode {
 class Route {
     /**
      *
-     * @param {PositionedNode} left
-     * @param {PositionedNode} right
+     * @param {PositionedNode["position"]} left
+     * @param {PositionedNode["position"]} right
      */
     constructor(left = null, right = null) {
         this.left = left
@@ -494,9 +494,9 @@ class Route {
     display(grid_map, ctx) {
         this.getNodes(grid_map).forEach(n => {
             const m = grid_map.nodeAt(n.x, n.y)
-            if(n.x == this.left.position.x && n.y == this.left.position.y) {
+            if(n.x == this.left.x && n.y == this.left.y) {
                 m.display(grid_map, ctx, "pink")
-            } else if(n.x == this.right.position.x && n.y == this.right.position.y) {
+            } else if(n.x == this.right.x && n.y == this.right.y) {
                 m.display(grid_map, ctx, "yellow")
             } else {
                 m.display(grid_map, ctx, "orange")
@@ -510,16 +510,17 @@ class Route {
      */
     getCost(grid_map) {
         if(!this.left) return Infinity
-        const [a, b] = [this.left, this.right]
         let cost = 0
-        if(a.position.x == b.position.x || a.position.y == b.position.y) {
+        if(this.left.x == this.right.x || this.left.y == this.right.y) {
             cost += 4
         } else {
             cost += 6
         }
         this.getNodes(grid_map).forEach(n => {
+            /** @type {PathNode} */
+            //@ts-ignore
             const m = grid_map.nodeAt(n.x, n.y)
-            if(m instanceof PathNode && (m.fromPosition.x == n.x || m.fromPosition.y == n.y)) {
+            if(m.fromPosition.x == n.x || m.fromPosition.y == n.y) {
                 cost += 4
             } else {
                 cost += 6
@@ -536,13 +537,17 @@ class Route {
         let [a, b] = [this.left, this.right]
         /** @type {PathNode["position"][]} */
         const nodes = []
-        while(a instanceof PathNode) {
-            nodes.push(a.position)
-            a = grid_map.nodeAt(a.fromPosition.x, a.fromPosition.y)
+        let an = grid_map.nodeAt(a.x, a.y)
+        while(an instanceof PathNode) {
+            nodes.push(a)
+            a = an.fromPosition
+            an = grid_map.nodeAt(a.x, a.y)
         }
-        while(b instanceof PathNode) {
-            nodes.unshift(b.position)
-            b = grid_map.nodeAt(b.fromPosition.x, b.fromPosition.y)
+        let bn = grid_map.nodeAt(b.x, b.y)
+        while(bn instanceof PathNode) {
+            nodes.unshift(b)
+            b = bn.fromPosition
+            bn = grid_map.nodeAt(b.x, b.y)
         }
         return nodes
     }
