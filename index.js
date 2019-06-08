@@ -493,7 +493,7 @@ class Route {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(grid_map, ctx) {
-        this.getNodes(grid_map).forEach(n => {
+        this.getNodes(grid_map).forEach((n, i) => {
             if(n.position.x == this.left.x && n.position.y == this.left.y) {
                 n.display(grid_map, ctx, "pink")
             } else if(n.position.x == this.right.x && n.position.y == this.right.y) {
@@ -564,12 +564,15 @@ class GridTest {
         this.paused = false
         this.currentTest = null
         this.size = null
+
+        this.startPosition = null
+        this.finishPosition = null
     }
     /** @type {testSignature} */
     get generatedState() {
         return {
-            start: this.start.position,
-            finish: this.finish.position,
+            start: this.startPosition,
+            finish: this.finishPosition,
             obstructions: this.obstructions.map(o => o.position),
             passed: null,
             correctLength: null,
@@ -623,21 +626,29 @@ class GridTest {
             ))
         }
 
+        this.startPosition = {
+            x: Math.floor(Math.random() * s),
+            y: Math.floor(Math.random() * s),
+        }
         this.start = new StartNode(
-            Math.floor(Math.random() * s),
-            Math.floor(Math.random() * s),
+            this.startPosition.x,
+            this.startPosition.y,
             1
         )
         this.routeStart = new RouteStepper(this.start)
         do {
-            this.finish = new StartNode(
-                Math.floor(Math.random() * s),
-                Math.floor(Math.random() * s),
-                2
-            )
+            this.finishPosition = {
+                x: Math.floor(Math.random() * s),
+                y: Math.floor(Math.random() * s),
+            }
         } while(
-            this.finish.position.x == this.start.position.x &&
-            this.finish.position.y == this.start.position.y
+            this.finishPosition.x == this.startPosition.x &&
+            this.finishPosition.y == this.startPosition.y
+        )
+        this.finish = new StartNode(
+            this.finishPosition.x,
+            this.finishPosition.y,
+            2
         )
         this.routeFinish = new RouteStepper(this.finish)
 
