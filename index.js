@@ -493,13 +493,14 @@ class Route {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(grid_map, ctx) {
-        this.getNodes(grid_map).forEach((n, i) => {
-            if(n.position.x == this.left.x && n.position.y == this.left.y) {
-                n.display(grid_map, ctx, "pink")
-            } else if(n.position.x == this.right.x && n.position.y == this.right.y) {
-                n.display(grid_map, ctx, "yellow")
+        this.getNodes(grid_map).forEach(n => {
+            const m = grid_map.nodeAt(n.x, n.y)
+            if(n.x == this.left.x && n.y == this.left.y) {
+                m.display(grid_map, ctx, "pink")
+            } else if(n.x == this.right.x && n.y == this.right.y) {
+                m.display(grid_map, ctx, "yellow")
             } else {
-                n.display(grid_map, ctx, "orange")
+                m.display(grid_map, ctx, "orange")
             }
         })
     }
@@ -518,7 +519,8 @@ class Route {
             cost += 6
         }
         this.getNodes(grid_map).forEach(n => {
-            if(n.fromPosition.x == n.x || n.fromPosition.y == n.y) {
+            const m = grid_map.nodeAt(n.x, n.y)
+            if(m instanceof PathNode && (m.fromPosition.x == n.x || m.fromPosition.y == n.y)) {
                 cost += 4
             } else {
                 cost += 6
@@ -529,17 +531,18 @@ class Route {
     /**
      *
      * @param {GridMap} grid_map
-     * @return {PathNode[]}
+     * @return {PathNode["position"][]}
      */
     getNodes(grid_map) {
         let [a, b] = [this.left, this.right]
+        /** @type {PathNode["position"][]} */
         const nodes = []
         while(a instanceof PathNode) {
-            nodes.push(a)
+            nodes.push(a.position)
             a = grid_map.nodeAt(a.fromPosition.x, a.fromPosition.y)
         }
         while(b instanceof PathNode) {
-            nodes.unshift(b)
+            nodes.unshift(b.position)
             b = grid_map.nodeAt(b.fromPosition.x, b.fromPosition.y)
         }
         return nodes
@@ -565,6 +568,7 @@ class GridTest {
         this.currentTest = null
         this.size = null
 
+        this.obstructions = null
         this.startPosition = null
         this.finishPosition = null
     }
@@ -573,7 +577,7 @@ class GridTest {
         return {
             start: this.startPosition,
             finish: this.finishPosition,
-            obstructions: this.obstructions.map(o => o.position),
+            obstructions: this.obstructions,
             passed: null,
             correctLength: null,
             size: this.size,
@@ -615,15 +619,15 @@ class GridTest {
      */
     initForRandom(s = 10) {
         this.currentTest = null
-        /** @type {ObstructionNode[]} */
-        this.obstructions = []
+        /** @type {ObstructionNode["position"][]} */
+        let obstructions = []
         this.size = s
         const m = Math.floor(s * s / 2)
         for(let i = 0; i < m; i++) {
-            this.obstructions.push(new ObstructionNode(
-                Math.floor(Math.random() * s),
-                Math.floor(Math.random() * s)
-            ))
+            obstructions.push({
+                x: Math.floor(Math.random() * s),
+                y: Math.floor(Math.random() * s)
+            })
         }
 
         this.startPosition = {
@@ -656,16 +660,22 @@ class GridTest {
         const grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => grid_map.addNode(o, true))
+        for(const o of obstructions) {
+            grid_map.addNode(new ObstructionNode(o.x, o.y), true)
+        }
         grid_map.addNode(this.start, true)
         grid_map.addNode(this.finish, true)
 
-        this.obstructions = this.obstructions.filter(
-            o => o.inMap(grid_map)
+        obstructions = obstructions.filter(
+            o => obstructions.filter(oo => oo.x == o.x && oo.y == o.y).length == 1
         )
 
+        this.obstructions = obstructions
+
         this.gridMap = grid_map
-        this.obstructions.forEach(o => o.display(grid_map, this.ctx, "red"))
+        for(const o of this.obstructions) {
+            grid_map.nodeAt(o.x, o.y).display(grid_map, this.ctx, "red")
+        }
         this.start.display(grid_map, this.ctx, "green")
         this.finish.display(grid_map, this.ctx, "blue")
 
@@ -689,25 +699,23 @@ class GridTest {
             2
         )
         this.routeFinish = new RouteStepper(this.finish)
-        this.obstructions = test.obstructions.map(pos => new ObstructionNode(
-            pos.x,
-            pos.y
-        ))
+        let obstructions = test.obstructions
         this.size = test.size || 10
         const w = this.buildContext(null, this.size)
         const grid_map = new GridMap(w, this.size)
         grid_map.display(this.ctx)
 
-        this.obstructions.forEach(o => grid_map.addNode(o, true))
+        for(const o of obstructions) {
+            grid_map.addNode(new ObstructionNode(o.x, o.y), true)
+        }
         grid_map.addNode(this.start, true)
         grid_map.addNode(this.finish, true)
 
-        this.obstructions = this.obstructions.filter(
-            o => o.inMap(grid_map)
-        )
-
         this.gridMap = grid_map
-        this.obstructions.forEach(o => o.display(grid_map, this.ctx, "red"))
+        for(const o of obstructions) {
+            grid_map.nodeAt(o.x, o.y).display(grid_map, this.ctx, "red")
+        }
+        this.obstructions = obstructions
         this.start.display(grid_map, this.ctx, "green")
         this.finish.display(grid_map, this.ctx, "blue")
     }
