@@ -22,7 +22,7 @@ class GridMap {
      * @returns {boolean}
      */
     addNode(n, overwrite = false) {
-        const address = n.x + n.y * this.l
+        const address = n.position.x + n.position.y * this.l
         const offset = Math.floor(address / 2)
         const bottom = address % 2
         const existing_node = bottom ?
@@ -86,7 +86,7 @@ class GridMap {
      */
     displayNode(grid_map, ctx, node, action) {
         ctx.save()
-        ctx.translate(node.x, node.y)
+        ctx.translate(node.position.x, node.position.y)
         action()
         ctx.restore()
     }
@@ -140,8 +140,10 @@ class PositionedNode {
      * @param {number} content 0-15
      */
     constructor(x, y, content) {
-        this.x = x
-        this.y = y
+        this.position = {
+            x: x,
+            y: y
+        }
         this.content = content
     }
     get nextSteps() {
@@ -150,18 +152,15 @@ class PositionedNode {
             expensive: [],
         };
         [-1, 1].forEach(o => {
-            steps.cheap.push({x: o + this.x, y: this.y})
-            steps.cheap.push({x: this.x, y: o + this.y})
+            steps.cheap.push({x: o + this.position.x, y: this.position.y})
+            steps.cheap.push({x: this.position.x, y: o + this.position.y})
         });
         [-1, 1].forEach(x => {
             [-1, 1].forEach(y => {
-                steps.expensive.push({x: x + this.x, y: y + this.y})
+                steps.expensive.push({x: x + this.position.x, y: y + this.position.y})
             })
         })
         return steps
-    }
-    get position() {
-        return {x: this.x, y: this.y}
     }
     /**
      *
@@ -181,7 +180,7 @@ class PositionedNode {
      * @returns {boolean}
      */
     inMap(grid_map) {
-        const n = grid_map.nodeAt(this.x, this.y)
+        const n = grid_map.nodeAt(this.position.x, this.position.y)
         return n instanceof this.constructor
     }
 }
@@ -260,7 +259,7 @@ class RouteStepper {
                             step.y,
                             PathNode.fromDirection(step.x, step.y, path)
                         )
-                        const cost = Math.abs(step.x - path.x) + Math.abs(step.y - path.y) > 1 ? 6 : 4
+                        const cost = Math.abs(step.x - path.position.x) + Math.abs(step.y - path.position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
                         (
@@ -341,8 +340,8 @@ class PathNode extends PositionedNode {
      * @param {PositionedNode} from_node
      */
     static fromDirection(x, y, from_node) {
-        const dx = x - from_node.x
-        const dy = y - from_node.y
+        const dx = x - from_node.position.x
+        const dy = y - from_node.position.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
             return 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
@@ -395,7 +394,7 @@ class PathNode extends PositionedNode {
      * The position this node came from.
      */
     get fromPosition() {
-        return PathNode.getFromPosition(this.x, this.y, this.fromDirection)
+        return PathNode.getFromPosition(this.position.x, this.position.y, this.fromDirection)
     }
     /**
      *
@@ -420,7 +419,7 @@ class PathNode extends PositionedNode {
     getOwner(grid_map) {
         let c, position
         for(
-            c = this.content, position = {x: this.x, y: this.y};
+            c = this.content, position = {x: this.position.x, y: this.position.y};
             c & 0b1000;
             position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
             c = grid_map.contentAt(position.x, position.y)
@@ -448,7 +447,7 @@ class PathNode extends PositionedNode {
      * @returns {boolean}
      */
     inMap(grid_map) {
-        const n = grid_map.nodeAt(this.x, this.y)
+        const n = grid_map.nodeAt(this.position.x, this.position.y)
         return n instanceof PathNode && n.fromDirection == this.fromDirection
     }
     /**
@@ -461,14 +460,14 @@ class PathNode extends PositionedNode {
         for(let x = -1; x <= 1; x++) {
             for(let y = -1; y <= 1; y++) {
                 if(x || y) {
-                    const c = grid_map.contentAt(this.x + x, this.y + y)
+                    const c = grid_map.contentAt(this.position.x + x, this.position.y + y)
                     if(c & 0b1000) {
                         const pos = PathNode.getFromPosition(
-                            this.x + x,
-                            this.y + y,
+                            this.position.x + x,
+                            this.position.y + y,
                             c
                         )
-                        if(pos.x == this.x && pos.y == this.y) return false
+                        if(pos.x == this.position.x && pos.y == this.position.y) return false
                     }
                 }
             }
@@ -495,9 +494,9 @@ class Route {
     display(grid_map, ctx) {
         this.getNodes(grid_map).forEach(n => {
             const m = grid_map.nodeAt(n.x, n.y)
-            if(n.x == this.left.x && n.y == this.left.y) {
+            if(n.x == this.left.position.x && n.y == this.left.position.y) {
                 m.display(grid_map, ctx, "pink")
-            } else if(n.x == this.right.x && n.y == this.right.y) {
+            } else if(n.x == this.right.position.x && n.y == this.right.position.y) {
                 m.display(grid_map, ctx, "yellow")
             } else {
                 m.display(grid_map, ctx, "orange")
@@ -513,7 +512,7 @@ class Route {
         if(!this.left) return Infinity
         const [a, b] = [this.left, this.right]
         let cost = 0
-        if(a.x == b.x || a.y == b.y) {
+        if(a.position.x == b.position.x || a.position.y == b.position.y) {
             cost += 4
         } else {
             cost += 6
