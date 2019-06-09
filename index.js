@@ -222,8 +222,9 @@ class RouteStepper {
     /**
      *
      * @param {StartNode} start_node
+     * @param {{x: number, y: number}} position
      */
-    constructor(start_node) {
+    constructor(start_node, position) {
         this.startNode = start_node
         /** @type {{[cost: number]: (StartNode|PathNode)[]}} */
         this.newRoutes = {
@@ -232,7 +233,7 @@ class RouteStepper {
         }
         /** @type {{[cost: number]: {x: number, y: number}[]}} */
         this.routes = {
-            0: [this.startNode.position],
+            0: [position],
             2: [],
             4: [],
             6: [],
@@ -642,7 +643,7 @@ class GridTest {
             this.startPosition.y,
             1
         )
-        this.routeStart = new RouteStepper(this.start)
+        this.routeStart = new RouteStepper(this.start, this.startPosition)
         do {
             this.finishPosition = {
                 x: Math.floor(Math.random() * s),
@@ -657,7 +658,7 @@ class GridTest {
             this.finishPosition.y,
             2
         )
-        this.routeFinish = new RouteStepper(this.finish)
+        this.routeFinish = new RouteStepper(this.finish, this.finishPosition)
 
         const w = this.buildContext(null, s)
         const grid_map = new GridMap(w, s)
@@ -695,13 +696,13 @@ class GridTest {
             test.start.y,
             1
         )
-        this.routeStart = new RouteStepper(this.start)
+        this.routeStart = new RouteStepper(this.start, test.start)
         this.finish = new StartNode(
             test.finish.x,
             test.finish.y,
             2
         )
-        this.routeFinish = new RouteStepper(this.finish)
+        this.routeFinish = new RouteStepper(this.finish, test.finish)
         let obstructions = test.obstructions
         this.size = test.size || 10
         const w = this.buildContext(null, this.size)
