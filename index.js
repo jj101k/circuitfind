@@ -121,6 +121,7 @@ class PositionedNode {
      * @param {"cheap" | "expensive"} step_type
      */
     static nextSteps(position, step_type) {
+        /** @type {{x: number, y: number}[]} */
         const steps = []
         if(step_type == "cheap") {
             [-1, 1].forEach(o => {
