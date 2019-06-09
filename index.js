@@ -227,7 +227,7 @@ class RouteStepper {
      */
     constructor(start_node, position) {
         this.startNode = start_node
-        /** @type {{[cost: number]: (StartNode|PathNode)[]}} */
+        /** @type {{[cost: number]: {from: {x: number, y: number}, to: {x: number, y: number}}[]}} */
         this.newRoutes = {
             4: [],
             6: [],
@@ -262,13 +262,8 @@ class RouteStepper {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
                     if(!existing_node) {
-                        const p = new PathNode(
-                            step.x,
-                            step.y,
-                            PathNode.encodeFromDirection(step.x, step.y, position)
-                        )
                         const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
-                        this.newRoutes[cost].push(p)
+                        this.newRoutes[cost].push({from: position, to: step})
                     } else if(
                         (
                             existing_node.content == target.content
@@ -308,9 +303,14 @@ class RouteStepper {
      * @param {number} cost
      */
     linkRoutes(grid_map, ctx, blind, cost) {
-        this.newRoutes[cost].forEach(p => {
-            if(grid_map.addNode(p, p.position) && !blind) {
-                p.display(grid_map, p.position, ctx, "light" + this.startNode.colour)
+        this.newRoutes[cost].forEach(r => {
+            const p = new PathNode(
+                r.to.x,
+                r.to.y,
+                PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+            )
+            if(grid_map.addNode(p, r.to) && !blind) {
+                p.display(grid_map, r.to, ctx, "light" + this.startNode.colour)
             }
         })
     }
@@ -329,8 +329,22 @@ class RouteStepper {
         }
         this.routes = {
             0: this.routes[2],
-            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map, p.position)).map(p => p.position)),
-            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map, p.position)).map(p => p.position)),
+            2: this.routes[4].concat(this.newRoutes[4].filter(r => {
+                const p = new PathNode(
+                    r.to.x,
+                    r.to.y,
+                    PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                )
+                return p.inMap(grid_map, r.to)
+            }).map(r => r.to)),
+            4: this.routes[6].concat(this.newRoutes[6].filter(r => {
+                const p = new PathNode(
+                    r.to.x,
+                    r.to.y,
+                    PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                )
+                return p.inMap(grid_map, r.to)
+            }).map(r => r.to)),
             6: [],
         }
         this.newRoutes = {
