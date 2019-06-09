@@ -81,7 +81,7 @@ class GridMap {
     /**
      *
      * @param {CanvasRenderingContext2D} ctx
-     * @param {PositionedNode["position"]} position
+     * @param {{x: number, y: number}} position
      * @param {function(): void} action
      */
     displayNode(ctx, position, action) {
@@ -98,8 +98,6 @@ class GridMap {
      */
     nodeAt(x, y) {
         return PositionedNode.nodeFor(
-            x,
-            y,
             this.contentAt(x, y)
         )
     }
@@ -139,33 +137,25 @@ class PositionedNode {
     }
     /**
      *
-     * @param {number} x
-     * @param {number} y
      * @param {number} content 0-15
      * @returns {?PositionedNode}
      */
-    static nodeFor(x, y, content) {
+    static nodeFor(content) {
         if(content & 0b1000) {
-            return new PathNode(x, y, content)
+            return new PathNode(content)
         } else if(content == 0b0111) {
-            return new ObstructionNode(x, y)
+            return new ObstructionNode()
         } else if(content > 0) {
-            return new StartNode(x, y, content)
+            return new StartNode(content)
         } else {
             return null
         }
     }
     /**
      *
-     * @param {number} x
-     * @param {number} y
      * @param {number} content 0-15
      */
-    constructor(x, y, content) {
-        this.position = {
-            x: x,
-            y: y
-        }
+    constructor(content) {
         this.content = content
     }
     /**
@@ -196,23 +186,19 @@ class PositionedNode {
 class ObstructionNode extends PositionedNode {
     /**
      *
-     * @param {number} x
-     * @param {number} y
      */
-    constructor(x, y) {
-        super(x, y, 0b111)
+    constructor() {
+        super(0b111)
     }
 }
 
 class StartNode extends PositionedNode {
     /**
      *
-     * @param {number} x
-     * @param {number} y
      * @param {number} index 1-6
      */
-    constructor(x, y, index) {
-        super(x, y, index)
+    constructor(index) {
+        super(index)
     }
     get colour() {
         return this.content & 1 ? "blue" : "green"
@@ -305,8 +291,6 @@ class RouteStepper {
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(r => {
             const p = new PathNode(
-                r.to.x,
-                r.to.y,
                 PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
             )
             if(grid_map.addNode(p, r.to) && !blind) {
@@ -331,16 +315,12 @@ class RouteStepper {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
                 const p = new PathNode(
-                    r.to.x,
-                    r.to.y,
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
                 return p.inMap(grid_map, r.to)
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
                 const p = new PathNode(
-                    r.to.x,
-                    r.to.y,
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
                 return p.inMap(grid_map, r.to)
@@ -402,12 +382,10 @@ class PathNode extends PositionedNode {
     }
     /**
      *
-     * @param {number} x
-     * @param {number} y
      * @param {number} fromDirection 0-7 or 8+(0-7)
      */
-    constructor(x, y, fromDirection) {
-        super(x, y, 0b1000 | fromDirection)
+    constructor(fromDirection) {
+        super(0b1000 | fromDirection)
     }
     get fromDirection() {
         return this.content & 0b111
@@ -493,8 +471,8 @@ class PathNode extends PositionedNode {
 class Route {
     /**
      *
-     * @param {PositionedNode["position"]} left
-     * @param {PositionedNode["position"]} right
+     * @param {{x: number, y: number}} left
+     * @param {{x: number, y: number}} right
      */
     constructor(left = null, right = null) {
         this.left = left
@@ -546,11 +524,11 @@ class Route {
     /**
      *
      * @param {GridMap} grid_map
-     * @return {PathNode["position"][]}
+     * @return {{x: number, y: number}[]}
      */
     getNodes(grid_map) {
         let [a, b] = [this.left, this.right]
-        /** @type {PathNode["position"][]} */
+        /** @type {{x: number, y: number}[]} */
         const nodes = []
         let an = grid_map.nodeAt(a.x, a.y)
         while(an instanceof PathNode) {
@@ -638,7 +616,7 @@ class GridTest {
      */
     initForRandom(s = 10) {
         this.currentTest = null
-        /** @type {ObstructionNode["position"][]} */
+        /** @type {{x: number, y: number}[]} */
         let obstructions = []
         this.size = s
         const m = Math.floor(s * s / 2)
@@ -653,11 +631,7 @@ class GridTest {
             x: Math.floor(Math.random() * s),
             y: Math.floor(Math.random() * s),
         }
-        this.start = new StartNode(
-            this.startPosition.x,
-            this.startPosition.y,
-            1
-        )
+        this.start = new StartNode(1)
         this.routeStart = new RouteStepper(this.start, this.startPosition)
         do {
             this.finishPosition = {
@@ -668,11 +642,7 @@ class GridTest {
             this.finishPosition.x == this.startPosition.x &&
             this.finishPosition.y == this.startPosition.y
         )
-        this.finish = new StartNode(
-            this.finishPosition.x,
-            this.finishPosition.y,
-            2
-        )
+        this.finish = new StartNode(2)
         this.routeFinish = new RouteStepper(this.finish, this.finishPosition)
 
         const w = this.buildContext(null, s)
@@ -680,7 +650,7 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(o.x, o.y), o, true)
+            grid_map.addNode(new ObstructionNode(), o, true)
         }
         grid_map.addNode(this.start, this.startPosition, true)
         grid_map.addNode(this.finish, this.finishPosition, true)
@@ -706,17 +676,9 @@ class GridTest {
      */
     initForTest(test) {
         this.currentTest = test
-        this.start = new StartNode(
-            test.start.x,
-            test.start.y,
-            1
-        )
+        this.start = new StartNode(1)
         this.routeStart = new RouteStepper(this.start, test.start)
-        this.finish = new StartNode(
-            test.finish.x,
-            test.finish.y,
-            2
-        )
+        this.finish = new StartNode(2)
         this.routeFinish = new RouteStepper(this.finish, test.finish)
         let obstructions = test.obstructions
         this.size = test.size || 10
@@ -725,7 +687,7 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(o.x, o.y), o, true)
+            grid_map.addNode(new ObstructionNode(), o, true)
         }
         grid_map.addNode(this.start, test.start, true)
         grid_map.addNode(this.finish, test.finish, true)
