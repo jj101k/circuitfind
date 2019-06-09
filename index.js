@@ -162,10 +162,11 @@ class PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @returns {boolean}
      */
-    inMap(grid_map) {
-        const n = grid_map.nodeAt(this.position.x, this.position.y)
+    inMap(grid_map, position) {
+        const n = grid_map.nodeAt(position.x, position.y)
         return n instanceof this.constructor
     }
     /**
@@ -318,7 +319,6 @@ class RouteStepper {
      * @param {boolean} blind
      */
     stepRoutes(grid_map, ctx, blind) {
-        // this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         if(!blind) {
             this.routes[0].forEach(path => {
                 if(path instanceof PathNode) path.display(grid_map, path.position, ctx, "black")
@@ -326,8 +326,8 @@ class RouteStepper {
         }
         this.routes = {
             0: this.routes[2],
-            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map))),
-            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map))),
+            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map, p.position))),
+            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map, p.position))),
             6: [],
         }
         this.newRoutes = {
@@ -450,10 +450,11 @@ class PathNode extends PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @returns {boolean}
      */
-    inMap(grid_map) {
-        const n = grid_map.nodeAt(this.position.x, this.position.y)
+    inMap(grid_map, position) {
+        const n = grid_map.nodeAt(position.x, position.y)
         return n instanceof PathNode && n.fromDirection == this.fromDirection
     }
     /**
