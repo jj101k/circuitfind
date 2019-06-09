@@ -149,11 +149,12 @@ class PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
-    display(grid_map, ctx, colour) {
-        grid_map.displayNode(ctx, this.position, () => {
+    display(grid_map, position, ctx, colour) {
+        grid_map.displayNode(ctx, position, () => {
             ctx.fillStyle = colour
             ctx.fillRect(0.125, 0.125, 0.75, 0.75)
         })
@@ -306,7 +307,7 @@ class RouteStepper {
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(p => {
             if(grid_map.addNode(p, p.position) && !blind) {
-                p.display(grid_map, ctx, "light" + this.startNode.colour)
+                p.display(grid_map, p.position, ctx, "light" + this.startNode.colour)
             }
         })
     }
@@ -320,7 +321,7 @@ class RouteStepper {
         // this.routes[0] = this.routes[0].filter(p => p.inMap(grid_map))
         if(!blind) {
             this.routes[0].forEach(path => {
-                if(path instanceof PathNode) path.display(grid_map, ctx, "black")
+                if(path instanceof PathNode) path.display(grid_map, path.position, ctx, "black")
             })
         }
         this.routes = {
@@ -403,12 +404,13 @@ class PathNode extends PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
-    display(grid_map, ctx, colour) {
-        super.display(grid_map, ctx, colour)
-        grid_map.displayNode(ctx, this.position, grid_map.cw > 10 ? () => {
+    display(grid_map, position, ctx, colour) {
+        super.display(grid_map, position, ctx, colour)
+        grid_map.displayNode(ctx, position, grid_map.cw > 10 ? () => {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
@@ -499,11 +501,11 @@ class Route {
         this.getNodes(grid_map).forEach(n => {
             const m = grid_map.nodeAt(n.x, n.y)
             if(n.x == this.left.x && n.y == this.left.y) {
-                m.display(grid_map, ctx, "pink")
+                m.display(grid_map, n, ctx, "pink")
             } else if(n.x == this.right.x && n.y == this.right.y) {
-                m.display(grid_map, ctx, "yellow")
+                m.display(grid_map, n, ctx, "yellow")
             } else {
-                m.display(grid_map, ctx, "orange")
+                m.display(grid_map, n, ctx, "orange")
             }
         })
     }
@@ -682,10 +684,10 @@ class GridTest {
 
         this.gridMap = grid_map
         for(const o of this.obstructions) {
-            grid_map.nodeAt(o.x, o.y).display(grid_map, this.ctx, "red")
+            grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
         }
-        this.start.display(grid_map, this.ctx, "green")
-        this.finish.display(grid_map, this.ctx, "blue")
+        this.start.display(grid_map, this.startPosition, this.ctx, "green")
+        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
 
         this.testNumber = null
     }
@@ -721,11 +723,11 @@ class GridTest {
 
         this.gridMap = grid_map
         for(const o of obstructions) {
-            grid_map.nodeAt(o.x, o.y).display(grid_map, this.ctx, "red")
+            grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
         }
         this.obstructions = obstructions
-        this.start.display(grid_map, this.ctx, "green")
-        this.finish.display(grid_map, this.ctx, "blue")
+        this.start.display(grid_map, this.startPosition, this.ctx, "green")
+        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
