@@ -225,14 +225,14 @@ class RouteStepper {
      */
     constructor(start_node) {
         this.startNode = start_node
-        /** @type {{[x: number]: (PathNode|StartNode)[]}} */
+        /** @type {{[cost: number]: (StartNode|PathNode)[]}} */
         this.newRoutes = {
             4: [],
             6: [],
         }
-        /** @type {{[x: number]: (PathNode|StartNode)[]}} */
+        /** @type {{[cost: number]: {x: number, y: number}[]}} */
         this.routes = {
-            0: [this.startNode],
+            0: [this.startNode.position],
             2: [],
             4: [],
             6: [],
@@ -254,8 +254,8 @@ class RouteStepper {
             (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
             []
         )
-        const route_found = this.routes[0].some(path => {
-            return path.nextSteps(path.position, step_type).some(step => {
+        const route_found = this.routes[0].some(position => {
+            return grid_map.nodeAt(position.x, position.y).nextSteps(position, step_type).some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
@@ -263,9 +263,9 @@ class RouteStepper {
                         const p = new PathNode(
                             step.x,
                             step.y,
-                            PathNode.encodeFromDirection(step.x, step.y, path.position)
+                            PathNode.encodeFromDirection(step.x, step.y, position)
                         )
-                        const cost = Math.abs(step.x - path.position.x) + Math.abs(step.y - path.position.y) > 1 ? 6 : 4
+                        const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
                     } else if(
                         (
@@ -279,7 +279,7 @@ class RouteStepper {
                             existing_node.getOwner(grid_map).content != this.startNode.content
                         )
                     ) {
-                        route = new Route(path.position, existing_node.position)
+                        route = new Route(position, existing_node.position)
                         return true
                     }
                 }
@@ -320,14 +320,15 @@ class RouteStepper {
      */
     stepRoutes(grid_map, ctx, blind) {
         if(!blind) {
-            this.routes[0].forEach(path => {
-                if(path instanceof PathNode) path.display(grid_map, path.position, ctx, "black")
+            this.routes[0].forEach(position => {
+                const path = grid_map.nodeAt(position.x, position.y)
+                if(path instanceof PathNode) path.display(grid_map, position, ctx, "black")
             })
         }
         this.routes = {
             0: this.routes[2],
-            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map, p.position))),
-            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map, p.position))),
+            2: this.routes[4].concat(this.newRoutes[4].filter(p => p.inMap(grid_map, p.position)).map(p => p.position)),
+            4: this.routes[6].concat(this.newRoutes[6].filter(p => p.inMap(grid_map, p.position)).map(p => p.position)),
             6: [],
         }
         this.newRoutes = {
