@@ -263,7 +263,7 @@ class RouteStepper {
                         const p = new PathNode(
                             step.x,
                             step.y,
-                            PathNode.fromDirection(step.x, step.y, path.position)
+                            PathNode.encodeFromDirection(step.x, step.y, path.position)
                         )
                         const cost = Math.abs(step.x - path.position.x) + Math.abs(step.y - path.position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push(p)
@@ -344,7 +344,7 @@ class PathNode extends PositionedNode {
      * @param {number} y
      * @param {{x: number, y: number}} from_position
      */
-    static fromDirection(x, y, from_position) {
+    static encodeFromDirection(x, y, from_position) {
         const dx = x - from_position.x
         const dy = y - from_position.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
