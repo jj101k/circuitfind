@@ -18,11 +18,12 @@ class GridMap {
     /**
      *
      * @param {PositionedNode} n
+     * @param {{x: number, y: number}} position
      * @param {boolean} overwrite
      * @returns {boolean}
      */
-    addNode(n, overwrite = false) {
-        const address = n.position.x + n.position.y * this.l
+    addNode(n, position, overwrite = false) {
+        const address = position.x + position.y * this.l
         const offset = Math.floor(address / 2)
         const bottom = address % 2
         const existing_node = bottom ?
@@ -299,7 +300,7 @@ class RouteStepper {
      */
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(p => {
-            if(grid_map.addNode(p) && !blind) {
+            if(grid_map.addNode(p, p.position) && !blind) {
                 p.display(grid_map, ctx, "light" + this.startNode.colour)
             }
         })
@@ -663,10 +664,10 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(o.x, o.y), true)
+            grid_map.addNode(new ObstructionNode(o.x, o.y), o, true)
         }
-        grid_map.addNode(this.start, true)
-        grid_map.addNode(this.finish, true)
+        grid_map.addNode(this.start, this.startPosition, true)
+        grid_map.addNode(this.finish, this.finishPosition, true)
 
         obstructions = obstructions.filter(
             o => obstructions.filter(oo => oo.x == o.x && oo.y == o.y).length == 1
@@ -708,10 +709,10 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(o.x, o.y), true)
+            grid_map.addNode(new ObstructionNode(o.x, o.y), o, true)
         }
-        grid_map.addNode(this.start, true)
-        grid_map.addNode(this.finish, true)
+        grid_map.addNode(this.start, test.start, true)
+        grid_map.addNode(this.finish, test.finish, true)
 
         this.gridMap = grid_map
         for(const o of obstructions) {
