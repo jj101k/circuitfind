@@ -117,6 +117,27 @@ class GridMap {
 class PositionedNode {
     /**
      *
+     * @param {{x: number, y: number}} position
+     * @param {"cheap" | "expensive"} step_type
+     */
+    static nextSteps(position, step_type) {
+        const steps = []
+        if(step_type == "cheap") {
+            [-1, 1].forEach(o => {
+                steps.push({x: o + position.x, y: position.y})
+                steps.push({x: position.x, y: o + position.y})
+            })
+        } else {
+            [-1, 1].forEach(x => {
+                [-1, 1].forEach(y => {
+                    steps.push({x: x + position.x, y: y + position.y})
+                })
+            })
+        }
+        return steps
+    }
+    /**
+     *
      * @param {number} x
      * @param {number} y
      * @param {number} content 0-15
@@ -168,27 +189,6 @@ class PositionedNode {
     inMap(grid_map, position) {
         const n = grid_map.nodeAt(position.x, position.y)
         return n instanceof this.constructor
-    }
-    /**
-     *
-     * @param {{x: number, y: number}} position
-     * @param {"cheap" | "expensive"} step_type
-     */
-    nextSteps(position, step_type) {
-        const steps = []
-        if(step_type == "cheap") {
-            [-1, 1].forEach(o => {
-                steps.push({x: o + position.x, y: position.y})
-                steps.push({x: position.x, y: o + position.y})
-            })
-        } else {
-            [-1, 1].forEach(x => {
-                [-1, 1].forEach(y => {
-                    steps.push({x: x + position.x, y: y + position.y})
-                })
-            })
-        }
-        return steps
     }
 }
 
@@ -255,7 +255,7 @@ class RouteStepper {
             []
         )
         const route_found = this.routes[0].some(position => {
-            return grid_map.nodeAt(position.x, position.y).nextSteps(position, step_type).some(step => {
+            return PositionedNode.nextSteps(position, step_type).some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
                     let existing_node = grid_map.nodeAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
