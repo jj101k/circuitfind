@@ -396,12 +396,6 @@ class PathNode extends PositionedNode {
         return this.content & 0b111
     }
     /**
-     * The position this node came from.
-     */
-    get fromPosition() {
-        return PathNode.getFromPosition(this.position.x, this.position.y, this.fromDirection)
-    }
-    /**
      *
      * @param {GridMap} grid_map
      * @param {{x: number, y: number}} position
@@ -416,6 +410,14 @@ class PathNode extends PositionedNode {
             ctx.fillStyle = "#888"
             ctx.fillText("" + this.fromDirection, 2, 8)
         } : () => {})
+    }
+    /**
+     * The position this node came from.
+     *
+     * @param {{x: number, y: number}} position
+     */
+    fromPosition(position) {
+        return PathNode.getFromPosition(position.x, position.y, this.fromDirection)
     }
     /**
      *
@@ -439,7 +441,7 @@ class PathNode extends PositionedNode {
      * @returns {StartNode | PathNode}
      */
     getPreviousNode(grid_map) {
-        const position = this.fromPosition
+        const position = this.fromPosition(this.position)
         const n = grid_map.nodeAt(position.x, position.y)
         if(n instanceof PathNode || n instanceof StartNode) {
             return n
@@ -527,7 +529,8 @@ class Route {
             /** @type {PathNode} */
             //@ts-ignore
             const m = grid_map.nodeAt(n.x, n.y)
-            if(m.fromPosition.x == n.x || m.fromPosition.y == n.y) {
+            const mf = m.fromPosition(n)
+            if(mf.x == n.x || mf.y == n.y) {
                 cost += 4
             } else {
                 cost += 6
@@ -547,13 +550,13 @@ class Route {
         let an = grid_map.nodeAt(a.x, a.y)
         while(an instanceof PathNode) {
             nodes.push(a)
-            a = an.fromPosition
+            a = an.fromPosition(a)
             an = grid_map.nodeAt(a.x, a.y)
         }
         let bn = grid_map.nodeAt(b.x, b.y)
         while(bn instanceof PathNode) {
             nodes.unshift(b)
-            b = bn.fromPosition
+            b = bn.fromPosition(b)
             bn = grid_map.nodeAt(b.x, b.y)
         }
         return nodes
