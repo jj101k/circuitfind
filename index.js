@@ -440,20 +440,6 @@ class PathNode extends PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
-     * @returns {StartNode | PathNode}
-     */
-    getPreviousNode(grid_map) {
-        const position = this.fromPosition(this.position)
-        const n = grid_map.nodeAt(position.x, position.y)
-        if(n instanceof PathNode || n instanceof StartNode) {
-            return n
-        } else {
-            throw new Error("Bad previous node")
-        }
-    }
-    /**
-     *
-     * @param {GridMap} grid_map
      * @param {{x: number, y: number}} position
      * @returns {boolean}
      */
