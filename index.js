@@ -232,13 +232,12 @@ class RouteStepper {
     }
     /**
      *
-     * @param {CanvasRenderingContext2D} ctx
      * @param {PositionedNode} target
      * @param {boolean} cheap
      * @param {GridMap} grid_map
      * @returns {?Route}
      */
-    stepOut(ctx, target, cheap, grid_map) {
+    stepOut(target, cheap, grid_map) {
         let route
 
         const step_type = cheap ? "cheap" : "expensive"
@@ -782,10 +781,10 @@ class GridTest {
     }
     step() {
         const possible_routes = [
-            this.routeStart.stepOut(this.ctx, this.finish, true, this.gridMap),
-            this.routeFinish.stepOut(this.ctx, this.start, true, this.gridMap),
-            this.routeStart.stepOut(this.ctx, this.finish, false, this.gridMap),
-            this.routeFinish.stepOut(this.ctx, this.start, false, this.gridMap),
+            this.routeStart.stepOut(this.finish, true, this.gridMap),
+            this.routeFinish.stepOut(this.start, true, this.gridMap),
+            this.routeStart.stepOut(this.finish, false, this.gridMap),
+            this.routeFinish.stepOut(this.start, false, this.gridMap),
         ].filter(route => route)
 
         if(possible_routes.length) {
