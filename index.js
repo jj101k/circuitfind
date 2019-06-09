@@ -276,7 +276,7 @@ class RouteStepper {
                             existing_node instanceof PathNode &&
                             existing_node.isLeafNode(grid_map) &&
                             !leaf_uids.some(uid => uid == step_uid) &&
-                            existing_node.getOwner(grid_map).content != this.startNode.content
+                            existing_node.getOwner(grid_map, step).content != this.startNode.content
                         )
                     ) {
                         route = new Route(position, existing_node.position)
@@ -423,12 +423,13 @@ class PathNode extends PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @returns {StartNode}
      */
-    getOwner(grid_map) {
-        let c, position
+    getOwner(grid_map, position) {
+        let c
         for(
-            c = this.content, position = {x: this.position.x, y: this.position.y};
+            c = this.content;
             c & 0b1000;
             position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
             c = grid_map.contentAt(position.x, position.y)
