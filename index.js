@@ -279,7 +279,7 @@ class RouteStepper {
                             existing_node.getOwner(grid_map, step).content != this.startNode.content
                         )
                     ) {
-                        route = new Route(position, existing_node.position)
+                        route = new Route(position, step)
                         return true
                     }
                 }
