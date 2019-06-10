@@ -3,6 +3,18 @@
 class GridMap {
     /**
      *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {{x: number, y: number}} position
+     * @param {function(): void} action
+     */
+    static displayNode(ctx, position, action) {
+        ctx.save()
+        ctx.translate(position.x, position.y)
+        action()
+        ctx.restore()
+    }
+    /**
+     *
      * @param {number} w
      * @param {number} l
      */
@@ -79,16 +91,28 @@ class GridMap {
         }
     }
     /**
+     * True if this is a leaf node, ie a non-target.
      *
-     * @param {CanvasRenderingContext2D} ctx
      * @param {{x: number, y: number}} position
-     * @param {function(): void} action
+     * @returns {boolean}
      */
-    displayNode(ctx, position, action) {
-        ctx.save()
-        ctx.translate(position.x, position.y)
-        action()
-        ctx.restore()
+    isLeafNode(position) {
+        for(let x = -1; x <= 1; x++) {
+            for(let y = -1; y <= 1; y++) {
+                if(x || y) {
+                    const c = this.contentAt(position.x + x, position.y + y)
+                    if(c & 0b1000) {
+                        const pos = PathNode.getFromPosition(
+                            position.x + x,
+                            position.y + y,
+                            c
+                        )
+                        if(pos.x == position.x && pos.y == position.y) return false
+                    }
+                }
+            }
+        }
+        return true
     }
     /**
      *
@@ -166,20 +190,10 @@ class PositionedNode {
      * @param {string} colour
      */
     display(grid_map, position, ctx, colour) {
-        grid_map.displayNode(ctx, position, () => {
+        GridMap.displayNode(ctx, position, () => {
             ctx.fillStyle = colour
             ctx.fillRect(0.125, 0.125, 0.75, 0.75)
         })
-    }
-    /**
-     *
-     * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
-     * @returns {boolean}
-     */
-    inMap(grid_map, position) {
-        const n = grid_map.nodeAt(position.x, position.y)
-        return n instanceof this.constructor
     }
 }
 
@@ -257,7 +271,7 @@ class RouteStepper {
                             existing_node.content & 0b1000 &&
                             (existing_node = grid_map.nodeAt(step.x, step.y)) &&
                             existing_node instanceof PathNode &&
-                            existing_node.isLeafNode(grid_map, step) &&
+                            grid_map.isLeafNode(step) &&
                             !leaf_uids.some(uid => uid == step_uid) &&
                             existing_node.getOwner(grid_map, step).content != this.startNode.content
                         )
@@ -317,13 +331,13 @@ class RouteStepper {
                 const p = new PathNode(
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
-                return p.inMap(grid_map, r.to)
+                return grid_map.nodeAt(r.to.x, r.to.y).content == p.content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
                 const p = new PathNode(
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
-                return p.inMap(grid_map, r.to)
+                return grid_map.nodeAt(r.to.x, r.to.y).content == p.content
             }).map(r => r.to)),
             6: [],
         }
@@ -399,7 +413,7 @@ class PathNode extends PositionedNode {
      */
     display(grid_map, position, ctx, colour) {
         super.display(grid_map, position, ctx, colour)
-        grid_map.displayNode(ctx, position, grid_map.cw > 10 ? () => {
+        GridMap.displayNode(ctx, position, grid_map.cw > 10 ? () => {
             ctx.scale(0.1, 0.1)
             ctx.font = "8px Arial"
             ctx.fillStyle = "#888"
@@ -430,41 +444,6 @@ class PathNode extends PositionedNode {
         ) ;
         // @ts-ignore
         return grid_map.nodeAt(position.x, position.y)
-    }
-    /**
-     *
-     * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
-     * @returns {boolean}
-     */
-    inMap(grid_map, position) {
-        const n = grid_map.nodeAt(position.x, position.y)
-        return n instanceof PathNode && n.fromDirection == this.fromDirection
-    }
-    /**
-     * True if this is a leaf node, ie a non-target.
-     *
-     * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
-     * @returns {boolean}
-     */
-    isLeafNode(grid_map, position) {
-        for(let x = -1; x <= 1; x++) {
-            for(let y = -1; y <= 1; y++) {
-                if(x || y) {
-                    const c = grid_map.contentAt(position.x + x, position.y + y)
-                    if(c & 0b1000) {
-                        const pos = PathNode.getFromPosition(
-                            position.x + x,
-                            position.y + y,
-                            c
-                        )
-                        if(pos.x == position.x && pos.y == position.y) return false
-                    }
-                }
-            }
-        }
-        return true
     }
 }
 
