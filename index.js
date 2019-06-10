@@ -559,6 +559,8 @@ class Route {
 class GridTest {
     constructor() {
         this.blind = false
+        /** @type {GridMap} */
+        this.gridMap = null
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
