@@ -656,7 +656,7 @@ class GridTest {
         grid_map.addNode(this.finish, this.finishPosition, true)
 
         obstructions = obstructions.filter(
-            o => obstructions.filter(oo => oo.x == o.x && oo.y == o.y).length == 1
+            (o, i) => obstructions.slice(i + 1).every(oo => (oo.x != o.x || oo.y != o.y))
         )
 
         this.obstructions = obstructions
