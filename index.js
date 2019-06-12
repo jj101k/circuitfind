@@ -436,14 +436,6 @@ class PathNode extends PositionedNode {
             ctx.fillText("" + this.fromDirection, 2, 8)
         } : () => {})
     }
-    /**
-     * The position this node came from.
-     *
-     * @param {{x: number, y: number}} position
-     */
-    fromPosition(position) {
-        return PathNode.getFromPosition(position.x, position.y, this.fromDirection)
-    }
 }
 
 class Route {
@@ -490,7 +482,7 @@ class Route {
             /** @type {PathNode} */
             //@ts-ignore
             const m = grid_map.nodeAt(n.x, n.y)
-            const mf = m.fromPosition(n)
+            const mf = PathNode.getFromPosition(n.x, n.y, m.content & 0b111)
             if(mf.x == n.x || mf.y == n.y) {
                 cost += 4
             } else {
@@ -508,17 +500,17 @@ class Route {
         let [a, b] = [this.left, this.right]
         /** @type {{x: number, y: number}[]} */
         const nodes = []
-        let an = grid_map.nodeAt(a.x, a.y)
-        while(an instanceof PathNode) {
+        let ac = grid_map.contentAt(a.x, a.y)
+        while(ac & 0b1000) {
             nodes.push(a)
-            a = an.fromPosition(a)
-            an = grid_map.nodeAt(a.x, a.y)
+            a = PathNode.getFromPosition(a.x, a.y, ac & 0b111)
+            ac = grid_map.contentAt(a.x, a.y)
         }
-        let bn = grid_map.nodeAt(b.x, b.y)
-        while(bn instanceof PathNode) {
+        let bc = grid_map.contentAt(b.x, b.y)
+        while(bc & 0b1000) {
             nodes.unshift(b)
-            b = bn.fromPosition(b)
-            bn = grid_map.nodeAt(b.x, b.y)
+            b = PathNode.getFromPosition(b.x, b.y, bc & 0b111)
+            bc = grid_map.contentAt(b.x, b.y)
         }
         return nodes
     }
