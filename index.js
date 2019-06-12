@@ -269,7 +269,6 @@ class RouteStepper {
                             existing_node.content == target.content
                         ) || (
                             existing_node.content & 0b1000 &&
-                            (existing_node = grid_map.nodeAt(step.x, step.y)) &&
                             existing_node instanceof PathNode &&
                             grid_map.isLeafNode(step) &&
                             !leaf_uids.some(uid => uid == step_uid) &&
