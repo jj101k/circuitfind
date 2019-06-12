@@ -305,13 +305,13 @@ class RouteStepper {
                 const p = new PathNode(
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
-                return grid_map.nodeAt(r.to.x, r.to.y).content == p.content
+                return grid_map.contentAt(r.to.x, r.to.y) == p.content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
                 const p = new PathNode(
                     PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 )
-                return grid_map.nodeAt(r.to.x, r.to.y).content == p.content
+                return grid_map.contentAt(r.to.x, r.to.y) == p.content
             }).map(r => r.to)),
             6: [],
         }
@@ -454,10 +454,8 @@ class Route {
             cost += 6
         }
         this.getNodes(grid_map).forEach(n => {
-            /** @type {PathNode} */
-            //@ts-ignore
-            const m = grid_map.nodeAt(n.x, n.y)
-            const mf = PathNode.getFromPosition(n.x, n.y, m.content & 0b111)
+            const m = grid_map.contentAt(n.x, n.y)
+            const mf = PathNode.getFromPosition(n.x, n.y, m & 0b111)
             if(mf.x == n.x || mf.y == n.y) {
                 cost += 4
             } else {
