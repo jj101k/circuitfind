@@ -278,10 +278,9 @@ class RouteStepper {
      */
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(r => {
-            const p = new PathNode(
-                PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
-            )
-            if(grid_map.addNode(p.content, r.to) && !blind) {
+            const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+            if(grid_map.addNode(content, r.to) && !blind) {
+                const p = new PathNode(content)
                 p.display(grid_map, r.to, ctx, "light" + (this.startNode.content & 1 ? "blue" : "green"))
             }
         })
@@ -302,16 +301,12 @@ class RouteStepper {
         this.routes = {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
-                const p = new PathNode(
-                    PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
-                )
-                return grid_map.contentAt(r.to.x, r.to.y) == p.content
+                const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
-                const p = new PathNode(
-                    PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
-                )
-                return grid_map.contentAt(r.to.x, r.to.y) == p.content
+                const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             6: [],
         }
