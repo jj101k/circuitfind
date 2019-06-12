@@ -168,7 +168,7 @@ class PositionedNode {
         if(content & 0b1000) {
             return new PathNode(content)
         } else if(content == 0b0111) {
-            return new ObstructionNode()
+            return new PositionedNode(content)
         } else if(content > 0) {
             return new StartNode(content)
         } else {
@@ -194,15 +194,6 @@ class PositionedNode {
             ctx.fillStyle = colour
             ctx.fillRect(0.125, 0.125, 0.75, 0.75)
         })
-    }
-}
-
-class ObstructionNode extends PositionedNode {
-    /**
-     *
-     */
-    constructor() {
-        super(0b111)
     }
 }
 
