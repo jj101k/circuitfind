@@ -29,12 +29,12 @@ class GridMap {
     }
     /**
      *
-     * @param {PositionedNode} n
+     * @param {number} content
      * @param {{x: number, y: number}} position
      * @param {boolean} overwrite
      * @returns {boolean}
      */
-    addNode(n, position, overwrite = false) {
+    addNode(content, position, overwrite = false) {
         const address = position.x + position.y * this.l
         const offset = Math.floor(address / 2)
         const bottom = address % 2
@@ -44,10 +44,10 @@ class GridMap {
         if(overwrite || !existing_node) {
             if(bottom) {
                 this.nodes[offset] =
-                    (this.nodes[offset] & 0b11110000) + (n.content & 0b1111)
+                    (this.nodes[offset] & 0b11110000) + (content & 0b1111)
             } else {
                 this.nodes[offset] =
-                    ((n.content & 0b1111) << 4) + (this.nodes[offset] & 0b1111)
+                    ((content & 0b1111) << 4) + (this.nodes[offset] & 0b1111)
             }
             return true
         } else {
@@ -307,7 +307,7 @@ class RouteStepper {
             const p = new PathNode(
                 PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
             )
-            if(grid_map.addNode(p, r.to) && !blind) {
+            if(grid_map.addNode(p.content, r.to) && !blind) {
                 p.display(grid_map, r.to, ctx, "light" + this.startNode.colour)
             }
         })
@@ -631,10 +631,10 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(), o, true)
+            grid_map.addNode(0b0111, o, true)
         }
-        grid_map.addNode(this.start, this.startPosition, true)
-        grid_map.addNode(this.finish, this.finishPosition, true)
+        grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.addNode(this.finish.content, this.finishPosition, true)
 
         obstructions = obstructions.filter(
             (o, i) => obstructions.slice(i + 1).every(oo => (oo.x != o.x || oo.y != o.y))
@@ -668,10 +668,10 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(new ObstructionNode(), o, true)
+            grid_map.addNode(0b0111, o, true)
         }
-        grid_map.addNode(this.start, test.start, true)
-        grid_map.addNode(this.finish, test.finish, true)
+        grid_map.addNode(this.start.content, test.start, true)
+        grid_map.addNode(this.finish.content, test.finish, true)
 
         this.gridMap = grid_map
         for(const o of obstructions) {
