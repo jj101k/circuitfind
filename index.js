@@ -259,20 +259,19 @@ class RouteStepper {
         const route_found = this.routes[0].some(position => {
             return PositionedNode.nextSteps(position, step_type).some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
-                    let existing_node = grid_map.nodeAt(step.x, step.y)
+                    const existing_content = grid_map.contentAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
-                    if(!existing_node) {
+                    if(!existing_content) {
                         const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push({from: position, to: step})
                     } else if(
                         (
-                            existing_node.content == target.content
+                            existing_content == target.content
                         ) || (
-                            existing_node.content & 0b1000 &&
+                            existing_content & 0b1000 &&
                             grid_map.isLeafNode(step) &&
                             !leaf_uids.some(uid => uid == step_uid) &&
-                            existing_node instanceof PathNode &&
-                            existing_node.getOwner(grid_map, step).content != this.startNode.content
+                            PathNode.getOwner(existing_content, grid_map, step).content != this.startNode.content
                         )
                     ) {
                         route = new Route(position, step)
@@ -395,6 +394,24 @@ class PathNode extends PositionedNode {
     }
     /**
      *
+     * @param {number} content
+     * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
+     * @returns {StartNode}
+     */
+    static getOwner(content, grid_map, position) {
+        let c
+        for(
+            c = content;
+            c & 0b1000;
+            position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
+            c = grid_map.contentAt(position.x, position.y)
+        ) ;
+        // @ts-ignore
+        return grid_map.nodeAt(position.x, position.y)
+    }
+    /**
+     *
      * @param {number} fromDirection 0-7 or 8+(0-7)
      */
     constructor(fromDirection) {
@@ -426,23 +443,6 @@ class PathNode extends PositionedNode {
      */
     fromPosition(position) {
         return PathNode.getFromPosition(position.x, position.y, this.fromDirection)
-    }
-    /**
-     *
-     * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
-     * @returns {StartNode}
-     */
-    getOwner(grid_map, position) {
-        let c
-        for(
-            c = this.content;
-            c & 0b1000;
-            position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
-            c = grid_map.contentAt(position.x, position.y)
-        ) ;
-        // @ts-ignore
-        return grid_map.nodeAt(position.x, position.y)
     }
 }
 
