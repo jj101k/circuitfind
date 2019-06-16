@@ -91,7 +91,7 @@ class GridMap {
         }
     }
     /**
-     * True if this is a leaf node, ie a non-target.
+     * True if `position` is a leaf node, ie a non-target.
      *
      * @param {{x: number, y: number}} position
      * @returns {boolean}
