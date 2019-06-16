@@ -554,6 +554,41 @@ class GridTest {
      *
      * @param {number} [s]
      */
+    initForNull(s = 10) {
+        this.currentTest = null
+        this.size = s
+
+        this.startPosition = {
+            x: 0,
+            y: 0,
+        }
+        this.start = new PositionedNode(1)
+        this.routeStart = new RouteStepper(this.start, this.startPosition)
+        this.finishPosition = {
+            x: s - 1,
+            y: s - 1,
+        }
+        this.finish = new PositionedNode(2)
+        this.routeFinish = new RouteStepper(this.finish, this.finishPosition)
+
+        const w = this.buildContext(null, s)
+        const grid_map = new GridMap(w, s)
+        grid_map.display(this.ctx)
+
+        grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.addNode(this.finish.content, this.finishPosition, true)
+        this.obstructions = []
+
+        this.gridMap = grid_map
+        this.start.display(grid_map, this.startPosition, this.ctx, "green")
+        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
+
+        this.testNumber = null
+    }
+    /**
+     *
+     * @param {number} [s]
+     */
     initForRandom(s = 10) {
         this.currentTest = null
         /** @type {{x: number, y: number}[]} */
@@ -647,6 +682,27 @@ class GridTest {
             this.run()
         }
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
+    }
+    /**
+     *
+     * @param {number} [s]
+     */
+    async nullTest(s = 10) {
+        this.initForNull(s)
+        this.testNumber = null
+        if(!this.paused) {
+            if(this.blind) {
+                const start = new Date().valueOf()
+                let running = true
+                while(running) {
+                    running = this.step()
+                }
+                const end = new Date().valueOf()
+                console.log(`Took ${end - start} ms`)
+            } else {
+                await this.run(0)
+            }
+        }
     }
     /**
      *
