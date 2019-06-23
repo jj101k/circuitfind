@@ -242,8 +242,10 @@ class RouteStepper {
                         this.newRoutes[cost].push({from: position, to: step})
                     } else if(
                         (
+                            // Directly reach the target (it happens)
                             existing_content == target.content
                         ) || (
+                            // Reach one of the target's path nodes
                             existing_content & 0b1000 &&
                             !leaf_uids.some(uid => uid == step_uid) &&
                             grid_map.isLeafNode(step) &&
