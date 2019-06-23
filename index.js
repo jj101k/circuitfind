@@ -232,8 +232,8 @@ class RouteStepper {
             (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
             []
         )
-        const route_found = this.routes[0].some(position => {
-            return PositionedNode.nextSteps(position, step_type).some(step => {
+        const route_found = this.routes[0].some(
+            position => PositionedNode.nextSteps(position, step_type).some(step => {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.contentAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
@@ -245,8 +245,8 @@ class RouteStepper {
                             existing_content == target.content
                         ) || (
                             existing_content & 0b1000 &&
-                            grid_map.isLeafNode(step) &&
                             !leaf_uids.some(uid => uid == step_uid) &&
+                            grid_map.isLeafNode(step) &&
                             PathNode.getOwner(existing_content, grid_map, step) != this.startNode.content
                         )
                     ) {
@@ -256,7 +256,7 @@ class RouteStepper {
                 }
                 return false
             })
-        })
+        )
         if(route_found) {
             console.log("Route found")
             return route
