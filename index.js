@@ -221,10 +221,13 @@ class RouteStepper {
      * @param {PositionedNode} target
      * @param {boolean} cheap
      * @param {GridMap} grid_map
+     * @param {RouteStepper} other_stepper
      * @returns {?Route}
      */
-    stepOut(target, cheap, grid_map) {
+    stepOut(target, cheap, grid_map, other_stepper) {
+        /** @type {?Route} */
         let route
+        let last_route_length = 0
 
         const step_type = cheap ? "cheap" : "expensive"
         /** @type {number[]} */
@@ -232,8 +235,8 @@ class RouteStepper {
             (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
             []
         )
-        const route_found = this.routes[0].some(
-            position => PositionedNode.nextSteps(position, step_type).some(step => {
+        for(const position of this.routes[0]) {
+            for(const step of PositionedNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.contentAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
@@ -252,14 +255,20 @@ class RouteStepper {
                             PathNode.getOwner(existing_content, grid_map, step) != this.startNode.content
                         )
                     ) {
-                        route = new Route(position, step)
-                        return true
+                        const r = new Route(position, step)
+                        const route_cost = r.getCost(grid_map)
+                        if(!route) {
+                            route = r
+                            last_route_length = route_cost
+                        } else if(last_route_length > route_cost) {
+                            route = r
+                            last_route_length = route_cost
+                        }
                     }
                 }
-                return false
-            })
-        )
-        if(route_found) {
+            }
+        }
+        if(route) {
             console.log("Route found")
             return route
         } else if(
@@ -758,10 +767,10 @@ class GridTest {
     }
     step() {
         const possible_routes = [
-            this.routeStart.stepOut(this.finish, true, this.gridMap),
-            this.routeFinish.stepOut(this.start, true, this.gridMap),
-            this.routeStart.stepOut(this.finish, false, this.gridMap),
-            this.routeFinish.stepOut(this.start, false, this.gridMap),
+            this.routeStart.stepOut(this.finish, true, this.gridMap, this.routeFinish),
+            this.routeFinish.stepOut(this.start, true, this.gridMap, this.routeStart),
+            this.routeStart.stepOut(this.finish, false, this.gridMap, this.routeFinish),
+            this.routeFinish.stepOut(this.start, false, this.gridMap, this.routeStart),
         ].filter(route => route)
 
         if(possible_routes.length) {
