@@ -226,7 +226,7 @@ class RouteStepper {
      */
     stepOut(target, cheap, grid_map, other_stepper) {
         /** @type {?Route} */
-        let route
+        let route = null
         let last_route_length = 0
 
         const step_type = cheap ? "cheap" : "expensive"
@@ -422,8 +422,8 @@ class PathNode extends PositionedNode {
 class Route {
     /**
      *
-     * @param {{x: number, y: number}} left
-     * @param {{x: number, y: number}} right
+     * @param {?{x: number, y: number}} left
+     * @param {?{x: number, y: number}} right
      */
     constructor(left = null, right = null) {
         this.left = left
@@ -497,8 +497,8 @@ class Route {
 
 /**
  * @typedef testSignature
- * @property {{x: number, y: number}} start
- * @property {{x: number, y: number}} finish
+ * @property {?{x: number, y: number}} start
+ * @property {?{x: number, y: number}} finish
  * @property {{x: number, y: number}[]} obstructions
  * @property {?boolean} passed
  * @property {?number} correctLength
@@ -508,7 +508,7 @@ class Route {
 class GridTest {
     constructor() {
         this.blind = false
-        /** @type {GridMap} */
+        /** @type {?GridMap} */
         this.gridMap = null
         this.tests = []
         this.nextTestNumber = 0
@@ -754,7 +754,7 @@ class GridTest {
     async runAll() {
         for(const [i, test] of Object.entries(this.tests)) {
             this.initForTest(test)
-            this.testNumber = i
+            this.testNumber = +i
             await this.run(10)
         }
     }
