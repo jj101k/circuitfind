@@ -605,12 +605,12 @@ class GridTest {
         /** @type {{x: number, y: number}[]} */
         let obstructions = []
         this.size = s
-        const m = Math.floor(s * s / 2)
-        for(let i = 0; i < m; i++) {
-            obstructions.push({
-                x: Math.floor(Math.random() * s),
-                y: Math.floor(Math.random() * s)
-            })
+        for(let x = 0; x < s; x++) {
+            for(let y = 0; y < s; y++) {
+                if(Math.random() > 0.5) {
+                    obstructions.push({x: x, y: y})
+                }
+            }
         }
 
         this.startPosition = {
@@ -640,10 +640,6 @@ class GridTest {
         }
         grid_map.addNode(this.start.content, this.startPosition, true)
         grid_map.addNode(this.finish.content, this.finishPosition, true)
-
-        obstructions = obstructions.filter(
-            (o, i) => obstructions.slice(i + 1).every(oo => (oo.x != o.x || oo.y != o.y))
-        )
 
         this.obstructions = obstructions
 
