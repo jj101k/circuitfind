@@ -230,11 +230,17 @@ class RouteStepper {
         let last_route_length = 0
 
         const step_type = cheap ? "cheap" : "expensive"
-        /** @type {number[]} */
-        const leaf_uids = Object.keys(this.routes).reduce(
-            (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
-            []
-        )
+        /** @type {?number[]} */
+        let leaf_uids = null
+        const get_leaf_uids = () => {
+            if(!leaf_uids) {
+                leaf_uids = Object.keys(this.routes).reduce(
+                    (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
+                    []
+                )
+            }
+            return leaf_uids
+        }
         for(const position of this.routes[0]) {
             for(const step of PositionedNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
@@ -250,7 +256,7 @@ class RouteStepper {
                         ) || (
                             // Reach one of the target's path nodes
                             existing_content & 0b1000 &&
-                            !leaf_uids.some(uid => uid == step_uid) &&
+                            !get_leaf_uids().some(uid => uid == step_uid) &&
                             grid_map.isLeafNode(step) &&
                             PathNode.getOwner(existing_content, grid_map, step) != this.startNode.content
                         )
