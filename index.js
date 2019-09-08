@@ -230,13 +230,13 @@ class RouteStepper {
     }
     /**
      *
-     * @param {PositionedNode} target
+     * @param {{x: number, y: number}} target_position
      * @param {boolean} cheap
      * @param {GridMap} grid_map
      * @param {RouteStepper} other_stepper
      * @returns {?Route}
      */
-    stepOut(target, cheap, grid_map, other_stepper) {
+    stepOut(target_position, cheap, grid_map, other_stepper) {
         /** @type {?Route} */
         let route = null
         let last_route_length = 0
@@ -264,7 +264,8 @@ class RouteStepper {
                     } else if(
                         (
                             // Directly reach the target (it happens)
-                            existing_content == target.content
+                            step.x == target_position.x &&
+                            step.y == target_position.y
                         ) || (
                             // Reach one of the target's path nodes
                             PathNode.isPath(existing_content) &&
@@ -812,10 +813,10 @@ class GridTest {
     }
     step() {
         const possible_routes = [
-            this.routeStart.stepOut(this.finish, true, this.gridMap, this.routeFinish),
-            this.routeFinish.stepOut(this.start, true, this.gridMap, this.routeStart),
-            this.routeStart.stepOut(this.finish, false, this.gridMap, this.routeFinish),
-            this.routeFinish.stepOut(this.start, false, this.gridMap, this.routeStart),
+            this.routeStart.stepOut(this.finishPosition, true, this.gridMap, this.routeFinish),
+            this.routeFinish.stepOut(this.startPosition, true, this.gridMap, this.routeStart),
+            this.routeStart.stepOut(this.finishPosition, false, this.gridMap, this.routeFinish),
+            this.routeFinish.stepOut(this.startPosition, false, this.gridMap, this.routeStart),
         ].filter(route => route)
 
         if(possible_routes.length) {
