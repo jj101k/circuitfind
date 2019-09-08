@@ -27,6 +27,9 @@ class GridMap {
         this.l = l
         /** @type {number[]} */
         this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
+
+        this.finish = {x: 0, y: 0}
+        this.start = {x: 0, y: 0}
     }
     get cw() {
         return this.w / this.l
@@ -405,7 +408,11 @@ class PathNode extends PositionedNode {
             position = PathNode.getFromPosition(position.x, position.y, c),
             c = grid_map.contentAt(position.x, position.y)
         ) ;
-        return grid_map.contentAt(position.x, position.y)
+        if(position.x == grid_map.start.x && position.y == grid_map.start.y) {
+            return 1
+        } else {
+            return 2
+        }
     }
     /**
      *
@@ -621,7 +628,9 @@ class GridTest {
         grid_map.display(this.ctx)
 
         grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.start = this.startPosition
         grid_map.addNode(this.finish.content, this.finishPosition, true)
+        grid_map.finish = this.finishPosition
         this.obstructions = []
 
         this.gridMap = grid_map
@@ -673,7 +682,9 @@ class GridTest {
             grid_map.addNode(OBSTRUCTION_NODE, o, true)
         }
         grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.start = this.startPosition
         grid_map.addNode(this.finish.content, this.finishPosition, true)
+        grid_map.finish = this.finishPosition
 
         this.obstructions = obstructions
 
@@ -706,7 +717,9 @@ class GridTest {
             grid_map.addNode(OBSTRUCTION_NODE, o, true)
         }
         grid_map.addNode(this.start.content, test.start, true)
+        grid_map.start = test.start
         grid_map.addNode(this.finish.content, test.finish, true)
+        grid_map.finish = test.finish
 
         this.gridMap = grid_map
         for(const o of obstructions) {
