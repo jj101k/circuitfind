@@ -207,11 +207,11 @@ class PositionedNode {
 class RouteStepper {
     /**
      *
-     * @param {PositionedNode} start_node
+     * @param {number} side
      * @param {{x: number, y: number}} position
      */
-    constructor(start_node, position) {
-        this.startNode = start_node
+    constructor(side, position) {
+        this.side = side
         /** @type {{[cost: number]: {from: {x: number, y: number}, to: {x: number, y: number}}[]}} */
         this.newRoutes = {
             4: [],
@@ -267,7 +267,7 @@ class RouteStepper {
                             PathNode.isPath(existing_content) &&
                             !get_leaf_uids().some(uid => uid == step_uid) &&
                             grid_map.isLeafNode(step) &&
-                            PathNode.getOwner(existing_content, grid_map, step) != this.startNode.content
+                            PathNode.getOwner(existing_content, grid_map, step) != this.side
                         )
                     ) {
                         const r = new Route(position, step)
@@ -307,7 +307,7 @@ class RouteStepper {
             const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
             if(grid_map.addNode(content, r.to) && !blind) {
                 const p = new PathNode(content)
-                p.display(grid_map, r.to, ctx, "light" + (this.startNode.content & 1 ? "blue" : "green"))
+                p.display(grid_map, r.to, ctx, "light" + (this.side & 1 ? "blue" : "green"))
             }
         })
     }
@@ -598,13 +598,13 @@ class GridTest {
             y: 0,
         }
         this.start = new PositionedNode(1)
-        this.routeStart = new RouteStepper(this.start, this.startPosition)
+        this.routeStart = new RouteStepper(1, this.startPosition)
         this.finishPosition = {
             x: s - 1,
             y: s - 1,
         }
         this.finish = new PositionedNode(2)
-        this.routeFinish = new RouteStepper(this.finish, this.finishPosition)
+        this.routeFinish = new RouteStepper(2, this.finishPosition)
 
         const w = this.buildContext(null, s)
         const grid_map = new GridMap(w, s)
@@ -642,7 +642,7 @@ class GridTest {
             y: Math.floor(Math.random() * s),
         }
         this.start = new PositionedNode(1)
-        this.routeStart = new RouteStepper(this.start, this.startPosition)
+        this.routeStart = new RouteStepper(1, this.startPosition)
         do {
             this.finishPosition = {
                 x: Math.floor(Math.random() * s),
@@ -653,7 +653,7 @@ class GridTest {
             this.finishPosition.y == this.startPosition.y
         )
         this.finish = new PositionedNode(2)
-        this.routeFinish = new RouteStepper(this.finish, this.finishPosition)
+        this.routeFinish = new RouteStepper(2, this.finishPosition)
 
         const w = this.buildContext(null, s)
         const grid_map = new GridMap(w, s)
@@ -683,9 +683,9 @@ class GridTest {
     initForTest(test) {
         this.currentTest = test
         this.start = new PositionedNode(1)
-        this.routeStart = new RouteStepper(this.start, test.start)
+        this.routeStart = new RouteStepper(1, test.start)
         this.finish = new PositionedNode(2)
-        this.routeFinish = new RouteStepper(this.finish, test.finish)
+        this.routeFinish = new RouteStepper(2, test.finish)
         let obstructions = test.obstructions
         this.size = test.size || 10
         const w = this.buildContext(null, this.size)
