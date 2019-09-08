@@ -173,7 +173,7 @@ class PositionedNode {
             case EMPTY_NODE:
                 return null
             case OBSTRUCTION_NODE:
-                new PositionedNode(content)
+                return new PositionedNode(content)
             default:
                 if(PathNode.isPath(content)) {
                     return new PathNode(content)
