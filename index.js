@@ -105,7 +105,7 @@ class GridMap {
             for(let y = -1; y <= 1; y++) {
                 if(x || y) {
                     const c = this.contentAt(position.x + x, position.y + y)
-                    if(c & 0b1000) {
+                    if(PathNode.isPath(c)) {
                         const pos = PathNode.getFromPosition(
                             position.x + x,
                             position.y + y,
@@ -175,7 +175,7 @@ class PositionedNode {
             case OBSTRUCTION_NODE:
                 new PositionedNode(content)
             default:
-                if(content & 0b1000) {
+                if(PathNode.isPath(content)) {
                     return new PathNode(content)
                 } else {
                     return new PositionedNode(content)
@@ -264,7 +264,7 @@ class RouteStepper {
                             existing_content == target.content
                         ) || (
                             // Reach one of the target's path nodes
-                            existing_content & 0b1000 &&
+                            PathNode.isPath(existing_content) &&
                             !get_leaf_uids().some(uid => uid == step_uid) &&
                             grid_map.isLeafNode(step) &&
                             PathNode.getOwner(existing_content, grid_map, step) != this.startNode.content
@@ -401,11 +401,19 @@ class PathNode extends PositionedNode {
         let c
         for(
             c = content;
-            c & 0b1000;
+            PathNode.isPath(c);
             position = PathNode.getFromPosition(position.x, position.y, c),
             c = grid_map.contentAt(position.x, position.y)
         ) ;
         return grid_map.contentAt(position.x, position.y)
+    }
+    /**
+     *
+     * @param {number} content
+     * @returns {boolean}
+     */
+    static isPath(content) {
+        return !!(content & 0b1000)
     }
     /**
      *
@@ -496,13 +504,13 @@ class Route {
         /** @type {{x: number, y: number}[]} */
         const nodes = []
         let ac = grid_map.contentAt(a.x, a.y)
-        while(ac & 0b1000) {
+        while(PathNode.isPath(ac)) {
             nodes.push(a)
             a = PathNode.getFromPosition(a.x, a.y, ac)
             ac = grid_map.contentAt(a.x, a.y)
         }
         let bc = grid_map.contentAt(b.x, b.y)
-        while(bc & 0b1000) {
+        while(PathNode.isPath(bc)) {
             nodes.unshift(b)
             b = PathNode.getFromPosition(b.x, b.y, bc)
             bc = grid_map.contentAt(b.x, b.y)
