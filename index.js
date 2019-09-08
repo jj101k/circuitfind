@@ -703,8 +703,8 @@ class GridTest {
             grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
         }
         this.obstructions = obstructions
-        this.start.display(grid_map, this.startPosition, this.ctx, "green")
-        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
+        this.start.display(grid_map, test.start, this.ctx, "green")
+        this.finish.display(grid_map, test.finish, this.ctx, "blue")
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
