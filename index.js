@@ -1,5 +1,6 @@
 "use strict"
 
+const FOUR_BITS = 0b1111
 const EMPTY_NODE = 0b0000
 const OBSTRUCTION_NODE = 0b0111
 
@@ -42,15 +43,15 @@ class GridMap {
         const offset = Math.floor(address / 2)
         const bottom = address % 2
         const existing_node = bottom ?
-            (this.nodes[offset] & 0b1111) :
+            (this.nodes[offset] & FOUR_BITS) :
             (this.nodes[offset] >> 4)
         if(overwrite || !existing_node) {
             if(bottom) {
                 this.nodes[offset] =
-                    (this.nodes[offset] & 0b11110000) + (content & 0b1111)
+                    (this.nodes[offset] & (FOUR_BITS << 4)) + (content & FOUR_BITS)
             } else {
                 this.nodes[offset] =
-                    ((content & 0b1111) << 4) + (this.nodes[offset] & 0b1111)
+                    ((content & FOUR_BITS) << 4) + (this.nodes[offset] & FOUR_BITS)
             }
             return true
         } else {
@@ -68,7 +69,7 @@ class GridMap {
         const offset = address >> 1
         const bottom = address & 1
         return bottom ?
-            (this.nodes[offset] & 0b1111) :
+            (this.nodes[offset] & FOUR_BITS) :
             (this.nodes[offset] >> 4)
     }
     /**
