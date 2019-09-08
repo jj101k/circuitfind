@@ -255,7 +255,7 @@ class RouteStepper {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.contentAt(step.x, step.y)
                     const step_uid = step.x + grid_map.l * step.y
-                    if(!existing_content) {
+                    if(existing_content == EMPTY_NODE) {
                         const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push({from: position, to: step})
                     } else if(
