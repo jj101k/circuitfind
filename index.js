@@ -704,8 +704,10 @@ class GridTest {
     initForTest(test) {
         this.currentTest = test
         this.start = new PositionedNode(1)
+        this.startPosition = test.start
         this.routeStart = new RouteStepper(1, test.start)
         this.finish = new PositionedNode(2)
+        this.finishPosition = test.finish
         this.routeFinish = new RouteStepper(2, test.finish)
         let obstructions = test.obstructions
         this.size = test.size || 10
