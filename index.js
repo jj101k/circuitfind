@@ -423,7 +423,16 @@ class PathNode extends PositionedNode {
         super(0b1000 | fromDirection)
     }
     get fromDirection() {
-        return this.content & 0b111
+        switch(this.content & 0b111) {
+            case 0: return "\u2193"
+            case 1: return "\u2192"
+            case 2: return "\u2191"
+            case 3: return "\u2190"
+            case 4: return "\u2198"
+            case 5: return "\u2197"
+            case 6: return "\u2199"
+            case 7: return "\u2196"
+        }
     }
     /**
      *
@@ -436,9 +445,10 @@ class PathNode extends PositionedNode {
         super.display(grid_map, position, ctx, colour)
         GridMap.displayNode(ctx, position, grid_map.cw > 10 ? () => {
             ctx.scale(0.1, 0.1)
-            ctx.font = "8px Arial"
+            ctx.font = "7px Arial"
             ctx.fillStyle = "#888"
-            ctx.fillText("" + this.fromDirection, 2, 8)
+            const m = ctx.measureText(this.fromDirection)
+            ctx.fillText(this.fromDirection, Math.ceil(4 - m.width / 2), 7)
         } : () => {})
     }
 }
