@@ -1,5 +1,8 @@
 "use strict"
 
+const EMPTY_NODE = 0b0000
+const OBSTRUCTION_NODE = 0b0111
+
 class GridMap {
     /**
      *
@@ -165,12 +168,17 @@ class PositionedNode {
      * @returns {?PositionedNode}
      */
     static nodeFor(content) {
-        if(content & 0b1000) {
-            return new PathNode(content)
-        } else if(content > 0) {
-            return new PositionedNode(content)
-        } else {
-            return null
+        switch(content) {
+            case EMPTY_NODE:
+                return null
+            case OBSTRUCTION_NODE:
+                new PositionedNode(content)
+            default:
+                if(content & 0b1000) {
+                    return new PathNode(content)
+                } else {
+                    return new PositionedNode(content)
+                }
         }
     }
     /**
@@ -643,7 +651,7 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(0b0111, o, true)
+            grid_map.addNode(OBSTRUCTION_NODE, o, true)
         }
         grid_map.addNode(this.start.content, this.startPosition, true)
         grid_map.addNode(this.finish.content, this.finishPosition, true)
@@ -676,7 +684,7 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(0b0111, o, true)
+            grid_map.addNode(OBSTRUCTION_NODE, o, true)
         }
         grid_map.addNode(this.start.content, test.start, true)
         grid_map.addNode(this.finish.content, test.finish, true)
