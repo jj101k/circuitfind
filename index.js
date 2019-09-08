@@ -295,7 +295,7 @@ class RouteStepper {
      */
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(r => {
-            const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+            const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
             if(grid_map.addNode(content, r.to) && !blind) {
                 const p = new PathNode(content)
                 p.display(grid_map, r.to, ctx, "light" + (this.startNode.content & 1 ? "blue" : "green"))
@@ -318,11 +318,11 @@ class RouteStepper {
         this.routes = {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
-                const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
-                const content = 0b1000 | PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
                 return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             6: [],
@@ -346,10 +346,10 @@ class PathNode extends PositionedNode {
         const dy = y - from_position.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
-            return 4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2
+            return 0b1000 | (4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2)
         } else {
             // straight
-            return Math.abs(dx) + dx + dy + 1
+            return 0b1000 | (Math.abs(dx) + dx + dy + 1)
         }
     }
     /**
@@ -361,9 +361,10 @@ class PathNode extends PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {number} from_direction
+     * @param {number} from_content
      */
-    static getFromPosition(x, y, from_direction) {
+    static getFromPosition(x, y, from_content) {
+        const from_direction = from_content & 0b111
         if(from_direction >= 4) {
             const t = from_direction - 4
             const dx = (t & 2) - 1
@@ -392,7 +393,7 @@ class PathNode extends PositionedNode {
         for(
             c = content;
             c & 0b1000;
-            position = PathNode.getFromPosition(position.x, position.y, c & 0b111),
+            position = PathNode.getFromPosition(position.x, position.y, c),
             c = grid_map.contentAt(position.x, position.y)
         ) ;
         return grid_map.contentAt(position.x, position.y)
@@ -467,7 +468,7 @@ class Route {
         }
         this.getNodes(grid_map).forEach(n => {
             const m = grid_map.contentAt(n.x, n.y)
-            const mf = PathNode.getFromPosition(n.x, n.y, m & 0b111)
+            const mf = PathNode.getFromPosition(n.x, n.y, m)
             if(mf.x == n.x || mf.y == n.y) {
                 cost += 4
             } else {
@@ -488,13 +489,13 @@ class Route {
         let ac = grid_map.contentAt(a.x, a.y)
         while(ac & 0b1000) {
             nodes.push(a)
-            a = PathNode.getFromPosition(a.x, a.y, ac & 0b111)
+            a = PathNode.getFromPosition(a.x, a.y, ac)
             ac = grid_map.contentAt(a.x, a.y)
         }
         let bc = grid_map.contentAt(b.x, b.y)
         while(bc & 0b1000) {
             nodes.unshift(b)
-            b = PathNode.getFromPosition(b.x, b.y, bc & 0b111)
+            b = PathNode.getFromPosition(b.x, b.y, bc)
             bc = grid_map.contentAt(b.x, b.y)
         }
         return nodes
