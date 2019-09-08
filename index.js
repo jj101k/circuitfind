@@ -229,31 +229,18 @@ class RouteStepper {
      * @param {{x: number, y: number}} target_position
      * @param {boolean} cheap
      * @param {GridMap} grid_map
-     * @param {RouteStepper} other_stepper
      * @returns {?Route}
      */
-    stepOut(target_position, cheap, grid_map, other_stepper) {
+    stepOut(target_position, cheap, grid_map) {
         /** @type {?Route} */
         let route = null
         let last_route_length = 0
 
         const step_type = cheap ? "cheap" : "expensive"
-        /** @type {?number[]} */
-        let leaf_uids = null
-        const get_leaf_uids = () => {
-            if(!leaf_uids) {
-                leaf_uids = Object.keys(this.routes).reduce(
-                    (carry, item) => carry.concat(this.routes[item].map(p => p.x + grid_map.l * p.y)),
-                    []
-                )
-            }
-            return leaf_uids
-        }
         for(const position of this.routes[0]) {
             for(const step of PositionedNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.contentAt(step.x, step.y)
-                    const step_uid = step.x + grid_map.l * step.y
                     if(existing_content == EMPTY_NODE) {
                         const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push({from: position, to: step})
@@ -265,7 +252,6 @@ class RouteStepper {
                         ) || (
                             // Reach one of the target's path nodes
                             PathNode.isPath(existing_content) &&
-                            !get_leaf_uids().some(uid => uid == step_uid) &&
                             grid_map.isLeafNode(step) &&
                             PathNode.getOwner(existing_content, grid_map, step) != this.side
                         )
@@ -816,10 +802,10 @@ class GridTest {
     }
     step() {
         const possible_routes = [
-            this.routeStart.stepOut(this.finishPosition, true, this.gridMap, this.routeFinish),
-            this.routeFinish.stepOut(this.startPosition, true, this.gridMap, this.routeStart),
-            this.routeStart.stepOut(this.finishPosition, false, this.gridMap, this.routeFinish),
-            this.routeFinish.stepOut(this.startPosition, false, this.gridMap, this.routeStart),
+            this.routeStart.stepOut(this.finishPosition, true, this.gridMap),
+            this.routeFinish.stepOut(this.startPosition, true, this.gridMap),
+            this.routeStart.stepOut(this.finishPosition, false, this.gridMap),
+            this.routeFinish.stepOut(this.startPosition, false, this.gridMap),
         ].filter(route => route)
 
         if(possible_routes.length) {
