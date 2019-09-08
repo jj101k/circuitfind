@@ -2,7 +2,7 @@
 
 const FOUR_BITS = 0b1111
 const EMPTY_NODE = 0b0000
-const OBSTRUCTION_NODE = 0b0111
+const OBSTRUCTION_NODE = 0b1111
 
 class GridMap {
     /**
@@ -178,11 +178,7 @@ class PositionedNode {
             case OBSTRUCTION_NODE:
                 return new PositionedNode(content)
             default:
-                if(PathNode.isPath(content)) {
-                    return new PathNode(content)
-                } else {
-                    return new PositionedNode(content)
-                }
+                return new PathNode(content)
         }
     }
     /**
@@ -359,10 +355,10 @@ class PathNode extends PositionedNode {
         const dy = y - from_position.y
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
-            return 0b1000 | (4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2)
+            return 1 + (4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2)
         } else {
             // straight
-            return 0b1000 | (Math.abs(dx) + dx + dy + 1)
+            return 1 + (Math.abs(dx) + dx + dy + 1)
         }
     }
     /**
@@ -377,7 +373,7 @@ class PathNode extends PositionedNode {
      * @param {number} from_content
      */
     static getFromPosition(x, y, from_content) {
-        const from_direction = from_content & 0b111
+        const from_direction = from_content - 1
         if(from_direction >= 4) {
             const t = from_direction - 4
             const dx = (t & 2) - 1
@@ -421,17 +417,10 @@ class PathNode extends PositionedNode {
      * @returns {boolean}
      */
     static isPath(content) {
-        return !!(content & 0b1000)
-    }
-    /**
-     *
-     * @param {number} fromDirection 0-7 or 8+(0-7)
-     */
-    constructor(fromDirection) {
-        super(0b1000 | fromDirection)
+        return content != EMPTY_NODE && content != OBSTRUCTION_NODE
     }
     get fromDirection() {
-        switch(this.content & 0b111) {
+        switch(this.content - 1) {
             case 0: return "\u2193"
             case 1: return "\u2192"
             case 2: return "\u2191"
@@ -440,6 +429,7 @@ class PathNode extends PositionedNode {
             case 5: return "\u2197"
             case 6: return "\u2199"
             case 7: return "\u2196"
+            default: return "?"
         }
     }
     /**
@@ -615,13 +605,13 @@ class GridTest {
             x: 0,
             y: 0,
         }
-        this.start = new PositionedNode(1)
+        this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         this.finishPosition = {
             x: s - 1,
             y: s - 1,
         }
-        this.finish = new PositionedNode(2)
+        this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
         const w = this.buildContext(null, s)
@@ -661,7 +651,7 @@ class GridTest {
             x: Math.floor(Math.random() * s),
             y: Math.floor(Math.random() * s),
         }
-        this.start = new PositionedNode(1)
+        this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         do {
             this.finishPosition = {
@@ -672,7 +662,7 @@ class GridTest {
             this.finishPosition.x == this.startPosition.x &&
             this.finishPosition.y == this.startPosition.y
         )
-        this.finish = new PositionedNode(2)
+        this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
         const w = this.buildContext(null, s)
@@ -704,10 +694,10 @@ class GridTest {
      */
     initForTest(test) {
         this.currentTest = test
-        this.start = new PositionedNode(1)
+        this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.startPosition = test.start
         this.routeStart = new RouteStepper(1, test.start)
-        this.finish = new PositionedNode(2)
+        this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.finishPosition = test.finish
         this.routeFinish = new RouteStepper(2, test.finish)
         let obstructions = test.obstructions
