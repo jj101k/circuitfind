@@ -304,7 +304,7 @@ class RouteStepper {
      */
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(r => {
-            const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+            const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
             if(grid_map.addNode(content, r.to) && !blind) {
                 const p = new PathNode(content)
                 p.display(grid_map, r.to, ctx, "light" + (this.side & 1 ? "blue" : "green"))
@@ -327,11 +327,11 @@ class RouteStepper {
         this.routes = {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
-                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
                 return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
-                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from)
+                const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
                 return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             6: [],
@@ -349,16 +349,23 @@ class PathNode extends PositionedNode {
      * @param {number} x
      * @param {number} y
      * @param {{x: number, y: number}} from_position
+     * @param {number} side
      */
-    static encodeFromDirection(x, y, from_position) {
+    static encodeFromDirection(x, y, from_position, side) {
         const dx = x - from_position.x
         const dy = y - from_position.y
+        let direction
         if(Math.abs(dx) - Math.abs(dy) == 0) {
             // diagonal
-            return 1 + (4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2)
+            direction = (4 + Math.abs(dx) + dx + (Math.abs(dy) + dy)/2)
         } else {
             // straight
-            return 1 + (Math.abs(dx) + dx + dy + 1)
+            direction = (Math.abs(dx) + dx + dy + 1)
+        }
+        if(side == 2 && direction < 6) {
+            return direction + 0b1000 + 1
+        } else {
+            return direction + 1
         }
     }
     /**
@@ -373,7 +380,7 @@ class PathNode extends PositionedNode {
      * @param {number} from_content
      */
     static getFromPosition(x, y, from_content) {
-        const from_direction = from_content - 1
+        const from_direction = (from_content - 1) & 0b111
         if(from_direction >= 4) {
             const t = from_direction - 4
             const dx = (t & 2) - 1
@@ -404,7 +411,13 @@ class PathNode extends PositionedNode {
             PathNode.isPath(c);
             position = PathNode.getFromPosition(position.x, position.y, c),
             c = grid_map.contentAt(position.x, position.y)
-        ) ;
+        ) {
+            if(c < 0b0111) {
+                return 1
+            } else if(c > 0b1000) {
+                return 2
+            }
+        }
         if(position.x == grid_map.start.x && position.y == grid_map.start.y) {
             return 1
         } else {
@@ -420,7 +433,7 @@ class PathNode extends PositionedNode {
         return content != EMPTY_NODE && content != OBSTRUCTION_NODE
     }
     get fromDirection() {
-        switch(this.content - 1) {
+        switch((this.content - 1) & 0b111) {
             case 0: return "\u2193"
             case 1: return "\u2192"
             case 2: return "\u2191"
