@@ -148,6 +148,7 @@ class PositionedNode {
      *
      * @param {{x: number, y: number}} position
      * @param {"cheap" | "expensive"} step_type
+     * @returns {{x: number, y: number}[]}
      */
     static nextSteps(position, step_type) {
         /** @type {{x: number, y: number}[]} */
@@ -847,5 +848,34 @@ class GridTest {
             this.routeFinish.stepRoutes(this.gridMap, this.ctx, this.blind)
             return true
         }
+    }
+}
+
+/** @type {HTMLInputElement} */
+const e = document.querySelector("#wasm-import")
+e.onchange = async function() {
+    if(e.files) {
+        const fr = new FileReader()
+        fr.onload = () => {
+            const m = new WebAssembly.Instance(new WebAssembly.Module(fr.result))
+            const h = new Uint32Array(m.exports.memory.buffer)
+            PositionedNode.nextSteps =
+            /**
+             *
+             * @param {{x: number, y: number}} position
+             * @param {"cheap" | "expensive"} step_type
+             * @returns {{x: number, y: number}[]}
+             */
+            (position, step_type) => {
+                const p = m.exports.nextSteps(position.x, position.y, +(step_type == "expensive"))
+                return [
+                    {x: h[p + 0], y: h[p + 1]},
+                    {x: h[p + 2], y: h[p + 3]},
+                    {x: h[p + 4], y: h[p + 5]},
+                    {x: h[p + 6], y: h[p + 7]},
+                ]
+            }
+        }
+        fr.readAsArrayBuffer(e.files[0])
     }
 }
