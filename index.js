@@ -4,35 +4,22 @@ const FOUR_BITS = 0b1111
 const EMPTY_NODE = 0b0000
 const OBSTRUCTION_NODE = 0b1111
 
-class GridMap {
+class GridMapSource {
     /**
      *
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {{x: number, y: number}} position
-     * @param {function(): void} action
-     */
-    static displayNode(ctx, position, action) {
-        ctx.save()
-        ctx.translate(position.x, position.y)
-        action()
-        ctx.restore()
-    }
-    /**
-     *
-     * @param {number} w
      * @param {number} l
      */
-    constructor(w, l) {
-        this.w = w
-        this.l = l
-        this.nodes = [] // Fixed below
-        this.finish = {x: 0, y: 0}
-        this.start = {x: 0, y: 0}
-
-        this.initNodes(l)
+    static build(l) {
+        return new GridMapSource(l)
     }
-    get cw() {
-        return this.w / this.l
+    /**
+     *
+     * @param {number} l
+     */
+    constructor(l) {
+        this.l = l
+        /** @type {number[]} */
+        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
     }
     /**
      *
@@ -76,36 +63,6 @@ class GridMap {
             (this.nodes[offset] >> 4)
     }
     /**
-     *
-     * @param {CanvasRenderingContext2D} ctx
-     */
-    display(ctx) {
-        ctx.fillStyle = this.cw > 10 ? "white" : "#888"
-        ctx.fillRect(0, 0, this.l, this.l)
-        ctx.beginPath()
-        ctx.strokeStyle = "black"
-        if(this.cw >= 3) {
-            for(let x = 0; x <= this.l; x++) {
-                ctx.moveTo(x, 0)
-                ctx.lineTo(x, this.l)
-            }
-            for(let y = 0; y <= this.l; y++) {
-                ctx.moveTo(0, y)
-                ctx.lineTo(this.l, y)
-            }
-            ctx.lineWidth = 2 / this.cw
-            ctx.stroke()
-        }
-    }
-    /**
-     *
-     * @param {number} l
-     */
-    initNodes(l) {
-        /** @type {number[]} */
-        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
-    }
-    /**
      * True if `position` is a leaf node, ie a non-target.
      *
      * @param {{x: number, y: number}} position
@@ -129,6 +86,57 @@ class GridMap {
         }
         return true
     }
+}
+class GridMap {
+    /**
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {{x: number, y: number}} position
+     * @param {function(): void} action
+     */
+    static displayNode(ctx, position, action) {
+        ctx.save()
+        ctx.translate(position.x, position.y)
+        action()
+        ctx.restore()
+    }
+    /**
+     *
+     * @param {number} w
+     * @param {number} l
+     */
+    constructor(w, l) {
+        this.finish = {x: 0, y: 0}
+        this.l = l
+        this.source = GridMapSource.build(l)
+        this.start = {x: 0, y: 0}
+        this.w = w
+    }
+    get cw() {
+        return this.w / this.l
+    }
+    /**
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    display(ctx) {
+        ctx.fillStyle = this.cw > 10 ? "white" : "#888"
+        ctx.fillRect(0, 0, this.l, this.l)
+        ctx.beginPath()
+        ctx.strokeStyle = "black"
+        if(this.cw >= 3) {
+            for(let x = 0; x <= this.l; x++) {
+                ctx.moveTo(x, 0)
+                ctx.lineTo(x, this.l)
+            }
+            for(let y = 0; y <= this.l; y++) {
+                ctx.moveTo(0, y)
+                ctx.lineTo(this.l, y)
+            }
+            ctx.lineWidth = 2 / this.cw
+            ctx.stroke()
+        }
+    }
     /**
      *
      * @param {number} x
@@ -137,7 +145,7 @@ class GridMap {
      */
     nodeAt(x, y) {
         return PositionedNode.nodeFor(
-            this.contentAt(x, y)
+            this.source.contentAt(x, y)
         )
     }
     /**
@@ -249,7 +257,7 @@ class RouteStepper {
         for(const position of this.routes[0]) {
             for(const step of PositionedNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
-                    const existing_content = grid_map.contentAt(step.x, step.y)
+                    const existing_content = grid_map.source.contentAt(step.x, step.y)
                     if(existing_content == EMPTY_NODE) {
                         const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push({from: position, to: step})
@@ -261,7 +269,7 @@ class RouteStepper {
                         ) || (
                             // Reach one of the target's path nodes
                             PathNode.isPath(existing_content) &&
-                            grid_map.isLeafNode(step) &&
+                            grid_map.source.isLeafNode(step) &&
                             PathNode.getOwner(existing_content, grid_map, step) != this.side
                         )
                     ) {
@@ -300,7 +308,7 @@ class RouteStepper {
     linkRoutes(grid_map, ctx, blind, cost) {
         this.newRoutes[cost].forEach(r => {
             const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-            if(grid_map.addNode(content, r.to) && !blind) {
+            if(grid_map.source.addNode(content, r.to) && !blind) {
                 const p = new PathNode(content)
                 p.display(grid_map, r.to, ctx, "light" + (this.side & 1 ? "blue" : "green"))
             }
@@ -323,11 +331,11 @@ class RouteStepper {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
                 const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-                return grid_map.contentAt(r.to.x, r.to.y) == content
+                return grid_map.source.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
                 const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-                return grid_map.contentAt(r.to.x, r.to.y) == content
+                return grid_map.source.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             6: [],
         }
@@ -405,7 +413,7 @@ class PathNode extends PositionedNode {
             c = content;
             PathNode.isPath(c);
             position = PathNode.getFromPosition(position.x, position.y, c),
-            c = grid_map.contentAt(position.x, position.y)
+            c = grid_map.source.contentAt(position.x, position.y)
         ) {
             if(c < 0b0111) {
                 return 1
@@ -500,7 +508,7 @@ class Route {
             cost += 6
         }
         this.getNodes(grid_map).forEach(n => {
-            const m = grid_map.contentAt(n.x, n.y)
+            const m = grid_map.source.contentAt(n.x, n.y)
             const mf = PathNode.getFromPosition(n.x, n.y, m)
             if(mf.x == n.x || mf.y == n.y) {
                 cost += 4
@@ -519,17 +527,17 @@ class Route {
         let [a, b] = [this.left, this.right]
         /** @type {{x: number, y: number}[]} */
         const nodes = []
-        let ac = grid_map.contentAt(a.x, a.y)
+        let ac = grid_map.source.contentAt(a.x, a.y)
         while(PathNode.isPath(ac)) {
             nodes.push(a)
             a = PathNode.getFromPosition(a.x, a.y, ac)
-            ac = grid_map.contentAt(a.x, a.y)
+            ac = grid_map.source.contentAt(a.x, a.y)
         }
-        let bc = grid_map.contentAt(b.x, b.y)
+        let bc = grid_map.source.contentAt(b.x, b.y)
         while(PathNode.isPath(bc)) {
             nodes.unshift(b)
             b = PathNode.getFromPosition(b.x, b.y, bc)
-            bc = grid_map.contentAt(b.x, b.y)
+            bc = grid_map.source.contentAt(b.x, b.y)
         }
         return nodes
     }
@@ -626,9 +634,9 @@ class GridTest {
         const grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
-        grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.source.addNode(this.start.content, this.startPosition, true)
         grid_map.start = this.startPosition
-        grid_map.addNode(this.finish.content, this.finishPosition, true)
+        grid_map.source.addNode(this.finish.content, this.finishPosition, true)
         grid_map.finish = this.finishPosition
         this.obstructions = []
 
@@ -678,11 +686,11 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(OBSTRUCTION_NODE, o, true)
+            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
         }
-        grid_map.addNode(this.start.content, this.startPosition, true)
+        grid_map.source.addNode(this.start.content, this.startPosition, true)
         grid_map.start = this.startPosition
-        grid_map.addNode(this.finish.content, this.finishPosition, true)
+        grid_map.source.addNode(this.finish.content, this.finishPosition, true)
         grid_map.finish = this.finishPosition
 
         this.obstructions = obstructions
@@ -715,11 +723,11 @@ class GridTest {
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
-            grid_map.addNode(OBSTRUCTION_NODE, o, true)
+            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
         }
-        grid_map.addNode(this.start.content, test.start, true)
+        grid_map.source.addNode(this.start.content, test.start, true)
         grid_map.start = test.start
-        grid_map.addNode(this.finish.content, test.finish, true)
+        grid_map.source.addNode(this.finish.content, test.finish, true)
         grid_map.finish = test.finish
 
         this.gridMap = grid_map
