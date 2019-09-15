@@ -25,11 +25,11 @@ class GridMap {
     constructor(w, l) {
         this.w = w
         this.l = l
-        /** @type {number[]} */
-        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
-
+        this.nodes = [] // Fixed below
         this.finish = {x: 0, y: 0}
         this.start = {x: 0, y: 0}
+
+        this.initNodes(l)
     }
     get cw() {
         return this.w / this.l
@@ -96,6 +96,14 @@ class GridMap {
             ctx.lineWidth = 2 / this.cw
             ctx.stroke()
         }
+    }
+    /**
+     *
+     * @param {number} l
+     */
+    initNodes(l) {
+        /** @type {number[]} */
+        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
     }
     /**
      * True if `position` is a leaf node, ie a non-target.
