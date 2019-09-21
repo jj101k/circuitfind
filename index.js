@@ -889,7 +889,7 @@ e.onchange = async function() {
                     },
                 },
             })
-            const h = new Uint32Array(m.exports.memory.buffer)
+            const h = new Int32Array(m.exports.memory.buffer)
             PositionedNode.nextSteps =
             /**
              *
