@@ -686,9 +686,9 @@ class GridTest {
         }
     }
     /**
-     * Runs the test. Where interval_ms is nonzero, that's the
-     * approximate time of each batch of steps and the wait time
-     * between batches.
+     * Runs the test. Where interval_ms is nonzero, that's the usual wait
+     * between frame updates (default 10ms). You can think of this as operating
+     * in a "vsync" mode.
      *
      * @param {number} interval_ms
      */
@@ -699,9 +699,12 @@ class GridTest {
             while(running) {
                 running = this.step()
                 const tp = new Date().valueOf()
-                if(tp - t >= interval_ms) {
+                if(tp - t >= interval_ms * 0.9) {
                     await new Promise(
-                        resolve => setTimeout(resolve, interval_ms)
+                        resolve => setTimeout(
+                            resolve,
+                            Math.max(0, interval_ms + t - tp)
+                        )
                     )
                     t = new Date().valueOf()
                 }
