@@ -3,7 +3,10 @@
     ;;(table 0 anyfunc)
     (memory $mem 1)
     (global $pos_offset i32 (i32.const 32))
+    (global $empty_node i32 (i32.const 0))
+    (global $obstruction_node i32 (i32.const 15))
     (export "getFromPosition" (func $getFromPosition))
+    (export "isPath" (func $isPath))
     (export "memory" (memory $mem))
     (export "nextSteps" (func $nextSteps))
     (func $getFromPosition
@@ -76,6 +79,15 @@
             )
         )
         global.get $pos_offset
+    )
+    (func $isPath
+        (param $content i32)
+        (result i32)
+
+        (i32.and
+            (i32.ne (local.get $content) (global.get $empty_node))
+            (i32.ne (local.get $content) (global.get $obstruction_node))
+        )
     )
     (func $nextSteps
         (param $x i32) (param $y i32) (param $expensive i32)

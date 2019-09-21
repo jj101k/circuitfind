@@ -913,6 +913,7 @@ e.onchange = async function() {
                     y: h[offset / 4 + 0],
                 }
             }
+            PathNode.isPath = content => !!m.exports.isPath(content)
         }
         fr.readAsArrayBuffer(e.files[0])
     }
