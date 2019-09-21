@@ -533,16 +533,30 @@ class GridTest {
      *
      * @param {number} [s]
      */
-    initForRandom(s = 10) {
+    async initForRandom(s = 10) {
         this.currentTest = null
         /** @type {{x: number, y: number}[]} */
         let obstructions = []
         this.size = s
-        for(let x = 0; x < s; x++) {
-            for(let y = 0; y < s; y++) {
+
+        const w = this.buildContext(null, s)
+        const grid_map = new GridMap(w, s)
+        grid_map.display(this.ctx)
+
+        let t = new Date().valueOf()
+        for(let y = 0; y < s; y++) {
+            for(let x = 0; x < s; x++) {
                 if(Math.random() > 0.5) {
-                    obstructions.push({x: x, y: y})
+                    const o = {x: x, y: y}
+                    obstructions.push(o)
+                    grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
+                    grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
                 }
+            }
+            const tp = new Date().valueOf()
+            if(tp > t + 10) {
+                await new Promise(resolve => setTimeout(resolve, 0))
+                t = new Date().valueOf()
             }
         }
 
@@ -582,13 +596,6 @@ class GridTest {
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
-        const w = this.buildContext(null, s)
-        const grid_map = new GridMap(w, s)
-        grid_map.display(this.ctx)
-
-        for(const o of obstructions) {
-            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
-        }
         grid_map.source.addNode(this.start.content, this.startPosition, true)
         grid_map.start = this.startPosition
         grid_map.source.addNode(this.finish.content, this.finishPosition, true)
@@ -597,9 +604,6 @@ class GridTest {
         this.obstructions = obstructions
 
         this.gridMap = grid_map
-        for(const o of this.obstructions) {
-            grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
-        }
         this.start.display(grid_map, this.startPosition, this.ctx, "green")
         this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
 
@@ -673,7 +677,7 @@ class GridTest {
      * @param {number} [s]
      */
     async randomTest(s = 10) {
-        this.initForRandom(s)
+        await this.initForRandom(s)
         this.testNumber = null
         if(!this.paused) {
             if(this.blind) {
