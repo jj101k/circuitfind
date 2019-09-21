@@ -390,21 +390,19 @@ class PathNode extends PositionedNode {
      */
     static getFromPosition(x, y, from_content) {
         const from_direction = (from_content - 1) & 0b111
-        if(from_direction >= 4) {
-            const t = from_direction - 4
-            const dx = (t & 2) - 1
-            const dy = (t % 2) * 2 - 1
-            return {x: x - dx, y: y - dy}
-        } else {
-            const t = from_direction - 1
-            if(t % 2) {
-                // -1, 1
-                return {x: x, y: y - t}
-            } else {
-                // 0, 2
-                return {x: x - t + 1, y: y}
-            }
+        let dx
+        let dy
+        if(from_direction >= 4) { // [4..15] <- [5..15, 16(*)]
+            dx = 1 - (from_direction & 2)
+            dy = 1 - (from_direction % 2) * 2
+        } else if(from_direction % 2) { // [1, 3] <- [2, 4]
+            dx = 2 - from_direction
+            dy = 0
+        } else { // [0, 2] <- [1, 3]
+            dx = 0
+            dy = 1 - from_direction
         }
+        return {x: x + dx, y: y + dy}
     }
     /**
      *
