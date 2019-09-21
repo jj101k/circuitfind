@@ -8,16 +8,19 @@ class GridMapSource {
     /**
      *
      * @param {number} l
+     * @param {number} w
      */
-    static build(l) {
-        return new GridMapSource(l)
+    static build(l, w) {
+        return new GridMapSource(l, w)
     }
     /**
      *
      * @param {number} l
+     * @param {number} w
      */
-    constructor(l) {
+    constructor(l, w) {
         this.l = l
+        this.w = w
         /** @type {number[]} */
         this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
     }
@@ -55,6 +58,9 @@ class GridMapSource {
      * @returns {number}
      */
     contentAt(x, y) {
+        if(x < 0 || y < 0 || x >= this.l || y >= this.w) {
+            return OBSTRUCTION_NODE
+        }
         const address = x + y * this.l
         const offset = address >> 1
         const bottom = address & 1
@@ -108,7 +114,7 @@ class GridMap {
     constructor(w, l) {
         this.finish = {x: 0, y: 0}
         this.l = l
-        this.source = GridMapSource.build(l)
+        this.source = GridMapSource.build(l, w)
         this.start = {x: 0, y: 0}
         this.w = w
     }
