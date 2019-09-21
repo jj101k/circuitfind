@@ -2,8 +2,81 @@
     (import "console" "log" (func $log (param i32))) ;; for testing
     ;;(table 0 anyfunc)
     (memory $mem 1)
+    (global $pos_offset i32 (i32.const 32))
+    (export "getFromPosition" (func $getFromPosition))
     (export "memory" (memory $mem))
     (export "nextSteps" (func $nextSteps))
+    (func $getFromPosition
+        (param $x i32)
+        (param $y i32)
+        (param $from_content i32) ;; unsigned
+        (result i32)
+        (local $from_direction i32) ;; unsigned
+        (local $dx i32)
+        (local $dy i32)
+
+        (local.set $from_direction
+            (i32.and
+                (i32.sub (local.get $from_content) (i32.const 1))
+                (i32.const 7)
+            )
+        )
+        (i32.ge_u (local.get $from_direction) (i32.const 4))
+        if ;; [4..15] <- [5..15, 16(*)] "xy delta"
+            (local.set $dx
+                (i32.sub
+                    (i32.const 1)
+                    (i32.and (local.get $from_direction) (i32.const 2))
+                )
+            )
+            (local.set $dy
+                (i32.sub
+                    (i32.const 1)
+                    (i32.mul
+                        (i32.rem_u (local.get $from_direction) (i32.const 2))
+                        (i32.const 2)
+                    )
+                )
+            )
+        else
+            (i32.rem_u
+                (local.get $from_direction)
+                (i32.const 2)
+            )
+            if ;; [1, 3] <- [2, 4] "x delta"
+                (local.set $dx
+                    (i32.sub (i32.const 2) (local.get $from_direction))
+                )
+                (local.set $dy (i32.const 0))
+            else ;; [0, 2] <- [1, 3] "y delta"
+                (local.set $dx (i32.const 0))
+                (local.set $dy
+                    (i32.sub (i32.const 1) (local.get $from_direction))
+                )
+            end
+        end
+        (i64.store
+            (global.get $pos_offset)
+            (i64.add
+                (i64.shl
+                    (i64.extend_i32_u
+                        (i32.add
+                            (local.get $x)
+                            (local.get $dx)
+                        )
+                    )
+                    (i64.const 32)
+                )
+                (i64.extend_i32_u
+                    (i32.add
+                        (local.get $y)
+                        (local.get $dy)
+                    )
+                )
+            )
+        )
+        global.get $pos_offset
+    )
     (func $nextSteps
         (param $x i32) (param $y i32) (param $expensive i32)
         (result i32) ;; pointer to 32 bytes of coordinates ({x1, y1} ... {x4, y4} all in i32 format)

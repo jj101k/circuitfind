@@ -906,6 +906,13 @@ e.onchange = async function() {
                     {x: h[p + 6], y: h[p + 7]},
                 ]
             }
+            PathNode.getFromPosition = (x, y, content) => {
+                const offset = m.exports.getFromPosition(x, y, content)
+                return {
+                    x: h[offset / 4 + 1],
+                    y: h[offset / 4 + 0],
+                }
+            }
         }
         fr.readAsArrayBuffer(e.files[0])
     }
