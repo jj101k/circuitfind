@@ -685,7 +685,7 @@ class GridTest {
             }
         }
     }
-    async run(interval_ms = 100) {
+    async run(interval_ms = 10) {
         let running = true
         if(interval_ms) {
             while(running) {
