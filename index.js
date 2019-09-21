@@ -914,6 +914,21 @@ e.onchange = async function() {
                 }
             }
             PathNode.isPath = content => !!m.exports.isPath(content)
+            GridMapSource.build = (l, w) => {
+                m.exports.init(l, w)
+                return {
+                    addNode(content, position, overwrite) {
+                        return !!m.exports.addNode(content, position.x, position.y, overwrite)
+                    },
+                    contentAt: m.exports.contentAt,
+                    isLeafNode(position) {
+                        return !!m.exports.isLeafNode(position.x, position.y)
+                    },
+                    nodes: [],
+                    l: l,
+                    w: w,
+                }
+            }
         }
         fr.readAsArrayBuffer(e.files[0])
     }
