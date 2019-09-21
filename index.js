@@ -440,6 +440,10 @@ class GridTest {
         this.blind = false
         /** @type {?GridMap} */
         this.gridMap = null
+        /**
+         * @type {?number}
+         */
+        this.innerRuntime = null
         /** @type {?Route} */
         this.lastRoute = null
         this.tests = []
@@ -509,6 +513,10 @@ class GridTest {
         td.textContent = this.lastRoute.getCost(this.gridMap) === Infinity ?
             "miss" :
             "" + this.lastRoute.getCost(this.gridMap)
+        tr.appendChild(td)
+
+        td = document.createElement("td")
+        td.textContent = "" + this.innerRuntime
         tr.appendChild(td)
 
         td = document.createElement("td")
@@ -727,11 +735,13 @@ class GridTest {
      * @param {number} interval_ms
      */
     async run(interval_ms = 10) {
+        this.innerRuntime = null
         let running = true
         if(interval_ms) {
             let t = new Date().valueOf()
             let steps = 0
             let calibrated_steps = 0
+            let inner_ms = 0
             while(running) {
                 running = this.step()
                 steps++
@@ -739,6 +749,7 @@ class GridTest {
                 const tp = new Date().valueOf()
                 if(tp - t >= interval_ms) {
                     calibrated_steps = steps * 0.75
+                    inner_ms += tp - t
                     await new Promise(
                         resolve => setTimeout(
                             resolve,
@@ -749,10 +760,13 @@ class GridTest {
                     t = new Date().valueOf()
                 }
             }
+            this.innerRuntime = inner_ms + new Date().valueOf() - t
         } else {
+            const t = new Date().valueOf()
             while(running) {
                 running = this.step()
             }
+            this.innerRuntime = new Date().valueOf() - t
         }
         this.displayResults()
     }
