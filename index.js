@@ -685,6 +685,12 @@ class GridTest {
             }
         }
     }
+    /**
+     * Runs the test. Where interval_ms is nonzero, that's the wait between
+     * steps.
+     *
+     * @param {number} interval_ms
+     */
     async run(interval_ms = 10) {
         let running = true
         if(interval_ms) {
