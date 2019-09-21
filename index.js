@@ -565,6 +565,7 @@ class GridTest {
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
+        this.randomCornerToCorner = false
         this.currentTest = null
         this.size = null
 
@@ -667,21 +668,35 @@ class GridTest {
             }
         }
 
-        this.startPosition = {
-            x: Math.floor(Math.random() * s),
-            y: Math.floor(Math.random() * s),
-        }
-        this.start = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeStart = new RouteStepper(1, this.startPosition)
-        do {
-            this.finishPosition = {
+        if(this.randomCornerToCorner) {
+            this.startPosition = {
+                x: 0,
+                y: 0,
+            }
+        } else {
+            this.startPosition = {
                 x: Math.floor(Math.random() * s),
                 y: Math.floor(Math.random() * s),
             }
-        } while(
-            this.finishPosition.x == this.startPosition.x &&
-            this.finishPosition.y == this.startPosition.y
-        )
+        }
+        this.start = new PositionedNode(OBSTRUCTION_NODE)
+        this.routeStart = new RouteStepper(1, this.startPosition)
+        if(this.randomCornerToCorner) {
+            this.finishPosition = {
+                x: s - 1,
+                y: s - 1,
+            }
+        } else {
+            do {
+                this.finishPosition = {
+                    x: Math.floor(Math.random() * s),
+                    y: Math.floor(Math.random() * s),
+                }
+            } while(
+                this.finishPosition.x == this.startPosition.x &&
+                this.finishPosition.y == this.startPosition.y
+            )
+        }
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
