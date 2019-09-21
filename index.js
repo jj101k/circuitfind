@@ -686,19 +686,25 @@ class GridTest {
         }
     }
     /**
-     * Runs the test. Where interval_ms is nonzero, that's the wait between
-     * steps.
+     * Runs the test. Where interval_ms is nonzero, that's the
+     * approximate time of each batch of steps and the wait time
+     * between batches.
      *
      * @param {number} interval_ms
      */
     async run(interval_ms = 10) {
         let running = true
         if(interval_ms) {
+            let t = new Date().valueOf()
             while(running) {
                 running = this.step()
-                await new Promise(
-                    resolve => setTimeout(resolve, interval_ms)
-                )
+                const tp = new Date().valueOf()
+                if(tp - t >= interval_ms) {
+                    await new Promise(
+                        resolve => setTimeout(resolve, interval_ms)
+                    )
+                    t = new Date().valueOf()
+                }
             }
         } else {
             while(running) {
