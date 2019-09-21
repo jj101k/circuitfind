@@ -1,4 +1,5 @@
 (module
+    (import "console" "log" (func $log (param i32))) ;; for testing
     ;;(table 0 anyfunc)
     (memory $mem 1)
     (export "memory" (memory $mem))

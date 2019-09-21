@@ -877,7 +877,18 @@ e.onchange = async function() {
     if(e.files) {
         const fr = new FileReader()
         fr.onload = () => {
-            const m = new WebAssembly.Instance(new WebAssembly.Module(fr.result))
+            const m = new WebAssembly.Instance(new WebAssembly.Module(fr.result), {
+                console: {
+                    /**
+                     * For debugging. Wraps actual console.log.
+                     *
+                     * @param {number} n
+                     */
+                    log(n) {
+                        console.log(n)
+                    },
+                },
+            })
             const h = new Uint32Array(m.exports.memory.buffer)
             PositionedNode.nextSteps =
             /**
