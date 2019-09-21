@@ -443,7 +443,7 @@ class GridTest {
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
-        this.randomCornerToCorner = false
+        this.randomCornerToCorner = true
         this.currentTest = null
         this.size = null
 
