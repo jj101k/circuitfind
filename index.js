@@ -547,9 +547,12 @@ class GridTest {
         }
 
         if(this.randomCornerToCorner) {
+            // If in the actual corner, your chance of being blocked initially
+            // is P^3, eg. 1/8; if offset by one it's P^8 (practically P^5), eg.
+            // 1/32; if offset by two it's P^8, eg. 1/256.
             this.startPosition = {
-                x: 0,
-                y: 0,
+                x: 2,
+                y: 2,
             }
         } else {
             this.startPosition = {
@@ -560,9 +563,10 @@ class GridTest {
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         if(this.randomCornerToCorner) {
+            // See note on start position
             this.finishPosition = {
-                x: s - 1,
-                y: s - 1,
+                x: s - 3,
+                y: s - 3,
             }
         } else {
             do {
