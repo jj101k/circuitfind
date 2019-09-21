@@ -661,14 +661,11 @@ class GridTest {
         if(!this.paused) {
             if(this.blind) {
                 const start = new Date().valueOf()
-                let running = true
-                while(running) {
-                    running = this.step()
-                }
+                await this.run(0)
                 const end = new Date().valueOf()
                 console.log(`Took ${end - start} ms`)
             } else {
-                await this.run(0)
+                await this.run()
             }
         }
     }
@@ -682,10 +679,7 @@ class GridTest {
         if(!this.paused) {
             if(this.blind) {
                 const start = new Date().valueOf()
-                let running = true
-                while(running) {
-                    running = this.step()
-                }
+                await this.run(0)
                 const end = new Date().valueOf()
                 console.log(`Took ${end - start} ms`)
             } else {
