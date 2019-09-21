@@ -681,7 +681,7 @@ class GridTest {
                 const end = new Date().valueOf()
                 console.log(`Took ${end - start} ms`)
             } else {
-                await this.run(0)
+                await this.run()
             }
         }
     }
