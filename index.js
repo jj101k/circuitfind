@@ -440,6 +440,8 @@ class GridTest {
         this.blind = false
         /** @type {?GridMap} */
         this.gridMap = null
+        /** @type {?Route} */
+        this.lastRoute = null
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
@@ -491,6 +493,36 @@ class GridTest {
         } else {
             console.log("Well, that's the wrong element type")
         }
+    }
+    displayResults() {
+        if(!this.lastRoute) {
+            throw new Error("No route described")
+        }
+        const tr = document.createElement("tr")
+        let td = document.createElement("td")
+        td.textContent = this.testNumber === null ?
+            "Random test" :
+            `Test ${this.testNumber}`
+        tr.appendChild(td)
+
+        td = document.createElement("td")
+        td.textContent = this.lastRoute.getCost(this.gridMap) === Infinity ?
+            "miss" :
+            "" + this.lastRoute.getCost(this.gridMap)
+        tr.appendChild(td)
+
+        td = document.createElement("td")
+        td.textContent = this.testNumber === null ?
+            "N/A" :
+            "" + this.currentTest.correctLength
+        tr.appendChild(td)
+
+        if(this.currentTest && this.currentTest.correctLength != this.lastRoute.getCost(this.gridMap)) {
+            tr.style.color = "red"
+        }
+        document.querySelector("#test-results").appendChild(
+            tr
+        )
     }
     /**
      *
@@ -722,6 +754,7 @@ class GridTest {
                 running = this.step()
             }
         }
+        this.displayResults()
     }
     async runAll() {
         for(const [i, test] of Object.entries(this.tests)) {
@@ -752,28 +785,8 @@ class GridTest {
             } else {
                 console.log("No route found")
             }
+            this.lastRoute = route
             console.log("done")
-            const tr = document.createElement("tr")
-            let td = document.createElement("td")
-            td.textContent = this.testNumber === null ?
-                "Random test" :
-                `Test ${this.testNumber}`
-            tr.appendChild(td)
-            td = document.createElement("td")
-            td.textContent = route.getCost(this.gridMap) === Infinity ? "miss" : "" + route.getCost(this.gridMap)
-            tr.appendChild(td)
-            td = document.createElement("td")
-            td.textContent = this.testNumber === null ?
-                "N/A" :
-                "" + this.currentTest.correctLength
-            tr.appendChild(td)
-
-            if(this.currentTest && this.currentTest.correctLength != route.getCost(this.gridMap)) {
-                tr.style.color = "red"
-            }
-            document.querySelector("#test-results").appendChild(
-                tr
-            )
             return false
         } else {
             this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
