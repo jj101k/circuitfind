@@ -482,6 +482,13 @@ class GridTest {
     dumpGeneratedState() {
         console.log(JSON.stringify(this.generatedState))
     }
+    /**
+     * Returns a new canvas 2D context scaled as appropriate
+     *
+     * @param {number} l
+     * @param {?number} w
+     * @returns {number}
+     */
     buildContext(l, w = null) {
         const c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
@@ -495,7 +502,7 @@ class GridTest {
             this.ctx = ctx
             return w
         } else {
-            console.log("Well, that's the wrong element type")
+            throw new Error("Well, that's the wrong element type")
         }
     }
     displayResults() {
