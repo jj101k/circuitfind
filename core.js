@@ -2,19 +2,16 @@ class GridMapSource {
     /**
      *
      * @param {number} node_width
-     * @param {number} pixel_width
      */
-    static build(node_width, pixel_width) {
-        return new GridMapSource(node_width, pixel_width)
+    static build(node_width) {
+        return new GridMapSource(node_width)
     }
     /**
      *
      * @param {number} node_width
-     * @param {number} pixel_width
      */
-    constructor(node_width, pixel_width) {
+    constructor(node_width) {
         this.nodeWidth = node_width
-        this.pixelWidth = pixel_width
         /** @type {number[]} */
         this.nodes = Array(Math.ceil(node_width * node_width / 2)).map(v => 0)
     }
@@ -52,7 +49,7 @@ class GridMapSource {
      * @returns {number}
      */
     contentAt(x, y) {
-        if(x < 0 || y < 0 || x >= this.nodeWidth || y >= this.pixelWidth) {
+        if(x < 0 || y < 0 || x >= this.nodeWidth || y >= this.nodeWidth) {
             return OBSTRUCTION_NODE
         }
         const address = x + y * this.nodeWidth

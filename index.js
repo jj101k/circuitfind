@@ -24,7 +24,7 @@ class GridMap {
     constructor(pixel_width, node_width) {
         this.finish = {x: 0, y: 0}
         this.nodeWidth = node_width
-        this.source = GridMapSource.build(node_width, pixel_width)
+        this.source = GridMapSource.build(node_width)
         this.start = {x: 0, y: 0}
         this.pixelWidth = pixel_width
     }
@@ -866,8 +866,8 @@ e.onchange = async function() {
                 }
             }
             PathNode.isPath = content => !!m.exports.isPath(content)
-            GridMapSource.build = (node_width, pixel_width) => {
-                m.exports.init(node_width, pixel_width)
+            GridMapSource.build = (node_width) => {
+                m.exports.init(node_width)
                 return {
                     addNode(content, position, overwrite) {
                         return !!m.exports.addNode(content, position.x, position.y, overwrite)
@@ -878,7 +878,6 @@ e.onchange = async function() {
                     },
                     nodes: [],
                     nodeWidth: node_width,
-                    pixelWidth: pixel_width,
                 }
             }
         }

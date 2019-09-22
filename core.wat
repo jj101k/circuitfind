@@ -3,7 +3,6 @@
     ;;(table 0 anyfunc)
     (memory $mem 10) ;; 640KB should be enough for anybody ;)
     (global $nodeWidth (mut i32) (i32.const 0))
-    (global $pixelWidth (mut i32) (i32.const 0))
     (global $pos_offset i32 (i32.const 32))
     (global $store_offset i32 (i32.const 64))
     (global $empty_node i32 (i32.const 0))
@@ -108,7 +107,7 @@
         (i32.or
             (i32.or
                 (i32.ge_s (local.get $x) (global.get $nodeWidth))
-                (i32.ge_s (local.get $y) (global.get $pixelWidth))
+                (i32.ge_s (local.get $y) (global.get $nodeWidth))
             )
             (i32.or
                 (i32.lt_s (local.get $x) (i32.const 0))
@@ -206,7 +205,6 @@
     )
     (func $init
         (param $nodeWidth i32)
-        (param $pixelWidth i32)
         (local $end i32)
         (local $size i32)
         (local $store_offset i32)
@@ -225,7 +223,6 @@
             (i32.add (i32.add (global.get $store_offset) (local.get $size)) (i32.const 1))
         )
         (global.set $nodeWidth (local.get $nodeWidth))
-        (global.set $pixelWidth (local.get $pixelWidth))
         loop
             (i32.store (local.get $store_offset) (i32.const 0))
             (local.set $store_offset (i32.add (local.get $store_offset) (i32.const 1)))
