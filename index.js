@@ -482,7 +482,7 @@ class GridTest {
     dumpGeneratedState() {
         console.log(JSON.stringify(this.generatedState))
     }
-    buildContext(w = null, l = 10) {
+    buildContext(l = 10, w = null) {
         const c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             c.width = c.clientWidth * window.devicePixelRatio
@@ -553,7 +553,7 @@ class GridTest {
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
-        const w = this.buildContext(null, s)
+        const w = this.buildContext(s)
         const grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
@@ -579,7 +579,7 @@ class GridTest {
         let obstructions = []
         this.size = s
 
-        const w = this.buildContext(null, s)
+        const w = this.buildContext(s)
         const grid_map = new GridMap(w, s)
         grid_map.display(this.ctx)
 
@@ -663,7 +663,7 @@ class GridTest {
         this.routeFinish = new RouteStepper(2, test.finish)
         let obstructions = test.obstructions
         this.size = test.size || 10
-        const w = this.buildContext(null, this.size)
+        const w = this.buildContext(this.size)
         const grid_map = new GridMap(w, this.size)
         grid_map.display(this.ctx)
 
