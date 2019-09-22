@@ -482,7 +482,7 @@ class GridTest {
     dumpGeneratedState() {
         console.log(JSON.stringify(this.generatedState))
     }
-    buildContext(l = 10, w = null) {
+    buildContext(l, w = null) {
         const c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             c.width = c.clientWidth * window.devicePixelRatio
