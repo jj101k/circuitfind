@@ -18,18 +18,18 @@ class GridMap {
     }
     /**
      *
-     * @param {number} w
-     * @param {number} l
+     * @param {number} pixel_width
+     * @param {number} node_width
      */
-    constructor(w, l) {
+    constructor(pixel_width, node_width) {
         this.finish = {x: 0, y: 0}
-        this.l = l
-        this.source = GridMapSource.build(l, w)
+        this.nodeWidth = node_width
+        this.source = GridMapSource.build(node_width, pixel_width)
         this.start = {x: 0, y: 0}
-        this.w = w
+        this.pixelWidth = pixel_width
     }
     get cw() {
-        return this.w / this.l
+        return this.pixelWidth / this.nodeWidth
     }
     /**
      *
@@ -37,17 +37,17 @@ class GridMap {
      */
     display(ctx) {
         ctx.fillStyle = this.cw > 10 ? "white" : "#888"
-        ctx.fillRect(0, 0, this.l, this.l)
+        ctx.fillRect(0, 0, this.nodeWidth, this.nodeWidth)
         ctx.beginPath()
         ctx.strokeStyle = "black"
         if(this.cw >= 3) {
-            for(let x = 0; x <= this.l; x++) {
+            for(let x = 0; x <= this.nodeWidth; x++) {
                 ctx.moveTo(x, 0)
-                ctx.lineTo(x, this.l)
+                ctx.lineTo(x, this.nodeWidth)
             }
-            for(let y = 0; y <= this.l; y++) {
+            for(let y = 0; y <= this.nodeWidth; y++) {
                 ctx.moveTo(0, y)
-                ctx.lineTo(this.l, y)
+                ctx.lineTo(this.nodeWidth, y)
             }
             ctx.lineWidth = 2 / this.cw
             ctx.stroke()
@@ -77,7 +77,7 @@ class GridMap {
      * @returns {?boolean}
      */
     validAddress(x, y) {
-        return x >= 0 && y >= 0 && x < this.l && y < this.l
+        return x >= 0 && y >= 0 && x < this.nodeWidth && y < this.nodeWidth
     }
 }
 
@@ -451,7 +451,7 @@ class GridTest {
         this.paused = false
         this.randomCornerToCorner = true
         this.currentTest = null
-        this.size = null
+        this.nodeWidth = null
 
         this.obstructions = null
         this.startPosition = null
@@ -465,7 +465,7 @@ class GridTest {
             obstructions: this.obstructions,
             passed: null,
             correctLength: null,
-            size: this.size,
+            size: this.nodeWidth,
         }
     }
     get testNumber() {
@@ -543,11 +543,11 @@ class GridTest {
     }
     /**
      *
-     * @param {number} [s]
+     * @param {number} [node_width]
      */
-    initForNull(s = 10) {
+    initForNull(node_width = 10) {
         this.currentTest = null
-        this.size = s
+        this.nodeWidth = node_width
 
         this.startPosition = {
             x: 0,
@@ -556,14 +556,14 @@ class GridTest {
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         this.finishPosition = {
-            x: s - 1,
-            y: s - 1,
+            x: node_width - 1,
+            y: node_width - 1,
         }
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
-        const w = this.buildContext(s)
-        const grid_map = new GridMap(w, s)
+        const pixel_width = this.buildContext(this.nodeWidth)
+        const grid_map = new GridMap(pixel_width, this.nodeWidth)
         grid_map.display(this.ctx)
 
         grid_map.source.addNode(this.start.content, this.startPosition, true)
@@ -580,21 +580,21 @@ class GridTest {
     }
     /**
      *
-     * @param {number} [s]
+     * @param {number} [node_width]
      */
-    async initForRandom(s = 10) {
+    async initForRandom(node_width = 10) {
         this.currentTest = null
         /** @type {{x: number, y: number}[]} */
         let obstructions = []
-        this.size = s
+        this.nodeWidth = node_width
 
-        const w = this.buildContext(s)
-        const grid_map = new GridMap(w, s)
+        const pixel_width = this.buildContext(this.nodeWidth)
+        const grid_map = new GridMap(pixel_width, node_width)
         grid_map.display(this.ctx)
 
         let t = new Date().valueOf()
-        for(let y = 0; y < s; y++) {
-            for(let x = 0; x < s; x++) {
+        for(let y = 0; y < node_width; y++) {
+            for(let x = 0; x < node_width; x++) {
                 if(Math.random() > 0.5) {
                     const o = {x: x, y: y}
                     obstructions.push(o)
@@ -619,8 +619,8 @@ class GridTest {
             }
         } else {
             this.startPosition = {
-                x: Math.floor(Math.random() * s),
-                y: Math.floor(Math.random() * s),
+                x: Math.floor(Math.random() * node_width),
+                y: Math.floor(Math.random() * node_width),
             }
         }
         this.start = new PositionedNode(OBSTRUCTION_NODE)
@@ -628,14 +628,14 @@ class GridTest {
         if(this.randomCornerToCorner) {
             // See note on start position
             this.finishPosition = {
-                x: s - 3,
-                y: s - 3,
+                x: node_width - 3,
+                y: node_width - 3,
             }
         } else {
             do {
                 this.finishPosition = {
-                    x: Math.floor(Math.random() * s),
-                    y: Math.floor(Math.random() * s),
+                    x: Math.floor(Math.random() * node_width),
+                    y: Math.floor(Math.random() * node_width),
                 }
             } while(
                 this.finishPosition.x == this.startPosition.x &&
@@ -671,9 +671,9 @@ class GridTest {
         this.finishPosition = test.finish
         this.routeFinish = new RouteStepper(2, test.finish)
         let obstructions = test.obstructions
-        this.size = test.size || 10
-        const w = this.buildContext(this.size)
-        const grid_map = new GridMap(w, this.size)
+        this.nodeWidth = test.size || 10
+        const pixel_width = this.buildContext(this.nodeWidth)
+        const grid_map = new GridMap(pixel_width, this.nodeWidth)
         grid_map.display(this.ctx)
 
         for(const o of obstructions) {
@@ -866,8 +866,8 @@ e.onchange = async function() {
                 }
             }
             PathNode.isPath = content => !!m.exports.isPath(content)
-            GridMapSource.build = (l, w) => {
-                m.exports.init(l, w)
+            GridMapSource.build = (node_width, pixel_width) => {
+                m.exports.init(node_width, pixel_width)
                 return {
                     addNode(content, position, overwrite) {
                         return !!m.exports.addNode(content, position.x, position.y, overwrite)
@@ -877,8 +877,8 @@ e.onchange = async function() {
                         return !!m.exports.isLeafNode(position.x, position.y)
                     },
                     nodes: [],
-                    l: l,
-                    w: w,
+                    nodeWidth: node_width,
+                    pixelWidth: pixel_width,
                 }
             }
         }

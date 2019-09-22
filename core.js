@@ -1,22 +1,22 @@
 class GridMapSource {
     /**
      *
-     * @param {number} l
-     * @param {number} w
+     * @param {number} node_width
+     * @param {number} pixel_width
      */
-    static build(l, w) {
-        return new GridMapSource(l, w)
+    static build(node_width, pixel_width) {
+        return new GridMapSource(node_width, pixel_width)
     }
     /**
      *
-     * @param {number} l
-     * @param {number} w
+     * @param {number} node_width
+     * @param {number} pixel_width
      */
-    constructor(l, w) {
-        this.l = l
-        this.w = w
+    constructor(node_width, pixel_width) {
+        this.nodeWidth = node_width
+        this.pixelWidth = pixel_width
         /** @type {number[]} */
-        this.nodes = Array(Math.ceil(l * l / 2)).map(v => 0)
+        this.nodes = Array(Math.ceil(node_width * node_width / 2)).map(v => 0)
     }
     /**
      *
@@ -26,7 +26,7 @@ class GridMapSource {
      * @returns {boolean}
      */
     addNode(content, position, overwrite = false) {
-        const address = position.x + position.y * this.l
+        const address = position.x + position.y * this.nodeWidth
         const offset = Math.floor(address / 2)
         const bottom = address % 2
         const existing_node = bottom ?
@@ -52,10 +52,10 @@ class GridMapSource {
      * @returns {number}
      */
     contentAt(x, y) {
-        if(x < 0 || y < 0 || x >= this.l || y >= this.w) {
+        if(x < 0 || y < 0 || x >= this.nodeWidth || y >= this.pixelWidth) {
             return OBSTRUCTION_NODE
         }
-        const address = x + y * this.l
+        const address = x + y * this.nodeWidth
         const offset = address >> 1
         const bottom = address & 1
         return bottom ?

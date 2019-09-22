@@ -2,8 +2,8 @@
     (import "console" "log" (func $log (param i32))) ;; for testing
     ;;(table 0 anyfunc)
     (memory $mem 10) ;; 640KB should be enough for anybody ;)
-    (global $l (mut i32) (i32.const 0))
-    (global $w (mut i32) (i32.const 0))
+    (global $nodeWidth (mut i32) (i32.const 0))
+    (global $pixelWidth (mut i32) (i32.const 0))
     (global $pos_offset i32 (i32.const 32))
     (global $store_offset i32 (i32.const 64))
     (global $empty_node i32 (i32.const 0))
@@ -28,7 +28,7 @@
         (local $current i32)
         (local $existing_node i32)
 
-        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $l))))
+        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $nodeWidth))))
         (local.set $offset (i32.shr_u (local.get $address) (i32.const 1)))
         (local.set $bottom (i32.and (local.get $address) (i32.const 1)))
 
@@ -94,7 +94,7 @@
         (local $address i32)
         (local $offset i32)
 
-        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $l))))
+        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $nodeWidth))))
         (local.set $offset (i32.shr_u (local.get $address) (i32.const 1)))
 
         (i32.load8_u (i32.add (global.get $store_offset) (local.get $offset)))
@@ -107,8 +107,8 @@
         ;; Hey no negatives
         (i32.or
             (i32.or
-                (i32.ge_s (local.get $x) (global.get $l))
-                (i32.ge_s (local.get $y) (global.get $w))
+                (i32.ge_s (local.get $x) (global.get $nodeWidth))
+                (i32.ge_s (local.get $y) (global.get $pixelWidth))
             )
             (i32.or
                 (i32.lt_s (local.get $x) (i32.const 0))
@@ -120,7 +120,7 @@
         end
         (if
             (result i32)
-            (i32.and (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $l))) (i32.const 1))
+            (i32.and (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $nodeWidth))) (i32.const 1))
             (then
                 (call $byteAt (local.get $x) (local.get $y))
                 i32.const 15
@@ -205,8 +205,8 @@
         global.get $pos_offset
     )
     (func $init
-        (param $l i32)
-        (param $w i32)
+        (param $nodeWidth i32)
+        (param $pixelWidth i32)
         (local $end i32)
         (local $size i32)
         (local $store_offset i32)
@@ -215,7 +215,7 @@
         (local.set $size
             (i32.shr_u
                 (i32.add
-                    (i32.mul (local.get $l) (local.get $l))
+                    (i32.mul (local.get $nodeWidth) (local.get $nodeWidth))
                     (i32.const 1)
                 )
                 (i32.const 1)
@@ -224,8 +224,8 @@
         (local.set $end
             (i32.add (i32.add (global.get $store_offset) (local.get $size)) (i32.const 1))
         )
-        (global.set $l (local.get $l))
-        (global.set $w (local.get $w))
+        (global.set $nodeWidth (local.get $nodeWidth))
+        (global.set $pixelWidth (local.get $pixelWidth))
         loop
             (i32.store (local.get $store_offset) (i32.const 0))
             (local.set $store_offset (i32.add (local.get $store_offset) (i32.const 1)))
@@ -345,7 +345,7 @@
         (local $address i32)
         (local $offset i32)
 
-        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $l))))
+        (local.set $address (i32.add (local.get $x) (i32.mul (local.get $y) (global.get $nodeWidth))))
         (local.set $offset (i32.shr_u (local.get $address) (i32.const 1)))
 
         (i32.store8
