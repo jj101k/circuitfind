@@ -1,7 +1,7 @@
 (module
     (import "console" "log" (func $log (param i32))) ;; for testing
     ;;(table 0 anyfunc)
-    (memory $mem 1)
+    (memory $mem 10) ;; 640KB should be enough for anybody ;)
     (global $l (mut i32) (i32.const 0))
     (global $w (mut i32) (i32.const 0))
     (global $pos_offset i32 (i32.const 32))
