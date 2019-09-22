@@ -485,24 +485,24 @@ class GridTest {
     /**
      * Returns a new canvas 2D context scaled as appropriate
      *
-     * @param {number} l The number of nodes per side
-     * @param {?number} w The number of pixels per side the canvas can neatly
-     * display
+     * @param {number} node_width The number of nodes per side
+     * @param {?number} pixel_width The number of pixels per side the canvas can
+     * neatly display
      * @returns {number} The number of pixels per side the canvas can neatly
      * display
      */
-    buildContext(l, w = null) {
+    buildContext(node_width, pixel_width = null) {
         const c = document.getElementById("grid")
         if(c instanceof HTMLCanvasElement) {
             c.width = c.clientWidth * window.devicePixelRatio
             c.height = c.clientHeight * window.devicePixelRatio
-            if(!w) w = c.width
+            if(!pixel_width) pixel_width = c.width
             const ctx = c.getContext("2d")
             ctx.restore()
             ctx.save()
-            ctx.scale(w / l, w / l)
+            ctx.scale(pixel_width / node_width, pixel_width / node_width)
             this.ctx = ctx
-            return w
+            return pixel_width
         } else {
             throw new Error("Well, that's the wrong element type")
         }
