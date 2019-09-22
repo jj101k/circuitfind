@@ -485,9 +485,11 @@ class GridTest {
     /**
      * Returns a new canvas 2D context scaled as appropriate
      *
-     * @param {number} l
-     * @param {?number} w
-     * @returns {number}
+     * @param {number} l The number of nodes per side
+     * @param {?number} w The number of pixels per side the canvas can neatly
+     * display
+     * @returns {number} The number of pixels per side the canvas can neatly
+     * display
      */
     buildContext(l, w = null) {
         const c = document.getElementById("grid")
