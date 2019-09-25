@@ -124,6 +124,8 @@ class RouteStepper {
             4: [],
             6: [],
         }
+
+        this.biggestRouteCount = 0
     }
     /**
      *
@@ -170,12 +172,17 @@ class RouteStepper {
                 }
             }
         }
+        const route_count = Object.values(this.newRoutes).reduce((c, r) => c + r.length, 0) + Object.values(this.routes).reduce((c, r) => c + r.length, 0)
+        if(route_count > this.biggestRouteCount) {
+            console.log(`Routes are ${route_count}`)
+            this.biggestRouteCount = route_count
+        }
         if(route) {
             console.log("Route found")
             return route
         } else if(
-            Object.keys(this.newRoutes).some(r => this.newRoutes[r].length > 0) ||
-            Object.keys(this.routes).some(r => this.routes[r].length > 0)
+            Object.values(this.newRoutes).some(r => r.length) ||
+            Object.values(this.routes).some(r => r.length)
         ) {
             return null
         } else {
