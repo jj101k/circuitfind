@@ -36,7 +36,7 @@ directions, 1b to indicate that it's just a blockage) so 2500 bytes. You could
 have up to 50 cells active at once on each side (unimpeded diagonal line -
 impediments can only decrease this number), so 100 active cells requiring just
 an address; technically these only require 13b but it's not practical to use
-less than 16 each, so 200b for those. That puts the RAM scale at 2700 bytes,
+less than 16 each, so 200 bytes for those. That puts the RAM scale at 2700 bytes,
 which is eminently usable.
 
 Existing routes count as impediments, which prevents the production of overly
