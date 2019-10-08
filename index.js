@@ -140,12 +140,12 @@ class RouteStepper {
         let last_route_length = 0
 
         const step_type = cheap ? "cheap" : "expensive"
+        const cost = cheap ? 4 : 6
         for(const position of this.routes[0]) {
             for(const step of GeneralNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.source.contentAt(step.x, step.y)
                     if(existing_content == EMPTY_NODE) {
-                        const cost = Math.abs(step.x - position.x) + Math.abs(step.y - position.y) > 1 ? 6 : 4
                         this.newRoutes[cost].push({from: position, to: step})
                     } else if(
                         (
