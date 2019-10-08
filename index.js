@@ -203,8 +203,7 @@ class RouteStepper {
         this.newRoutes[cost].forEach(r => {
             const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
             if(grid_map.source.addNode(content, r.to) && !blind) {
-                const p = new PathNode(content)
-                p.display(grid_map, r.to, ctx, "light" + (this.side & 1 ? "blue" : "green"))
+                PathNode.displayAt(content, grid_map, r.to, ctx, this.side)
             }
         })
     }
@@ -238,9 +237,38 @@ class RouteStepper {
             6: [],
         }
     }
+    /**
+     *
+     * @param {GridMap} grid_map
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {boolean} blind
+     */
+    stepRoutes(grid_map, ctx, blind) {
+        if(!blind) {
+            for(const position of this.zeroPositions) {
+                const path = grid_map.nodeAt(position.x, position.y)
+                if(path instanceof PathNode) {
+                    path.display(grid_map, position, ctx, "black")
+                }
+            }
+        }
+        this.stepRoutesInner(grid_map)
+    }
 }
 
 class PathNode extends PositionedNode {
+    /**
+     *
+     * @param {number} content
+     * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} side
+     */
+    static displayAt(content, grid_map, position, ctx, side) {
+        const p = new PathNode(content)
+        p.display(grid_map, position, ctx, "light" + (side & 1 ? "blue" : "green"))
+    }
     /**
      *
      * @param {number} x
