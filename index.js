@@ -127,6 +127,9 @@ class RouteStepper {
 
         this.biggestRouteCount = 0
     }
+    get zeroPositions() {
+        return this.routes[0]
+    }
     /**
      *
      * @param {{x: number, y: number}} target_position
@@ -141,7 +144,7 @@ class RouteStepper {
 
         const step_type = cheap ? "cheap" : "expensive"
         const cost = cheap ? 4 : 6
-        for(const position of this.routes[0]) {
+        for(const position of this.zeroPositions) {
             for(const step of GeneralNode.nextSteps(position, step_type)) {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.source.contentAt(step.x, step.y)
