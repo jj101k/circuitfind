@@ -822,12 +822,16 @@ class GridTest {
             console.log("done")
             return false
         } else {
-            this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
-            this.routeFinish.linkRoutes(this.gridMap, this.ctx, this.blind, 4)
-            this.routeStart.linkRoutes(this.gridMap, this.ctx, this.blind, 6)
-            this.routeFinish.linkRoutes(this.gridMap, this.ctx, this.blind, 6)
-            this.routeStart.stepRoutes(this.gridMap, this.ctx, this.blind)
-            this.routeFinish.stepRoutes(this.gridMap, this.ctx, this.blind)
+            const costs = [4, 6]
+            const routes = [this.routeStart, this.routeFinish]
+            for(const cost of costs) {
+                for(const route of routes) {
+                    route.linkRoutes(this.gridMap, this.ctx, this.blind, cost)
+                }
+            }
+            for(const route of routes) {
+                route.stepRoutes(this.gridMap, this.ctx, this.blind)
+            }
             return true
         }
     }
