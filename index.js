@@ -149,7 +149,7 @@ class RouteStepper {
                 if(grid_map.validAddress(step.x, step.y)) {
                     const existing_content = grid_map.source.contentAt(step.x, step.y)
                     if(existing_content == EMPTY_NODE) {
-                        this.newRoutes[cost].push({from: position, to: step})
+                        this.addNewRoute(cost, {from: position, to: step})
                     } else if(
                         (
                             // Directly reach the target (it happens)
@@ -206,6 +206,14 @@ class RouteStepper {
                 PathNode.displayAt(content, grid_map, r.to, ctx, this.side)
             }
         })
+    }
+    /**
+     *
+     * @param {number} n
+     * @param {{from: {x: number, y: number}, to: {x: number, y: number}}} r
+     */
+    addNewRoute(n, r) {
+        this.newRoutes[n].push(r)
     }
     /**
      *
