@@ -410,6 +410,9 @@ class Route {
     display(grid_map, ctx) {
         this.getNodes(grid_map).forEach(n => {
             const m = grid_map.nodeAt(n.x, n.y)
+            if(!this.left) throw new Error("this.left is null")
+            if(!this.right) throw new Error("this.right is null")
+            if(!m) throw new Error("node is null")
             if(n.x == this.left.x && n.y == this.left.y) {
                 m.display(grid_map, n, ctx, "pink")
             } else if(n.x == this.right.x && n.y == this.right.y) {
@@ -426,6 +429,7 @@ class Route {
      */
     getCost(grid_map) {
         if(!this.left) return Infinity
+        if(!this.right) throw new Error("this.right is null")
         let cost = 0
         if(this.left.x == this.right.x || this.left.y == this.right.y) {
             cost += 4
@@ -449,6 +453,8 @@ class Route {
      * @return {{x: number, y: number}[]}
      */
     getNodes(grid_map) {
+        if(!this.left) throw new Error("this.left is null")
+        if(!this.right) throw new Error("this.right is null")
         let [a, b] = [this.left, this.right]
         /** @type {{x: number, y: number}[]} */
         const nodes = []
@@ -541,6 +547,7 @@ class GridTest {
             c.height = c.clientHeight * window.devicePixelRatio
             if(!pixel_width) pixel_width = c.width
             const ctx = c.getContext("2d")
+            if(!ctx) throw new Error("canvas context is null")
             ctx.restore()
             ctx.save()
             ctx.scale(pixel_width / node_width, pixel_width / node_width)
@@ -554,6 +561,8 @@ class GridTest {
         if(!this.lastRoute) {
             throw new Error("No route described")
         }
+        if(!this.gridMap) throw new Error("grid map is null")
+        if(!this.currentTest) throw new Error("current test is null")
         const tr = document.createElement("tr")
         let td = document.createElement("td")
         td.textContent = this.testNumber === null ?
@@ -580,9 +589,10 @@ class GridTest {
         if(this.currentTest && this.currentTest.correctLength != this.lastRoute.getCost(this.gridMap)) {
             tr.style.color = "red"
         }
-        document.querySelector("#test-results").appendChild(
-            tr
-        )
+        const testResultsElement = document.querySelector("#test-results")
+        if(testResultsElement) {
+            testResultsElement.appendChild(tr)
+        }
     }
     /**
      *
@@ -606,6 +616,7 @@ class GridTest {
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
         const pixel_width = this.buildContext(this.nodeWidth)
+        if(!this.ctx) throw new Error("canvas context is null")
         const grid_map = new GridMap(pixel_width, this.nodeWidth)
         grid_map.display(this.ctx)
 
@@ -632,6 +643,7 @@ class GridTest {
         this.nodeWidth = node_width
 
         const pixel_width = this.buildContext(this.nodeWidth)
+        if(!this.ctx) throw new Error("canvas context is null")
         const grid_map = new GridMap(pixel_width, node_width)
         grid_map.display(this.ctx)
 
@@ -642,7 +654,9 @@ class GridTest {
                     const o = {x: x, y: y}
                     obstructions.push(o)
                     grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
-                    grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
+                    const node = grid_map.nodeAt(o.x, o.y)
+                    if(!node) throw new Error("node is null??")
+                    node.display(grid_map, o, this.ctx, "red")
                 }
             }
             const tp = new Date().valueOf()
@@ -706,6 +720,8 @@ class GridTest {
      * @param {testSignature} test
      */
     initForTest(test) {
+        if(!test.start) throw new Error("No start?")
+        if(!test.finish) throw new Error("No finish?")
         this.currentTest = test
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.startPosition = test.start
@@ -716,6 +732,7 @@ class GridTest {
         let obstructions = test.obstructions
         this.nodeWidth = test.size || 10
         const pixel_width = this.buildContext(this.nodeWidth)
+        if(!this.ctx) throw new Error("canvas context is null")
         const grid_map = new GridMap(pixel_width, this.nodeWidth)
         grid_map.display(this.ctx)
 
@@ -729,7 +746,9 @@ class GridTest {
 
         this.gridMap = grid_map
         for(const o of obstructions) {
-            grid_map.nodeAt(o.x, o.y).display(grid_map, o, this.ctx, "red")
+            const node = grid_map.nodeAt(o.x, o.y)
+            if(!node) throw new Error("node is null??")
+            node.display(grid_map, o, this.ctx, "red")
         }
         this.obstructions = obstructions
         this.start.display(grid_map, test.start, this.ctx, "green")
@@ -837,6 +856,17 @@ class GridTest {
         }
     }
     step() {
+        if(!this.routeStart) throw new Error("No route start??")
+        if(!this.routeFinish) throw new Error("No route finish??")
+        if(!this.startPosition) throw new Error("No route start position??")
+        if(!this.finishPosition) throw new Error("No route finish position??")
+        if(!this.gridMap) throw new Error("No grid map??")
+        if(!this.ctx) throw new Error("canvas context is null")
+        const grid_map = this.gridMap
+        /**
+         * @type {Route[]}
+         */
+        //@ts-ignore
         const possible_routes = [
             this.routeStart.stepOut(this.finishPosition, true, this.gridMap),
             this.routeFinish.stepOut(this.startPosition, true, this.gridMap),
@@ -845,7 +875,7 @@ class GridTest {
         ].filter(route => route)
 
         if(possible_routes.length) {
-            const route = possible_routes.sort((a, b) => a.getCost(this.gridMap) - b.getCost(this.gridMap))[0]
+            const route = possible_routes.sort((a, b) => a.getCost(grid_map) - b.getCost(grid_map))[0]
             if(route.left) {
                 route.display(this.gridMap, this.ctx)
             } else {
@@ -876,6 +906,7 @@ e.onchange = async function() {
     if(e.files) {
         const fr = new FileReader()
         fr.onload = () => {
+            if(!(fr.result instanceof ArrayBuffer)) throw new Error("Wrong result type?")
             const m = new WebAssembly.Instance(new WebAssembly.Module(fr.result), {
                 console: {
                     /**
@@ -888,7 +919,12 @@ e.onchange = async function() {
                     },
                 },
             })
-            const h = new Int32Array(m.exports.memory.buffer)
+            /**
+             * @type {{memory: WebAssembly.Memory, addNode(content: number, position_x: number, position_y: number, overwrite: number): number, isLeafNode(position_x: number, position_y: number): number, nextSteps(position_x: number, position_y: number, step_type: number): number, getFromPosition(x: number, y: number, content: number): number, isPath(content: number): number, init(node_width: number)}}
+             */
+            //@ts-ignore
+            const m_exports = m.exports
+            const h = new Int32Array(m_exports.memory.buffer)
             GeneralNode.nextSteps =
             /**
              *
@@ -897,7 +933,7 @@ e.onchange = async function() {
              * @returns {{x: number, y: number}[]}
              */
             (position, step_type) => {
-                const p = m.exports.nextSteps(position.x, position.y, +(step_type == "expensive"))
+                const p = m_exports.nextSteps(position.x, position.y, +(step_type == "expensive"))
                 return [
                     {x: h[p + 0], y: h[p + 1]},
                     {x: h[p + 2], y: h[p + 3]},
@@ -906,22 +942,22 @@ e.onchange = async function() {
                 ]
             }
             PathNode.getFromPosition = (x, y, content) => {
-                const offset = m.exports.getFromPosition(x, y, content)
+                const offset = m_exports.getFromPosition(x, y, content)
                 return {
                     x: h[offset / 4 + 1],
                     y: h[offset / 4 + 0],
                 }
             }
-            PathNode.isPath = content => !!m.exports.isPath(content)
+            PathNode.isPath = content => !!m_exports.isPath(content)
             GridMapSource.build = (node_width) => {
-                m.exports.init(node_width)
+                m_exports.init(node_width)
                 return {
                     addNode(content, position, overwrite) {
-                        return !!m.exports.addNode(content, position.x, position.y, overwrite)
+                        return !!m_exports.addNode(content, position.x, position.y, +!!overwrite)
                     },
                     contentAt: m.exports.contentAt,
                     isLeafNode(position) {
-                        return !!m.exports.isLeafNode(position.x, position.y)
+                        return !!m_exports.isLeafNode(position.x, position.y)
                     },
                     nodes: [],
                     nodeWidth: node_width,
