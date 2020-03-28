@@ -222,17 +222,26 @@ class RouteStepper {
         return this.newRoutes[n]
     }
     /**
+     *
      * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {boolean} blind
      */
     stepRoutes(grid_map, ctx, blind) {
         if(!blind) {
-            this.routes[0].forEach(position => {
+            for(const position of this.zeroPositions) {
                 const path = grid_map.nodeAt(position.x, position.y)
-                if(path instanceof PathNode) path.display(grid_map, position, ctx, "black")
-            })
+                if(path instanceof PathNode) {
+                    path.display(grid_map, position, ctx, "black")
+                }
+            }
         }
+        this.stepRoutesInner(grid_map)
+    }
+    /**
+     * @param {GridMap} grid_map
+     */
+    stepRoutesInner(grid_map) {
         this.routes = {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
@@ -249,23 +258,6 @@ class RouteStepper {
             4: [],
             6: [],
         }
-    }
-    /**
-     *
-     * @param {GridMap} grid_map
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {boolean} blind
-     */
-    stepRoutes(grid_map, ctx, blind) {
-        if(!blind) {
-            for(const position of this.zeroPositions) {
-                const path = grid_map.nodeAt(position.x, position.y)
-                if(path instanceof PathNode) {
-                    path.display(grid_map, position, ctx, "black")
-                }
-            }
-        }
-        this.stepRoutesInner(grid_map)
     }
 }
 
