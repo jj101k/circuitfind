@@ -175,11 +175,7 @@ class RouteStepper {
                 }
             }
         }
-        const route_count = Object.values(this.newRoutes).reduce((c, r) => c + r.length, 0) + Object.values(this.routes).reduce((c, r) => c + r.length, 0)
-        if(route_count > this.biggestRouteCount) {
-            console.log(`Routes are ${route_count}`)
-            this.biggestRouteCount = route_count
-        }
+
         if(route) {
             console.log("Route found")
             return route
