@@ -96,16 +96,16 @@ class GeneralNode {
         /** @type {{x: number, y: number}[]} */
         const steps = []
         if(step_type == "cheap") {
-            [-1, 1].forEach(o => {
-                steps.push({x: o + position.x, y: position.y})
-                steps.push({x: position.x, y: o + position.y})
-            })
+            steps.push({x: position.x - 1, y: position.y}) // -1  0
+            steps.push({x: position.x, y: position.y + 1}) //  0 +1
+            steps.push({x: position.x + 1, y: position.y}) // +1  0
+            steps.push({x: position.x, y: position.y - 1}) //  0 -1
         } else {
-            [-1, 1].forEach(x => {
-                [-1, 1].forEach(y => {
-                    steps.push({x: x + position.x, y: y + position.y})
-                })
-            })
+            // This is ordered to get a circular order
+            steps.push({x: position.x - 1, y: position.y - 1}) // -1 -1
+            steps.push({x: position.x - 1, y: position.y + 1}) // -1 +1
+            steps.push({x: position.x + 1, y: position.y + 1}) // +1 +1
+            steps.push({x: position.x + 1, y: position.y - 1}) // +1 -1
         }
         return steps
     }
