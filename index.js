@@ -179,10 +179,7 @@ class RouteStepper {
         if(route) {
             console.log("Route found")
             return route
-        } else if(
-            Object.values(this.newRoutes).some(r => r.length) ||
-            Object.values(this.routes).some(r => r.length)
-        ) {
+        } else if(this.hasRoutes()) {
             return null
         } else {
             return new Route()
@@ -210,6 +207,12 @@ class RouteStepper {
      */
     addNewRoute(n, r) {
         this.newRoutes[n].push(r)
+    }
+    hasRoutes() {
+        return(
+            Object.values(this.newRoutes).some(r => r.length) ||
+            Object.values(this.routes).some(r => r.length)
+        )
     }
     /**
      *
