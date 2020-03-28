@@ -193,12 +193,12 @@ class RouteStepper {
      * @param {number} cost
      */
     linkRoutes(grid_map, ctx, blind, cost) {
-        this.newRoutes[cost].forEach(r => {
+        for(const r of this.newRoutesFor(cost)) {
             const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
             if(grid_map.source.addNode(content, r.to) && !blind) {
                 PathNode.displayAt(content, grid_map, r.to, ctx, this.side)
             }
-        })
+        }
     }
     /**
      *
@@ -216,6 +216,12 @@ class RouteStepper {
     }
     /**
      *
+     * @param {number} n
+     */
+    newRoutesFor(n) {
+        return this.newRoutes[n]
+    }
+    /**
      * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
      * @param {boolean} blind
