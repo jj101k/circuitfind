@@ -562,7 +562,6 @@ class GridTest {
             throw new Error("No route described")
         }
         if(!this.gridMap) throw new Error("grid map is null")
-        if(!this.currentTest) throw new Error("current test is null")
         const tr = document.createElement("tr")
         let td = document.createElement("td")
         td.textContent = this.testNumber === null ?
@@ -581,9 +580,10 @@ class GridTest {
         tr.appendChild(td)
 
         td = document.createElement("td")
-        td.textContent = this.testNumber === null ?
-            "N/A" :
-            "" + this.currentTest.correctLength
+        td.textContent = this.currentTest ?
+            "" + this.currentTest.correctLength :
+            "N/A"
+
         tr.appendChild(td)
 
         if(this.currentTest && this.currentTest.correctLength != this.lastRoute.getCost(this.gridMap)) {
