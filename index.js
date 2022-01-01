@@ -498,7 +498,6 @@ class GridTest {
         this.tests = []
         this.nextTestNumber = 0
         this.paused = false
-        this.randomCornerToCorner = true
         this.currentTest = null
         this.nodeWidth = null
 
@@ -636,10 +635,8 @@ class GridTest {
      *
      * @param {number} [node_width]
      */
-    async initForRandom(node_width = 10) {
+    async clear(node_width = 10) {
         this.currentTest = null
-        /** @type {{x: number, y: number}[]} */
-        let obstructions = []
         this.nodeWidth = node_width
 
         const pixel_width = this.buildContext(this.nodeWidth)
@@ -647,67 +644,44 @@ class GridTest {
         const grid_map = new GridMap(pixel_width, node_width)
         grid_map.display(this.ctx)
 
-        let t = new Date().valueOf()
-        for(let y = 0; y < node_width; y++) {
-            for(let x = 0; x < node_width; x++) {
-                if(Math.random() > 0.5) {
-                    const o = {x: x, y: y}
-                    obstructions.push(o)
-                    grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
-                    const node = grid_map.nodeAt(o.x, o.y)
-                    if(!node) throw new Error("node is null??")
-                    node.display(grid_map, o, this.ctx, "red")
-                }
-            }
-            const tp = new Date().valueOf()
-            if(tp > t + 10) {
-                await new Promise(resolve => setTimeout(resolve, 0))
-                t = new Date().valueOf()
-            }
-        }
+        this.obstructions = []
 
-        if(this.randomCornerToCorner) {
-            // If in the actual corner, your chance of being blocked initially
-            // is P^3, eg. 1/8; if offset by one it's P^8 (practically P^5), eg.
-            // 1/32; if offset by two it's P^8, eg. 1/256.
-            this.startPosition = {
-                x: 2,
-                y: 2,
-            }
-        } else {
-            this.startPosition = {
-                x: Math.floor(Math.random() * node_width),
-                y: Math.floor(Math.random() * node_width),
-            }
+        this.gridMap = grid_map
+        this.testNumber = null
+    }
+    /**
+     *
+     * @param {number} [node_width]
+     */
+    async initForRandom(node_width = 10) {
+        this.startPosition = {
+            x: Math.floor(Math.random() * node_width),
+            y: Math.floor(Math.random() * node_width),
         }
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
-        if(this.randomCornerToCorner) {
-            // See note on start position
+        do {
             this.finishPosition = {
-                x: node_width - 3,
-                y: node_width - 3,
+                x: Math.floor(Math.random() * node_width),
+                y: Math.floor(Math.random() * node_width),
             }
-        } else {
-            do {
-                this.finishPosition = {
-                    x: Math.floor(Math.random() * node_width),
-                    y: Math.floor(Math.random() * node_width),
-                }
-            } while(
-                this.finishPosition.x == this.startPosition.x &&
-                this.finishPosition.y == this.startPosition.y
-            )
-        }
+        } while(
+            this.finishPosition.x == this.startPosition.x &&
+            this.finishPosition.y == this.startPosition.y
+        )
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
+
+        const grid_map = this.gridMap
+        if(!grid_map) {
+            throw new Error("Must clear first")
+        }
+        if(!this.ctx) throw new Error("canvas context is null")
 
         grid_map.source.addNode(this.start.content, this.startPosition, true)
         grid_map.start = this.startPosition
         grid_map.source.addNode(this.finish.content, this.finishPosition, true)
         grid_map.finish = this.finishPosition
-
-        this.obstructions = obstructions
 
         this.gridMap = grid_map
         this.start.display(grid_map, this.startPosition, this.ctx, "green")
@@ -782,19 +756,23 @@ class GridTest {
     }
     /**
      *
+     * @param {number} [times]
      * @param {number} [s]
      */
-    async randomTest(s = 10) {
-        await this.initForRandom(s)
-        this.testNumber = null
-        if(!this.paused) {
-            if(this.blind) {
-                const start = new Date().valueOf()
-                await this.run(0)
-                const end = new Date().valueOf()
-                console.log(`Took ${end - start} ms`)
-            } else {
-                await this.run()
+    async randomTest(times = 10, s = 10) {
+        await this.clear(s)
+        for(let i = 0; i < times; i++) {
+            await this.initForRandom(s)
+            this.testNumber = null
+            if(!this.paused) {
+                if(this.blind) {
+                    const start = new Date().valueOf()
+                    await this.run(0)
+                    const end = new Date().valueOf()
+                    console.log(`Took ${end - start} ms`)
+                } else {
+                    await this.run()
+                }
             }
         }
     }
