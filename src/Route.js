@@ -15,8 +15,8 @@ class Route {
      * @param {GridMap} grid_map
      */
     burn(grid_map) {
+        const o = new PositionedNode(OBSTRUCTION_NODE)
         for (const node of this.getNodes(grid_map)) {
-            const o = new PositionedNode(OBSTRUCTION_NODE)
             grid_map.source.addNode(o.content, node, true)
         }
     }
