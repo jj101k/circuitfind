@@ -107,4 +107,36 @@ large number of grid points, although this should be manageable.
 
 ## Origin
 
-This is forked from pathfind, which is a path finder for laser squad-like constraints.
+This is forked from pathfind, which is a path finder for laser squad-like
+constraints.
+
+## Diagonal Obstructions
+
+While _pathfind_ considers a diagonal path to be obstructed only if the
+destination cell is visibly occupied, this considers it to be obstructed if the
+adjacent cells are visible occupied.
+
+For example, move from bottom-left to top-right here is blocked:
+
+```
++-+-+-+-+
+| |x| | |
++-+-+-+-+
+| | |x| |
++-+-+-+-+
+|o| | |x|
++=+-+-+-+
+```
+
+In practice, it's convenient to do this by blocking all truly adjacent paths, so
+in actuality the obstructions look like this:
+
+```
++-+-+-+-+
+|\|x|\| |
++-+-+-+-+
+| |\|x|\|
++-+-+-+-+
+|o| |\|x|
++=+-+-+-+
+```

@@ -10,13 +10,17 @@ class Route {
         this.right = right
     }
     /**
-     * This burns the path onto the map as obstacles
+     * This burns the path onto the map as obstacles, 3-wide.
      *
      * @param {GridMap} grid_map
      */
     burn(grid_map) {
         const o = new PositionedNode(OBSTRUCTION_NODE)
         for (const node of this.getNodes(grid_map)) {
+            for(const delta of [-1, 1]) {
+                grid_map.source.addNode(o.content, {x: node.x + delta, y: node.y}, true)
+                grid_map.source.addNode(o.content, {x: node.x, y: node.y + delta}, true)
+            }
             grid_map.source.addNode(o.content, node, true)
         }
     }
