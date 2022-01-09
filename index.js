@@ -654,10 +654,29 @@ class GridTest {
      * @param {number} [node_width]
      */
     async initForRandom(node_width = 10) {
-        this.startPosition = {
-            x: Math.floor(Math.random() * node_width),
-            y: Math.floor(Math.random() * node_width),
+        const grid_map = this.gridMap
+        if(!grid_map) {
+            throw new Error("Must clear first")
         }
+        for(let x = 0; x < node_width; x++) {
+            for(let y = 0; y < node_width; y++) {
+                const s = grid_map.source.contentAt(x, y)
+                if(s != EMPTY_NODE && s != OBSTRUCTION_NODE) {
+                    grid_map.source.addNode(EMPTY_NODE, {x, y}, true)
+                }
+            }
+        }
+        do {
+            this.startPosition = {
+                x: Math.floor(Math.random() * node_width),
+                y: Math.floor(Math.random() * node_width),
+            }
+        } while(
+            grid_map.source.contentAt(
+                this.startPosition.x,
+                this.startPosition.y
+            ) != EMPTY_NODE
+        )
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         do {
@@ -666,16 +685,18 @@ class GridTest {
                 y: Math.floor(Math.random() * node_width),
             }
         } while(
-            this.finishPosition.x == this.startPosition.x &&
-            this.finishPosition.y == this.startPosition.y
+            grid_map.source.contentAt(
+                this.finishPosition.x,
+                this.finishPosition.y
+            ) != EMPTY_NODE ||
+            (
+                this.finishPosition.x == this.startPosition.x &&
+                this.finishPosition.y == this.startPosition.y
+            )
         )
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
-        const grid_map = this.gridMap
-        if(!grid_map) {
-            throw new Error("Must clear first")
-        }
         if(!this.ctx) throw new Error("canvas context is null")
 
         grid_map.source.addNode(this.start.content, this.startPosition, true)
