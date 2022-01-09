@@ -403,6 +403,17 @@ class Route {
         this.right = right
     }
     /**
+     * This burns the path onto the map as obstacles
+     *
+     * @param {GridMap} grid_map
+     */
+    burn(grid_map) {
+        for(const node of this.getNodes(grid_map)) {
+            const o = new PositionedNode(OBSTRUCTION_NODE)
+            grid_map.source.addNode(o.content, node, true)
+        }
+    }
+    /**
      *
      * @param {GridMap} grid_map
      * @param {CanvasRenderingContext2D} ctx
@@ -877,6 +888,7 @@ class GridTest {
             const route = possible_routes.sort((a, b) => a.getCost(grid_map) - b.getCost(grid_map))[0]
             if(route.left) {
                 route.display(this.gridMap, this.ctx)
+                route.burn(this.gridMap)
             } else {
                 console.log("No route found")
             }
