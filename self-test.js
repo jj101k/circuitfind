@@ -3,7 +3,7 @@
 function selfTest(continue_on_failure = false) {
     const init_by_name = {
         contentAt: () => {
-            const s = GridMapSource.build(16, 16)
+            const s = GridMapSource.build(16)
             for(let i = 0; i < 16; i++) {
                 s.addNode(i, {x: i, y: 0}, false)
                 s.addNode(i, {x: i, y: 1}, false)
@@ -112,19 +112,19 @@ function selfTest(continue_on_failure = false) {
         })),
         nextSteps: [
             {
-                f: () => PositionedNode.nextSteps({x: 0, y: 0}, "cheap"),
+                f: () => GeneralNode.nextSteps({x: 0, y: 0}, "cheap"),
                 v: [{x: -1, y: 0}, {x: 0, y: -1}, {x: 1, y: 0}, {x: 0, y: 1}],
             },
             {
-                f: () => PositionedNode.nextSteps({x: 0, y: 0}, "expensive"),
+                f: () => GeneralNode.nextSteps({x: 0, y: 0}, "expensive"),
                 v: [{x: -1, y: -1}, {x: -1, y: 1}, {x: 1, y: -1}, {x: 1, y: 1}],
             },
             {
-                f: () => PositionedNode.nextSteps({x: 30, y: 30}, "expensive"),
+                f: () => GeneralNode.nextSteps({x: 30, y: 30}, "expensive"),
                 v: [{x: 29, y: 29}, {x: 29, y: 31}, {x: 31, y: 29}, {x: 31, y: 31}],
             },
             {
-                f: () => PositionedNode.nextSteps({x: 30, y: 30}, "cheap"),
+                f: () => GeneralNode.nextSteps({x: 30, y: 30}, "cheap"),
                 v: [{x: 29, y: 30}, {x: 30, y: 29}, {x: 31, y: 30}, {x: 30, y: 31}],
             },
         ],

@@ -16,9 +16,11 @@ class GridTest {
         this.currentTest = null
         this.nodeWidth = null
 
-        this.obstructions = null
+        this.obstructions = []
         this.startPosition = null
         this.finishPosition = null
+
+        this._testNumber = null
     }
     /** @type {testSignature} */
     get generatedState() {

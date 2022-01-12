@@ -1,7 +1,23 @@
 "use strict"
 
 /**
- * @param {{memory: WebAssembly.Memory, addNode(content: number, position_x: number, position_y: number, overwrite: number): number, isLeafNode(position_x: number, position_y: number): number, nextSteps(position_x: number, position_y: number, step_type: number): number, getFromPosition(x: number, y: number, content: number): number, isPath(content: number): number, init(node_width: number)}} m_exports
+ * @typedef m_exports
+ * @property {WebAssembly.Memory} memory
+ * @property {(content: number, position_x: number, position_y: number,
+ * overwrite: number) => number} addNode
+ * @property {(x: number, y: number) => number} contentAt
+ * @property {(position_x: number,
+ * position_y: number) => number} isLeafNode
+ * @property {(position_x: number, position_y:
+ * number, step_type: number) => number} nextSteps
+ * @property {(x: number, y: number,
+ * content: number) => number} getFromPosition
+ * @property {(content: number) => number} isPath
+ * @property {(node_width: number) => *} init
+ */
+
+/**
+ * @param {m_exports} m_exports
  */
 function load_webassembly(m_exports) {
     const h = new Int32Array(m_exports.memory.buffer)
@@ -58,8 +74,11 @@ const webassembly_import = {
 }
 
 if(location.protocol == "file:") {
-    /** @type {HTMLInputElement} */
+    /** @type {HTMLInputElement | null} */
     const e = document.querySelector("#wasm-import")
+    if(!e) {
+        throw new Error("Cannot find import element")
+    }
     e.onchange = async function() {
         if(e.files) {
             const fr = new FileReader()
