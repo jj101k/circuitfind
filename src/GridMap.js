@@ -75,4 +75,29 @@ class GridMap {
     validAddress(x, y) {
         return x >= 0 && y >= 0 && x < this.nodeWidth && y < this.nodeWidth
     }
+    /**
+     * This clears the display of everything that's not an obstruction
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {string | null} [fillStyle]
+     */
+    wipeNonObstruction(ctx, fillStyle = null) {
+        ctx.save()
+        ctx.fillStyle = fillStyle ?? (this.cw > 10 ? "white" : "#888")
+        let lastX = 0
+        let lastY = 0
+
+        for (let x = 0; x <= this.nodeWidth; x++) {
+            for (let y = 0; y <= this.nodeWidth; y++) {
+                if(this.source.contentAt(x, y) != OBSTRUCTION_NODE) {
+                    ctx.translate(x - lastX, y - lastY)
+                    lastX = x
+                    lastY = y
+                    ctx.fillRect(0.125, 0.125, 0.75, 0.75)
+                }
+            }
+        }
+
+        ctx.restore()
+    }
 }

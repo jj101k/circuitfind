@@ -319,6 +319,9 @@ class GridTest {
                 }
             }
         }
+        if(this.gridMap && this.ctx) {
+            this.gridMap.wipeNonObstruction(this.ctx, "black")
+        }
     }
     /**
      * Runs the test. Where interval_ms is nonzero, that's the usual wait
