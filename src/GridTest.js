@@ -144,24 +144,15 @@ class GridTest {
         if (!this.ctx)
             throw new Error("canvas context is null")
 
-        this.startPosition = grid_map.searchEmptyNode(() => ({
-            x: Math.floor(Math.random() * node_width),
-            y: Math.floor(Math.random() * node_width),
-        }))
+        const builder = new TestBuilder(grid_map)
+
+        this.startPosition = builder.startPosition
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
-        grid_map.source.addNode(this.start.content, this.startPosition, true)
-        grid_map.start = this.startPosition
 
-        this.finishPosition = grid_map.searchEmptyNode(() => ({
-            x: Math.floor(Math.random() * node_width),
-            y: Math.floor(Math.random() * node_width),
-        }))
+        this.finishPosition = builder.finishPosition
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
-
-        grid_map.source.addNode(this.finish.content, this.finishPosition, true)
-        grid_map.finish = this.finishPosition
 
         this.start.display(grid_map, this.startPosition, this.ctx, "green")
         this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
