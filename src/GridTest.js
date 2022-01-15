@@ -153,6 +153,9 @@ class GridTest {
         ) != EMPTY_NODE)
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
+        grid_map.source.addNode(this.start.content, this.startPosition, true)
+        grid_map.start = this.startPosition
+
         do {
             this.finishPosition = {
                 x: Math.floor(Math.random() * node_width),
@@ -162,21 +165,15 @@ class GridTest {
         while (grid_map.source.contentAt(
             this.finishPosition.x,
             this.finishPosition.y
-        ) != EMPTY_NODE ||
-            (
-                this.finishPosition.x == this.startPosition.x &&
-                this.finishPosition.y == this.startPosition.y
-            ))
+        ) != EMPTY_NODE)
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 
-        if (!this.ctx)
-            throw new Error("canvas context is null")
-
-        grid_map.source.addNode(this.start.content, this.startPosition, true)
-        grid_map.start = this.startPosition
         grid_map.source.addNode(this.finish.content, this.finishPosition, true)
         grid_map.finish = this.finishPosition
+
+        if (!this.ctx)
+            throw new Error("canvas context is null")
 
         this.gridMap = grid_map
         this.start.display(grid_map, this.startPosition, this.ctx, "green")
