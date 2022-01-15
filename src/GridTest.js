@@ -141,6 +141,9 @@ class GridTest {
         if (!grid_map) {
             throw new Error("Must clear first")
         }
+        if (!this.ctx)
+            throw new Error("canvas context is null")
+
         this.startPosition = grid_map.searchEmptyNode(() => ({
             x: Math.floor(Math.random() * node_width),
             y: Math.floor(Math.random() * node_width),
@@ -160,10 +163,6 @@ class GridTest {
         grid_map.source.addNode(this.finish.content, this.finishPosition, true)
         grid_map.finish = this.finishPosition
 
-        if (!this.ctx)
-            throw new Error("canvas context is null")
-
-        this.gridMap = grid_map
         this.start.display(grid_map, this.startPosition, this.ctx, "green")
         this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
 
