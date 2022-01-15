@@ -117,45 +117,6 @@ class GridTest {
      *
      * @param {number} [node_width]
      */
-    initForNull(node_width = 10) {
-        this.currentTest = null
-        this.nodeWidth = node_width
-
-        this.startPosition = {
-            x: 0,
-            y: 0,
-        }
-        this.start = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeStart = new RouteStepper(1, this.startPosition)
-        this.finishPosition = {
-            x: node_width - 1,
-            y: node_width - 1,
-        }
-        this.finish = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeFinish = new RouteStepper(2, this.finishPosition)
-
-        const pixel_width = this.buildContext(this.nodeWidth)
-        if (!this.ctx)
-            throw new Error("canvas context is null")
-        const grid_map = new GridMap(pixel_width, this.nodeWidth)
-        grid_map.display(this.ctx)
-
-        grid_map.source.addNode(this.start.content, this.startPosition, true)
-        grid_map.start = this.startPosition
-        grid_map.source.addNode(this.finish.content, this.finishPosition, true)
-        grid_map.finish = this.finishPosition
-        this.obstructions = []
-
-        this.gridMap = grid_map
-        this.start.display(grid_map, this.startPosition, this.ctx, "green")
-        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
-
-        this.testNumber = null
-    }
-    /**
-     *
-     * @param {number} [node_width]
-     */
     async clear(node_width = 10) {
         this.currentTest = null
         this.nodeWidth = node_width
@@ -281,24 +242,6 @@ class GridTest {
             this.run()
         }
         this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
-    }
-    /**
-     *
-     * @param {number} [s]
-     */
-    async nullTest(s = 10) {
-        this.initForNull(s)
-        this.testNumber = null
-        if (!this.paused) {
-            if (this.blind) {
-                const start = new Date().valueOf()
-                await this.run(0)
-                const end = new Date().valueOf()
-                console.log(`Took ${end - start} ms`)
-            } else {
-                await this.run()
-            }
-        }
     }
     /**
      *
