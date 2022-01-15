@@ -141,14 +141,6 @@ class GridTest {
         if (!grid_map) {
             throw new Error("Must clear first")
         }
-        for (let x = 0; x < node_width; x++) {
-            for (let y = 0; y < node_width; y++) {
-                const s = grid_map.source.contentAt(x, y)
-                if (s != EMPTY_NODE && s != OBSTRUCTION_NODE) {
-                    grid_map.source.addNode(EMPTY_NODE, { x, y }, true)
-                }
-            }
-        }
         do {
             this.startPosition = {
                 x: Math.floor(Math.random() * node_width),
@@ -251,6 +243,7 @@ class GridTest {
     async randomTest(times = 10, s = 10) {
         await this.clear(s)
         for (let i = 0; i < times; i++) {
+            await this.gridMap?.replaceNonObstruction()
             await this.initForRandomInstance(s)
             this.testNumber = null
             if (!this.paused) {

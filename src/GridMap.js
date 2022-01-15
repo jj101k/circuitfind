@@ -76,6 +76,19 @@ class GridMap {
         return x >= 0 && y >= 0 && x < this.nodeWidth && y < this.nodeWidth
     }
     /**
+     * This clears the storage of everything that's not an obstruction
+     */
+    replaceNonObstruction() {
+        for (let x = 0; x <= this.nodeWidth; x++) {
+            for (let y = 0; y <= this.nodeWidth; y++) {
+                const s = this.source.contentAt(x, y)
+                if (s != EMPTY_NODE && s != OBSTRUCTION_NODE) {
+                    this.source.addNode(EMPTY_NODE, { x, y }, true)
+                }
+            }
+        }
+    }
+    /**
      * This clears the display of everything that's not an obstruction
      *
      * @param {CanvasRenderingContext2D} ctx
