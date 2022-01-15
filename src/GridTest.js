@@ -136,7 +136,7 @@ class GridTest {
      *
      * @param {number} [node_width]
      */
-    async initForRandom(node_width = 10) {
+    async initForRandomInstance(node_width = 10) {
         const grid_map = this.gridMap
         if (!grid_map) {
             throw new Error("Must clear first")
@@ -251,7 +251,7 @@ class GridTest {
     async randomTest(times = 10, s = 10) {
         await this.clear(s)
         for (let i = 0; i < times; i++) {
-            await this.initForRandom(s)
+            await this.initForRandomInstance(s)
             this.testNumber = null
             if (!this.paused) {
                 if (this.blind) {
