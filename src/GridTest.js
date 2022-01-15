@@ -146,11 +146,11 @@ class GridTest {
 
         const builder = new TestBuilder(grid_map)
 
-        this.startPosition = builder.startPosition
+        this.startPosition = builder.start
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
 
-        this.finishPosition = builder.finishPosition
+        this.finishPosition = builder.finish
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 

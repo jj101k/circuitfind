@@ -1,7 +1,10 @@
+/**
+ * @extends {testSignature}
+ */
 class TestBuilder {
     #gridMap
-    #startPosition
-    #finishPosition
+    #start
+    #finish
 
     #findAndObstruct() {
         const position = this.#gridMap.searchEmptyNode(() => ({
@@ -12,18 +15,34 @@ class TestBuilder {
         return position
     }
 
-    get finishPosition() {
-        if(!this.#finishPosition) {
-            this.#gridMap.finish = this.#finishPosition = this.#findAndObstruct()
-        }
-        return this.#finishPosition
+    get correctLength() {
+        return null
     }
 
-    get startPosition() {
-        if(!this.#startPosition) {
-            this.#gridMap.start = this.#startPosition = this.#findAndObstruct()
+    get finish() {
+        if(!this.#finish) {
+            this.#gridMap.finish = this.#finish = this.#findAndObstruct()
         }
-        return this.#startPosition
+        return this.#finish
+    }
+
+    get obstructions() {
+        return []
+    }
+
+    get passed() {
+        return null
+    }
+
+    get size() {
+        return null
+    }
+
+    get start() {
+        if(!this.#start) {
+            this.#gridMap.start = this.#start = this.#findAndObstruct()
+        }
+        return this.#start
     }
 
     /**
