@@ -141,31 +141,19 @@ class GridTest {
         if (!grid_map) {
             throw new Error("Must clear first")
         }
-        do {
-            this.startPosition = {
-                x: Math.floor(Math.random() * node_width),
-                y: Math.floor(Math.random() * node_width),
-            }
-        }
-        while (grid_map.source.contentAt(
-            this.startPosition.x,
-            this.startPosition.y
-        ) != EMPTY_NODE)
+        this.startPosition = grid_map.searchEmptyNode(() => ({
+            x: Math.floor(Math.random() * node_width),
+            y: Math.floor(Math.random() * node_width),
+        }))
         this.start = new PositionedNode(OBSTRUCTION_NODE)
         this.routeStart = new RouteStepper(1, this.startPosition)
         grid_map.source.addNode(this.start.content, this.startPosition, true)
         grid_map.start = this.startPosition
 
-        do {
-            this.finishPosition = {
-                x: Math.floor(Math.random() * node_width),
-                y: Math.floor(Math.random() * node_width),
-            }
-        }
-        while (grid_map.source.contentAt(
-            this.finishPosition.x,
-            this.finishPosition.y
-        ) != EMPTY_NODE)
+        this.finishPosition = grid_map.searchEmptyNode(() => ({
+            x: Math.floor(Math.random() * node_width),
+            y: Math.floor(Math.random() * node_width),
+        }))
         this.finish = new PositionedNode(OBSTRUCTION_NODE)
         this.routeFinish = new RouteStepper(2, this.finishPosition)
 

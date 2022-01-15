@@ -67,15 +67,6 @@ class GridMap {
         }
     }
     /**
-     *
-     * @param {number} x
-     * @param {number} y
-     * @returns {?boolean}
-     */
-    validAddress(x, y) {
-        return x >= 0 && y >= 0 && x < this.nodeWidth && y < this.nodeWidth
-    }
-    /**
      * This clears the storage of everything that's not an obstruction
      */
     replaceNonObstruction() {
@@ -87,6 +78,26 @@ class GridMap {
                 }
             }
         }
+    }
+    /**
+     *
+     * @param {() => {x: number, y: number}} f
+     */
+    searchEmptyNode(f) {
+        let point
+        do {
+            point = f()
+        } while (this.source.contentAt(point.x, point.y) != EMPTY_NODE)
+        return point
+    }
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @returns {?boolean}
+     */
+    validAddress(x, y) {
+        return x >= 0 && y >= 0 && x < this.nodeWidth && y < this.nodeWidth
     }
     /**
      * This clears the display of everything that's not an obstruction
