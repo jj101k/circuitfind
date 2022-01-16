@@ -10,6 +10,16 @@ class GridTest {
      */
     #finishPosition
 
+    /**
+     * @type {?RouteStepper}
+     */
+    #routeFinish
+
+    /**
+     * @type {?RouteStepper}
+     */
+    #routeStart
+
     get finishPosition() {
         return this.#finishPosition
     }
@@ -17,7 +27,7 @@ class GridTest {
         this.#finishPosition = v
         if(v) {
             if(this.gridMap) {
-                this.routeFinish = new RouteStepper(2, v)
+                this.#routeFinish = new RouteStepper(2, v)
                 this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
                 this.gridMap.finish = v
                 if(this.ctx) {
@@ -35,7 +45,7 @@ class GridTest {
         this.#startPosition = v
         if(v) {
             if(this.gridMap) {
-                this.routeStart = new RouteStepper(1, v)
+                this.#routeStart = new RouteStepper(1, v)
                 this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
                 this.gridMap.start = v
                 if(this.ctx) {
@@ -330,9 +340,9 @@ class GridTest {
         }
     }
     step() {
-        if (!this.routeStart)
+        if (!this.#routeStart)
             throw new Error("No route start??")
-        if (!this.routeFinish)
+        if (!this.#routeFinish)
             throw new Error("No route finish??")
         if (!this.startPosition)
             throw new Error("No route start position??")
@@ -348,10 +358,10 @@ class GridTest {
          */
         //@ts-ignore
         const possible_routes = [
-            this.routeStart.stepOut(this.finishPosition, true, this.gridMap),
-            this.routeFinish.stepOut(this.startPosition, true, this.gridMap),
-            this.routeStart.stepOut(this.finishPosition, false, this.gridMap),
-            this.routeFinish.stepOut(this.startPosition, false, this.gridMap),
+            this.#routeStart.stepOut(this.finishPosition, true, this.gridMap),
+            this.#routeFinish.stepOut(this.startPosition, true, this.gridMap),
+            this.#routeStart.stepOut(this.finishPosition, false, this.gridMap),
+            this.#routeFinish.stepOut(this.startPosition, false, this.gridMap),
         ].filter(route => route)
 
         if (possible_routes.length) {
@@ -367,7 +377,7 @@ class GridTest {
             return false
         } else {
             const costs = [4, 6]
-            const routes = [this.routeStart, this.routeFinish]
+            const routes = [this.#routeStart, this.#routeFinish]
             for (const cost of costs) {
                 for (const route of routes) {
                     route.linkRoutes(this.gridMap, this.ctx, this.blind, cost)
