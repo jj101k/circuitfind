@@ -6,12 +6,11 @@ class TestBuilder {
     #start
     #finish
 
-    #findAndObstruct() {
+    #findFreePosition() {
         const position = this.#gridMap.searchEmptyNode(() => ({
             x: Math.floor(Math.random() * this.#gridMap.nodeWidth),
             y: Math.floor(Math.random() * this.#gridMap.nodeWidth),
         }))
-        this.#gridMap.source.addNode(OBSTRUCTION_NODE, position, true)
         return position
     }
 
@@ -21,7 +20,7 @@ class TestBuilder {
 
     get finish() {
         if(!this.#finish) {
-            this.#gridMap.finish = this.#finish = this.#findAndObstruct()
+            this.#finish = this.#findFreePosition()
         }
         return this.#finish
     }
@@ -40,7 +39,7 @@ class TestBuilder {
 
     get start() {
         if(!this.#start) {
-            this.#gridMap.start = this.#start = this.#findAndObstruct()
+            this.#start = this.#findFreePosition()
         }
         return this.#start
     }

@@ -22,7 +22,6 @@ class GridTest {
 
         this._testNumber = null
     }
-    /** @type {testSignature} */
     get generatedState() {
         return {
             start: this.startPosition,
@@ -144,63 +143,64 @@ class GridTest {
         if (!this.ctx)
             throw new Error("canvas context is null")
 
-        const builder = new TestBuilder(grid_map)
-
-        this.startPosition = builder.start
-        this.start = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeStart = new RouteStepper(1, this.startPosition)
-
-        this.finishPosition = builder.finish
-        this.finish = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeFinish = new RouteStepper(2, this.finishPosition)
-
-        this.start.display(grid_map, this.startPosition, this.ctx, "green")
-        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
-
+        /**
+         * @type {testSignature}
+         */
+        const test = new TestBuilder(grid_map)
         this.testNumber = null
+
+        this.postInitForTest(test, grid_map)
     }
     /**
      *
      * @param {testSignature} test
      */
     initForTest(test) {
-        if (!test.start)
-            throw new Error("No start?")
-        if (!test.finish)
-            throw new Error("No finish?")
-        this.currentTest = test
-        this.start = new PositionedNode(OBSTRUCTION_NODE)
-        this.startPosition = test.start
-        this.routeStart = new RouteStepper(1, test.start)
-        this.finish = new PositionedNode(OBSTRUCTION_NODE)
-        this.finishPosition = test.finish
-        this.routeFinish = new RouteStepper(2, test.finish)
-        let obstructions = test.obstructions
         this.nodeWidth = test.size || 10
         const pixel_width = this.buildContext(this.nodeWidth)
+        const grid_map = new GridMap(pixel_width, this.nodeWidth)
         if (!this.ctx)
             throw new Error("canvas context is null")
-        const grid_map = new GridMap(pixel_width, this.nodeWidth)
         grid_map.display(this.ctx)
-
-        for (const o of obstructions) {
-            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
-        }
-        grid_map.source.addNode(this.start.content, test.start, true)
-        grid_map.start = test.start
-        grid_map.source.addNode(this.finish.content, test.finish, true)
-        grid_map.finish = test.finish
-
         this.gridMap = grid_map
-        for (const o of obstructions) {
+
+        this.currentTest = test
+        this.postInitForTest(test, grid_map)
+    }
+    /**
+     *
+     * @param {testSignature} test
+     * @param {GridMap} grid_map
+     */
+    postInitForTest(test, grid_map) {
+        this.nodeWidth = test.size || 10
+        if (!this.ctx)
+            throw new Error("canvas context is null")
+
+        this.startPosition = test.start
+        this.start = new PositionedNode(OBSTRUCTION_NODE)
+        this.routeStart = new RouteStepper(1, this.startPosition)
+        grid_map.source.addNode(OBSTRUCTION_NODE, this.startPosition, true)
+        grid_map.start = test.start
+        this.start.display(grid_map, this.startPosition, this.ctx, "green")
+
+        this.finishPosition = test.finish
+        this.finish = new PositionedNode(OBSTRUCTION_NODE)
+        this.routeFinish = new RouteStepper(2, this.finishPosition)
+        grid_map.source.addNode(OBSTRUCTION_NODE, this.finishPosition, true)
+        grid_map.finish = test.finish
+        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
+
+        for (const o of test.obstructions) {
+            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
             const node = grid_map.nodeAt(o.x, o.y)
             if (!node)
                 throw new Error("node is null??")
             node.display(grid_map, o, this.ctx, "red")
         }
-        this.obstructions = obstructions
-        this.start.display(grid_map, test.start, this.ctx, "green")
-        this.finish.display(grid_map, test.finish, this.ctx, "blue")
+        this.obstructions = test.obstructions
+
+        this.testNumber = null
     }
     nextTest() {
         this.initForTest(this.tests[this.nextTestNumber])
