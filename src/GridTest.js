@@ -26,8 +26,8 @@ class GridTest {
     set finishPosition(v) {
         this.#finishPosition = v
         if(v) {
+            this.#routeFinish = new RouteStepper(2, v)
             if(this.gridMap) {
-                this.#routeFinish = new RouteStepper(2, v)
                 this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
                 this.gridMap.finish = v
                 if(this.ctx) {
@@ -44,8 +44,8 @@ class GridTest {
     set startPosition(v) {
         this.#startPosition = v
         if(v) {
+            this.#routeStart = new RouteStepper(1, v)
             if(this.gridMap) {
-                this.#routeStart = new RouteStepper(1, v)
                 this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
                 this.gridMap.start = v
                 if(this.ctx) {
