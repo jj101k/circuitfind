@@ -1,5 +1,51 @@
 "use strict"
 class GridTest {
+    /**
+     * @type {?{x: number, y: number}}
+     */
+    #startPosition
+
+    /**
+     * @type {?{x: number, y: number}}
+     */
+    #finishPosition
+
+    get finishPosition() {
+        return this.#finishPosition
+    }
+    set finishPosition(v) {
+        this.#finishPosition = v
+        if(v) {
+            if(this.gridMap) {
+                this.routeFinish = new RouteStepper(2, v)
+                this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
+                this.gridMap.finish = v
+                if(this.ctx) {
+                    const finish = new PositionedNode(OBSTRUCTION_NODE)
+                    finish.display(this.gridMap, v, this.ctx, "blue")
+                }
+            }
+        }
+    }
+
+    get startPosition() {
+        return this.#startPosition
+    }
+    set startPosition(v) {
+        this.#startPosition = v
+        if(v) {
+            if(this.gridMap) {
+                this.routeStart = new RouteStepper(1, v)
+                this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
+                this.gridMap.start = v
+                if(this.ctx) {
+                    const start = new PositionedNode(OBSTRUCTION_NODE)
+                    start.display(this.gridMap, v, this.ctx, "green")
+                }
+            }
+        }
+    }
+
     constructor() {
         this.blind = false
         /** @type {?GridMap} */
@@ -178,18 +224,7 @@ class GridTest {
             throw new Error("canvas context is null")
 
         this.startPosition = test.start
-        this.start = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeStart = new RouteStepper(1, this.startPosition)
-        grid_map.source.addNode(OBSTRUCTION_NODE, this.startPosition, true)
-        grid_map.start = test.start
-        this.start.display(grid_map, this.startPosition, this.ctx, "green")
-
         this.finishPosition = test.finish
-        this.finish = new PositionedNode(OBSTRUCTION_NODE)
-        this.routeFinish = new RouteStepper(2, this.finishPosition)
-        grid_map.source.addNode(OBSTRUCTION_NODE, this.finishPosition, true)
-        grid_map.finish = test.finish
-        this.finish.display(grid_map, this.finishPosition, this.ctx, "blue")
 
         for (const o of test.obstructions) {
             grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
