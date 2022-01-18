@@ -18,10 +18,16 @@ class GridMap {
      * @param {number} node_width
      */
     constructor(pixel_width, node_width) {
-        this.finish = { x: 0, y: 0 }
+        /**
+         * @type {?{x: number, y: number}}
+         */
+        this.finish = null
         this.nodeWidth = node_width
         this.source = GridMapSource.build(node_width)
-        this.start = { x: 0, y: 0 }
+        /**
+         * @type {?{x: number, y: number}}
+         */
+        this.start = null
         this.pixelWidth = pixel_width
     }
     get cw() {
@@ -85,8 +91,14 @@ class GridMap {
      */
     searchEmptyNode(f) {
         let point
+        let tries = 0
+        const maxTries = 1000
         do {
             point = f()
+            tries++
+            if(tries > maxTries) {
+                throw new Error("Max tries exceeded")
+            }
         } while (this.source.contentAt(point.x, point.y) != EMPTY_NODE)
         return point
     }

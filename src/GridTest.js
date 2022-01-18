@@ -3,12 +3,12 @@ class GridTest {
     /**
      * @type {?{x: number, y: number}}
      */
-    #startPosition
+    #finishPosition
 
     /**
-     * @type {?{x: number, y: number}}
+     * @type {?GridMap}
      */
-    #finishPosition
+    #gridMap
 
     /**
      * @type {?RouteStepper}
@@ -20,21 +20,48 @@ class GridTest {
      */
     #routeStart
 
+    /**
+     * @type {?{x: number, y: number}}
+     */
+    #startPosition
+
+    /**
+     *
+     */
+    #displayEnds() {
+        if(this.gridMap) {
+            if(this.finishPosition && !this.gridMap.finish) {
+                this.gridMap.source.addNode(OBSTRUCTION_NODE, this.finishPosition, true)
+                this.gridMap.finish = this.finishPosition
+                if(this.ctx) {
+                    const node = new PositionedNode(OBSTRUCTION_NODE)
+                    node.display(this.gridMap, this.finishPosition, this.ctx, "blue")
+                }
+            }
+            if(this.startPosition && !this.gridMap.start) {
+                this.gridMap.source.addNode(OBSTRUCTION_NODE, this.startPosition, true)
+                this.gridMap.start = this.startPosition
+                if(this.ctx) {
+                    const node = new PositionedNode(OBSTRUCTION_NODE)
+                    node.display(this.gridMap, this.startPosition, this.ctx, "green")
+                }
+            }
+        }
+    }
+
     get finishPosition() {
         return this.#finishPosition
     }
     set finishPosition(v) {
         this.#finishPosition = v
+        if(this.gridMap) {
+            this.gridMap.finish = null
+        }
         if(v) {
             this.#routeFinish = new RouteStepper(2, v)
-            if(this.gridMap) {
-                this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
-                this.gridMap.finish = v
-                if(this.ctx) {
-                    const finish = new PositionedNode(OBSTRUCTION_NODE)
-                    finish.display(this.gridMap, v, this.ctx, "blue")
-                }
-            }
+            this.#displayEnds()
+        } else {
+            this.#routeFinish = null
         }
     }
 
@@ -43,17 +70,23 @@ class GridTest {
     }
     set startPosition(v) {
         this.#startPosition = v
+        if(this.gridMap) {
+            this.gridMap.start = null
+        }
         if(v) {
             this.#routeStart = new RouteStepper(1, v)
-            if(this.gridMap) {
-                this.gridMap.source.addNode(OBSTRUCTION_NODE, v, true)
-                this.gridMap.start = v
-                if(this.ctx) {
-                    const start = new PositionedNode(OBSTRUCTION_NODE)
-                    start.display(this.gridMap, v, this.ctx, "green")
-                }
-            }
+            this.#displayEnds()
+        } else {
+            this.#routeStart = null
         }
+    }
+
+    get gridMap() {
+        return this.#gridMap
+    }
+    set gridMap(v) {
+        this.#gridMap = v
+        this.#displayEnds()
     }
 
     constructor() {
