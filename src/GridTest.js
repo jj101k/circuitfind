@@ -291,12 +291,19 @@ class GridTest {
     async run(interval_ms = 10) {
         this.innerRuntime = null
         let running = true
+        const maxTries = 1000
+        let tries
         if (interval_ms) {
             let t = new Date().valueOf()
             let steps = 0
             let calibrated_steps = 0
             let inner_ms = 0
+            tries = 0
             while (running) {
+                tries++
+                if(tries > maxTries) {
+                    throw new Error("Max tries exceeded")
+                }
                 running = this.step()
                 steps++
                 if (steps < calibrated_steps)
@@ -318,7 +325,12 @@ class GridTest {
             this.innerRuntime = inner_ms + new Date().valueOf() - t
         } else {
             const t = new Date().valueOf()
+            tries = 0
             while (running) {
+                tries++
+                if(tries > maxTries) {
+                    throw new Error("Max tries exceeded")
+                }
                 running = this.step()
             }
             this.innerRuntime = new Date().valueOf() - t

@@ -87,17 +87,32 @@ class Route {
         let [a, b] = [this.left, this.right]
         /** @type {{x: number, y: number}[]} */
         const nodes = []
+
+        let tries
+        const maxTries = 1000
+
         let ac = grid_map.source.contentAt(a.x, a.y)
+        tries = 0
         while (PathNode.isPath(ac)) {
             nodes.push(a)
             a = PathNode.getFromPosition(a.x, a.y, ac)
             ac = grid_map.source.contentAt(a.x, a.y)
+            tries++
+            if(tries > maxTries) {
+                throw new Error("Max tries exceeded")
+            }
         }
+
         let bc = grid_map.source.contentAt(b.x, b.y)
+        tries = 0
         while (PathNode.isPath(bc)) {
             nodes.unshift(b)
             b = PathNode.getFromPosition(b.x, b.y, bc)
             bc = grid_map.source.contentAt(b.x, b.y)
+            tries++
+            if(tries > maxTries) {
+                throw new Error("Max tries exceeded")
+            }
         }
         return nodes
     }
