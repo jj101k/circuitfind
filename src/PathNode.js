@@ -80,10 +80,14 @@ class PathNode extends PositionedNode {
                 return 2
             }
         }
-        if (position.x == grid_map.start.x && position.y == grid_map.start.y) {
-            return 1
+        if(grid_map.start) {
+            if (position.x == grid_map.start.x && position.y == grid_map.start.y) {
+                return 1
+            } else {
+                return 2
+            }
         } else {
-            return 2
+            throw new Error("Missing start")
         }
     }
     /**
