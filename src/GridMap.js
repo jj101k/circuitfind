@@ -6,6 +6,11 @@ class GridMap {
     #finish
 
     /**
+     * @type {GridMapSource}
+     */
+    #source
+
+    /**
      * @type {?{x: number, y: number}}
      */
     #start
@@ -15,7 +20,7 @@ class GridMap {
     }
     set finish(v) {
         if(this.#finish) {
-            this.source.addNode(EMPTY_NODE, this.#finish, true)
+            this.#source.addNode(EMPTY_NODE, this.#finish, true)
         }
         this.#finish = v
         if(v) {
@@ -28,7 +33,7 @@ class GridMap {
     }
     set start(v) {
         if(this.#start) {
-            this.source.addNode(EMPTY_NODE, this.#start, true)
+            this.#source.addNode(EMPTY_NODE, this.#start, true)
         }
         this.#start = v
         if(v) {
@@ -59,7 +64,7 @@ class GridMap {
          */
         this.finish = null
         this.nodeWidth = node_width
-        this.source = GridMapSource.build(node_width)
+        this.#source = GridMapSource.build(node_width)
         /**
          * @type {?{x: number, y: number}}
          */
@@ -76,7 +81,7 @@ class GridMap {
      * @param {{x: number, y: number}} o
      */
     conditionallyAddNode(content, o) {
-        return this.source.addNode(content, o)
+        return this.#source.addNode(content, o)
     }
 
     /**
@@ -86,7 +91,7 @@ class GridMap {
      * @returns
      */
     contentAt(x, y) {
-        return this.source.contentAt(x, y)
+        return this.#source.contentAt(x, y)
     }
 
     /**
@@ -117,7 +122,7 @@ class GridMap {
      * @param {{x: number, y: number}} o
      */
     isLeafNode(o) {
-        return this.source.isLeafNode(o)
+        return this.#source.isLeafNode(o)
     }
     /**
      *
@@ -142,7 +147,7 @@ class GridMap {
      * @param {{x: number, y: number}} o
      */
     obstruct(o) {
-        this.source.addNode(OBSTRUCTION_NODE, o, true)
+        this.#source.addNode(OBSTRUCTION_NODE, o, true)
     }
     /**
      * This clears the storage of everything that's not an obstruction
@@ -152,7 +157,7 @@ class GridMap {
             for (let y = 0; y <= this.nodeWidth; y++) {
                 const s = this.contentAt(x, y)
                 if (s != EMPTY_NODE && s != OBSTRUCTION_NODE) {
-                    this.source.addNode(EMPTY_NODE, { x, y }, true)
+                    this.#source.addNode(EMPTY_NODE, { x, y }, true)
                 }
             }
         }
