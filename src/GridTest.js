@@ -268,7 +268,7 @@ class GridTest {
         this.finishPosition = test.finish
 
         for (const o of test.obstructions) {
-            grid_map.source.addNode(OBSTRUCTION_NODE, o, true)
+            grid_map.obstruct(o)
             const node = grid_map.nodeAt(o.x, o.y)
             if (!node)
                 throw new Error("node is null??")

@@ -18,10 +18,10 @@ class Route {
         const o = new PositionedNode(OBSTRUCTION_NODE)
         for (const node of this.getNodes(grid_map)) {
             for(const delta of [-1, 1]) {
-                grid_map.source.addNode(o.content, {x: node.x + delta, y: node.y}, true)
-                grid_map.source.addNode(o.content, {x: node.x, y: node.y + delta}, true)
+                grid_map.obstruct({x: node.x + delta, y: node.y})
+                grid_map.obstruct({x: node.x, y: node.y + delta})
             }
-            grid_map.source.addNode(o.content, node, true)
+            grid_map.obstruct(node)
         }
     }
     /**

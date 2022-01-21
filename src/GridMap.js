@@ -19,7 +19,7 @@ class GridMap {
         }
         this.#finish = v
         if(v) {
-            this.source.addNode(OBSTRUCTION_NODE, v, true)
+            this.obstruct(v)
         }
     }
 
@@ -32,7 +32,7 @@ class GridMap {
         }
         this.#start = v
         if(v) {
-            this.source.addNode(OBSTRUCTION_NODE, v, true)
+            this.obstruct(v)
         }
     }
 
