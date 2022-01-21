@@ -72,6 +72,15 @@ class GridMap {
 
     /**
      *
+     * @param {number} content
+     * @param {{x: number, y: number}} o
+     */
+    conditionallyAddNode(content, o) {
+        return this.source.addNode(content, o)
+    }
+
+    /**
+     *
      * @param {number} x
      * @param {number} y
      * @returns
@@ -101,6 +110,14 @@ class GridMap {
             ctx.lineWidth = 2 / this.cw
             ctx.stroke()
         }
+    }
+
+    /**
+     *
+     * @param {{x: number, y: number}} o
+     */
+    isLeafNode(o) {
+        return this.source.isLeafNode(o)
     }
     /**
      *

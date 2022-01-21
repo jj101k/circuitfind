@@ -52,7 +52,7 @@ class RouteStepper {
                     ) || (
                             // Reach one of the target's path nodes
                             existingNode instanceof PathNode &&
-                            grid_map.source.isLeafNode(step) &&
+                            grid_map.isLeafNode(step) &&
                             PathNode.getOwner(existingNode, grid_map, step) != this.side
                         )) {
                         const r = new Route(position, step)
@@ -88,7 +88,7 @@ class RouteStepper {
     linkRoutes(grid_map, ctx, blind, cost) {
         for (const r of this.newRoutesFor(cost)) {
             const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-            if (grid_map.source.addNode(content, r.to) && !blind) {
+            if (grid_map.conditionallyAddNode(content, r.to) && !blind) {
                 PathNode.displayAt(content, grid_map, r.to, ctx, this.side)
             }
         }
