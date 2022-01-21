@@ -42,7 +42,7 @@ class RouteStepper {
         for (const position of this.zeroPositions) {
             for (const step of GeneralNode.nextSteps(position, step_type)) {
                 if (grid_map.validAddress(step.x, step.y)) {
-                    const existing_content = grid_map.source.contentAt(step.x, step.y)
+                    const existing_content = grid_map.contentAt(step.x, step.y)
                     if (existing_content == EMPTY_NODE) {
                         this.addNewRoute(cost, { from: position, to: step })
                     } else if ((
@@ -139,11 +139,11 @@ class RouteStepper {
             0: this.routes[2],
             2: this.routes[4].concat(this.newRoutes[4].filter(r => {
                 const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-                return grid_map.source.contentAt(r.to.x, r.to.y) == content
+                return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             4: this.routes[6].concat(this.newRoutes[6].filter(r => {
                 const content = PathNode.encodeFromDirection(r.to.x, r.to.y, r.from, this.side)
-                return grid_map.source.contentAt(r.to.x, r.to.y) == content
+                return grid_map.contentAt(r.to.x, r.to.y) == content
             }).map(r => r.to)),
             6: [],
         }

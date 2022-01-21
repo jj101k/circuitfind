@@ -73,7 +73,7 @@ class PathNode extends PositionedNode {
     static getOwner(content, grid_map, position) {
         let c
         for (c = content; PathNode.isPath(c); position = PathNode.getFromPosition(position.x, position.y, c),
-            c = grid_map.source.contentAt(position.x, position.y)) {
+            c = grid_map.contentAt(position.x, position.y)) {
             if (c < 0b0111) {
                 return 1
             } else if (c > 0b1000) {

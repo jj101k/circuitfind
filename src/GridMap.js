@@ -1,6 +1,42 @@
 "use strict"
 class GridMap {
     /**
+     * @type {?{x: number, y: number}}
+     */
+    #finish
+
+    /**
+     * @type {?{x: number, y: number}}
+     */
+    #start
+
+    get finish() {
+        return this.#finish
+    }
+    set finish(v) {
+        if(this.#finish) {
+            this.source.addNode(EMPTY_NODE, this.#finish, true)
+        }
+        this.#finish = v
+        if(v) {
+            this.source.addNode(OBSTRUCTION_NODE, v, true)
+        }
+    }
+
+    get start() {
+        return this.#start
+    }
+    set start(v) {
+        if(this.#start) {
+            this.source.addNode(EMPTY_NODE, this.#start, true)
+        }
+        this.#start = v
+        if(v) {
+            this.source.addNode(OBSTRUCTION_NODE, v, true)
+        }
+    }
+
+    /**
      *
      * @param {CanvasRenderingContext2D} ctx
      * @param {{x: number, y: number}} position
@@ -33,6 +69,17 @@ class GridMap {
     get cw() {
         return this.pixelWidth / this.nodeWidth
     }
+
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @returns
+     */
+    contentAt(x, y) {
+        return this.source.contentAt(x, y)
+    }
+
     /**
      *
      * @param {CanvasRenderingContext2D} ctx
@@ -62,7 +109,7 @@ class GridMap {
      * @returns {?PositionedNode}
      */
     nodeAt(x, y) {
-        const content = this.source.contentAt(x, y)
+        const content = this.contentAt(x, y)
         switch (content) {
             case EMPTY_NODE:
                 return null
@@ -72,13 +119,21 @@ class GridMap {
                 return new PathNode(content)
         }
     }
+
+    /**
+     *
+     * @param {{x: number, y: number}} o
+     */
+    obstruct(o) {
+        this.source.addNode(OBSTRUCTION_NODE, o, true)
+    }
     /**
      * This clears the storage of everything that's not an obstruction
      */
     replaceNonObstruction() {
         for (let x = 0; x <= this.nodeWidth; x++) {
             for (let y = 0; y <= this.nodeWidth; y++) {
-                const s = this.source.contentAt(x, y)
+                const s = this.contentAt(x, y)
                 if (s != EMPTY_NODE && s != OBSTRUCTION_NODE) {
                     this.source.addNode(EMPTY_NODE, { x, y }, true)
                 }
@@ -99,7 +154,7 @@ class GridMap {
             if(tries > maxTries) {
                 throw new Error("Max tries exceeded")
             }
-        } while (this.source.contentAt(point.x, point.y) != EMPTY_NODE)
+        } while (this.contentAt(point.x, point.y) != EMPTY_NODE)
         return point
     }
     /**
@@ -125,7 +180,7 @@ class GridMap {
 
         for (let x = 0; x <= this.nodeWidth; x++) {
             for (let y = 0; y <= this.nodeWidth; y++) {
-                if(this.source.contentAt(x, y) != OBSTRUCTION_NODE) {
+                if(this.contentAt(x, y) != OBSTRUCTION_NODE) {
                     ctx.translate(x - lastX, y - lastY)
                     lastX = x
                     lastY = y

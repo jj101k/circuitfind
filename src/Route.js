@@ -63,15 +63,15 @@ class Route {
         } else {
             cost += 6
         }
-        this.getNodes(grid_map).forEach(n => {
-            const m = grid_map.source.contentAt(n.x, n.y)
+        for(const n of this.getNodes(grid_map)) {
+            const m = grid_map.contentAt(n.x, n.y)
             const mf = PathNode.getFromPosition(n.x, n.y, m)
             if (mf.x == n.x || mf.y == n.y) {
                 cost += 4
             } else {
                 cost += 6
             }
-        })
+        }
         return cost
     }
     /**
@@ -91,24 +91,24 @@ class Route {
         let tries
         const maxTries = 1000
 
-        let ac = grid_map.source.contentAt(a.x, a.y)
+        let ac = grid_map.contentAt(a.x, a.y)
         tries = 0
         while (PathNode.isPath(ac)) {
             nodes.push(a)
             a = PathNode.getFromPosition(a.x, a.y, ac)
-            ac = grid_map.source.contentAt(a.x, a.y)
+            ac = grid_map.contentAt(a.x, a.y)
             tries++
             if(tries > maxTries) {
                 throw new Error("Max tries exceeded")
             }
         }
 
-        let bc = grid_map.source.contentAt(b.x, b.y)
+        let bc = grid_map.contentAt(b.x, b.y)
         tries = 0
         while (PathNode.isPath(bc)) {
             nodes.unshift(b)
             b = PathNode.getFromPosition(b.x, b.y, bc)
-            bc = grid_map.source.contentAt(b.x, b.y)
+            bc = grid_map.contentAt(b.x, b.y)
             tries++
             if(tries > maxTries) {
                 throw new Error("Max tries exceeded")

@@ -31,7 +31,6 @@ class GridTest {
     #displayEnds() {
         if(this.gridMap) {
             if(this.finishPosition && !this.gridMap.finish) {
-                this.gridMap.source.addNode(OBSTRUCTION_NODE, this.finishPosition, true)
                 this.gridMap.finish = this.finishPosition
                 if(this.ctx) {
                     const node = new PositionedNode(OBSTRUCTION_NODE)
@@ -39,7 +38,6 @@ class GridTest {
                 }
             }
             if(this.startPosition && !this.gridMap.start) {
-                this.gridMap.source.addNode(OBSTRUCTION_NODE, this.startPosition, true)
                 this.gridMap.start = this.startPosition
                 if(this.ctx) {
                     const node = new PositionedNode(OBSTRUCTION_NODE)
