@@ -65,19 +65,17 @@ class PathNode extends PositionedNode {
     }
     /**
      *
-     * @param {number} content
+     * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
      * @param {{x: number, y: number}} position
      * @returns {number}
      */
-    static getOwner(content, grid_map, position) {
+    static getOwner(existingNode, grid_map, position) {
         let c
-        for (c = content; PathNode.isPath(c); position = PathNode.getFromPosition(position.x, position.y, c),
-            c = grid_map.contentAt(position.x, position.y)) {
-            if (c < 0b0111) {
-                return 1
-            } else if (c > 0b1000) {
-                return 2
+        for (c = existingNode; c && c instanceof PathNode; position = PathNode.getFromPosition(position.x, position.y, c.content),
+            c = grid_map.nodeAt(position.x, position.y)) {
+            if(c.owner) {
+                return c.owner
             }
         }
         if(grid_map.start) {
@@ -111,6 +109,17 @@ class PathNode extends PositionedNode {
             default: return "?"
         }
     }
+
+    get owner() {
+        if(this.content < 0b0111) {
+            return 1
+        } else if (this.content > 0b1000) {
+            return 2
+        } else {
+            return null
+        }
+    }
+
     /**
      *
      * @param {GridMap} grid_map

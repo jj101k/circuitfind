@@ -42,8 +42,8 @@ class RouteStepper {
         for (const position of this.zeroPositions) {
             for (const step of GeneralNode.nextSteps(position, step_type)) {
                 if (grid_map.validAddress(step.x, step.y)) {
-                    const existing_content = grid_map.contentAt(step.x, step.y)
-                    if (existing_content == EMPTY_NODE) {
+                    const existingNode = grid_map.nodeAt(step.x, step.y)
+                    if (!existingNode) {
                         this.addNewRoute(cost, { from: position, to: step })
                     } else if ((
                         // Directly reach the target (it happens)
@@ -51,9 +51,9 @@ class RouteStepper {
                         step.y == target_position.y
                     ) || (
                             // Reach one of the target's path nodes
-                            PathNode.isPath(existing_content) &&
+                            existingNode instanceof PathNode &&
                             grid_map.source.isLeafNode(step) &&
-                            PathNode.getOwner(existing_content, grid_map, step) != this.side
+                            PathNode.getOwner(existingNode, grid_map, step) != this.side
                         )) {
                         const r = new Route(position, step)
                         const route_cost = r.getCost(grid_map)
