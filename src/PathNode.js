@@ -68,25 +68,44 @@ class PathNode extends PositionedNode {
      * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
      * @param {{x: number, y: number}} position
+     * @returns {Generator<{origin: "start" | "finish", node:
+     * PositionedNode} | {origin: null, node: PathNode}>}
+     */
+    static *getPathNodes(existingNode, grid_map, position) {
+        let c
+        for (c = existingNode; c; position = PathNode.getFromPosition(position.x, position.y, c.content),
+            c = grid_map.nodeAt(position.x, position.y)) {
+            if(!(c instanceof PathNode)) {
+                if (grid_map.start && position.x == grid_map.start.x && position.y == grid_map.start.y) {
+                    yield {origin: "start", node: c}
+                } else if(grid_map.finish && position.x == grid_map.finish.x && position.y == grid_map.finish.y) {
+                    yield {origin: "finish", node: c}
+                } else {
+                    throw new Error("Bad path??")
+                }
+                break
+            }
+            yield {origin: null, node: c}
+        }
+    }
+    /**
+     *
+     * @param {PositionedNode} existingNode
+     * @param {GridMap} grid_map
+     * @param {{x: number, y: number}} position
      * @returns {number}
      */
     static getOwner(existingNode, grid_map, position) {
-        let c
-        for (c = existingNode; c && c instanceof PathNode; position = PathNode.getFromPosition(position.x, position.y, c.content),
-            c = grid_map.nodeAt(position.x, position.y)) {
-            if(c.owner) {
-                return c.owner
-            }
-        }
-        if(grid_map.start) {
-            if (position.x == grid_map.start.x && position.y == grid_map.start.y) {
+        for(const nodeWithOrigin of this.getPathNodes(existingNode, grid_map, position)) {
+            if(nodeWithOrigin.origin == "start") {
                 return 1
-            } else {
+            } else if(nodeWithOrigin.origin == "finish") {
                 return 2
+            } else if(nodeWithOrigin.node.owner) {
+                return nodeWithOrigin.node.owner
             }
-        } else {
-            throw new Error("Missing start")
         }
+        throw new Error("Could not backtrack path")
     }
     /**
      *
