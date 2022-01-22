@@ -26,9 +26,9 @@ class GridTest {
     #startPosition
 
     /**
-     *
+     * This updates the map start/finish positions and handles display if needed
      */
-    #displayEnds() {
+    #updateMapInit() {
         if(this.gridMap) {
             if(this.finishPosition && !this.gridMap.finish) {
                 this.gridMap.finish = this.finishPosition
@@ -57,7 +57,7 @@ class GridTest {
         }
         if(v) {
             this.#routeFinish = new RouteStepper(2, v)
-            this.#displayEnds()
+            this.#updateMapInit()
         } else {
             this.#routeFinish = null
         }
@@ -73,7 +73,7 @@ class GridTest {
         }
         if(v) {
             this.#routeStart = new RouteStepper(1, v)
-            this.#displayEnds()
+            this.#updateMapInit()
         } else {
             this.#routeStart = null
         }
@@ -84,7 +84,7 @@ class GridTest {
     }
     set gridMap(v) {
         this.#gridMap = v
-        this.#displayEnds()
+        this.#updateMapInit()
     }
 
     constructor() {
