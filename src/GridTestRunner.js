@@ -25,7 +25,9 @@ class GridTestRunner {
      */
     #innerRuntime = null
 
-    /** @type {?Route} */
+    /**
+     * @type {?Route}
+     */
     #lastRoute = null
 
     /**
@@ -79,6 +81,9 @@ class GridTestRunner {
         }
     }
 
+    /**
+     * True if updates are going to be turned off
+     */
     blind = false
 
     get finishPosition() {
@@ -95,6 +100,9 @@ class GridTestRunner {
         }
     }
 
+    /**
+     * Information about the test
+     */
     get generatedState() {
         return {
             start: this.startPosition,
@@ -106,6 +114,9 @@ class GridTestRunner {
         }
     }
 
+    /**
+     * Information about how the test went
+     */
     get results() {
         if (!this.#lastRoute) {
             throw new Error("No route described")
@@ -146,9 +157,11 @@ class GridTestRunner {
         this.#nodeWidth = test.size ?? 10
         this.#pixelWidth = pixelWidth
 
+        const scale = this.#pixelWidth / this.#nodeWidth
+
         ctx.restore()
         ctx.save()
-        ctx.scale(this.#pixelWidth / this.#nodeWidth, this.#pixelWidth / this.#nodeWidth)
+        ctx.scale(scale, scale)
         this.#ctx = ctx
 
         this.#gridMap = new GridMap(this.#pixelWidth, this.#nodeWidth)
@@ -156,25 +169,24 @@ class GridTestRunner {
     }
 
     /**
-     *
+     * This cleans up display of non-obstructions
      */
     deinit() {
         this.#gridMap.wipeNonObstruction(this.#ctx, "black")
     }
 
     /**
-     *
+     * This clears path markers and attaches a new test
      */
     async reinitForRandomInstance() {
         await this.#gridMap.replaceNonObstruction()
-        /**
-         * @type {testSignature}
-         */
         const test = new TestBuilder(this.#gridMap)
+        this.#currentTest = test
         this.#testNumber = null
 
         this.postInitForTest(test)
     }
+
     /**
      *
      * @param {testSignature} test
