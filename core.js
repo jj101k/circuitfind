@@ -18,7 +18,7 @@ class GridMapSource {
     /**
      *
      * @param {number} content
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {boolean} overwrite
      * @returns {boolean}
      */
@@ -62,7 +62,7 @@ class GridMapSource {
     /**
      * True if `position` is a leaf node, ie a non-target.
      *
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @returns {boolean}
      */
     isLeafNode(position) {
@@ -88,12 +88,12 @@ class GridMapSource {
 class GeneralNode {
     /**
      *
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {"cheap" | "expensive"} step_type
-     * @returns {{x: number, y: number}[]}
+     * @returns {position[]}
      */
     static nextSteps(position, step_type) {
-        /** @type {{x: number, y: number}[]} */
+        /** @type {position[]} */
         const steps = []
         if(step_type == "cheap") {
             steps.push({x: position.x - 1, y: position.y}) // -1  0

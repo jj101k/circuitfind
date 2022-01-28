@@ -1,10 +1,16 @@
 "use strict"
 
 /**
+ * @typedef position
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
  * @typedef testSignature
- * @property {{x: number, y: number}} start
- * @property {{x: number, y: number}} finish
- * @property {{x: number, y: number}[]} obstructions
+ * @property {position} start
+ * @property {position} finish
+ * @property {position[]} obstructions
  * @property {?boolean} passed
  * @property {?number} correctLength
  * @property {?number} size

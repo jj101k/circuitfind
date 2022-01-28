@@ -2,8 +2,8 @@
 class Route {
     /**
      *
-     * @param {?{x: number, y: number}} left
-     * @param {?{x: number, y: number}} right
+     * @param {?position} left
+     * @param {?position} right
      */
     constructor(left = null, right = null) {
         this.left = left
@@ -77,7 +77,7 @@ class Route {
     /**
      *
      * @param {GridMap} grid_map
-     * @return {{x: number, y: number}[]}
+     * @return {position[]}
      */
     getNodes(grid_map) {
         if (!this.left)
@@ -85,7 +85,7 @@ class Route {
         if (!this.right)
             throw new Error("this.right is null")
         let [a, b] = [this.left, this.right]
-        /** @type {{x: number, y: number}[]} */
+        /** @type {position[]} */
         const nodes = []
 
         let tries

@@ -3,16 +3,16 @@ class RouteStepper {
     /**
      *
      * @param {number} side
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      */
     constructor(side, position) {
         this.side = side
-        /** @type {{[cost: number]: {from: {x: number, y: number}, to: {x: number, y: number}}[]}} */
+        /** @type {{[cost: number]: {from: position, to: position}[]}} */
         this.newRoutes = {
             4: [],
             6: [],
         }
-        /** @type {{[cost: number]: {x: number, y: number}[]}} */
+        /** @type {{[cost: number]: position[]}} */
         this.routes = {
             0: [position],
             2: [],
@@ -27,7 +27,7 @@ class RouteStepper {
     }
     /**
      *
-     * @param {{x: number, y: number}} target_position
+     * @param {position} target_position
      * @param {boolean} cheap
      * @param {GridMap} grid_map
      * @returns {?Route}
@@ -96,7 +96,7 @@ class RouteStepper {
     /**
      *
      * @param {number} n
-     * @param {{from: {x: number, y: number}, to: {x: number, y: number}}} r
+     * @param {{from: position, to: position}} r
      */
     addNewRoute(n, r) {
         this.newRoutes[n].push(r)

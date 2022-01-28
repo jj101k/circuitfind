@@ -1,7 +1,7 @@
 "use strict"
 class GridMap {
     /**
-     * @type {?{x: number, y: number}}
+     * @type {?position}
      */
     #finish
 
@@ -11,7 +11,7 @@ class GridMap {
     #source
 
     /**
-     * @type {?{x: number, y: number}}
+     * @type {?position}
      */
     #start
 
@@ -44,7 +44,7 @@ class GridMap {
     /**
      *
      * @param {CanvasRenderingContext2D} ctx
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {function(): void} action
      */
     static displayNode(ctx, position, action) {
@@ -60,13 +60,13 @@ class GridMap {
      */
     constructor(pixel_width, node_width) {
         /**
-         * @type {?{x: number, y: number}}
+         * @type {?position}
          */
         this.finish = null
         this.nodeWidth = node_width
         this.#source = GridMapSource.build(node_width)
         /**
-         * @type {?{x: number, y: number}}
+         * @type {?position}
          */
         this.start = null
         this.pixelWidth = pixel_width
@@ -78,7 +78,7 @@ class GridMap {
     /**
      *
      * @param {number} content
-     * @param {{x: number, y: number}} o
+     * @param {position} o
      */
     conditionallyAddNode(content, o) {
         return this.#source.addNode(content, o)
@@ -119,7 +119,7 @@ class GridMap {
 
     /**
      *
-     * @param {{x: number, y: number}} o
+     * @param {position} o
      */
     isLeafNode(o) {
         return this.#source.isLeafNode(o)
@@ -144,7 +144,7 @@ class GridMap {
 
     /**
      *
-     * @param {{x: number, y: number}} o
+     * @param {position} o
      */
     obstruct(o) {
         this.#source.addNode(OBSTRUCTION_NODE, o, true)
@@ -164,7 +164,7 @@ class GridMap {
     }
     /**
      *
-     * @param {() => {x: number, y: number}} f
+     * @param {() => position} f
      */
     searchEmptyNode(f) {
         let point

@@ -24,9 +24,9 @@ function load_webassembly(m_exports) {
     GeneralNode.nextSteps =
     /**
      *
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {"cheap" | "expensive"} step_type
-     * @returns {{x: number, y: number}[]}
+     * @returns {position[]}
      */
     (position, step_type) => {
         const p = m_exports.nextSteps(position.x, position.y, +(step_type == "expensive"))

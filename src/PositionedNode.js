@@ -10,7 +10,7 @@ class PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */

@@ -4,7 +4,7 @@ class PathNode extends PositionedNode {
      *
      * @param {number} content
      * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {CanvasRenderingContext2D} ctx
      * @param {number} side
      */
@@ -16,7 +16,7 @@ class PathNode extends PositionedNode {
      *
      * @param {number} x
      * @param {number} y
-     * @param {{x: number, y: number}} from_position
+     * @param {position} from_position
      * @param {number} side
      */
     static encodeFromDirection(x, y, from_position, side) {
@@ -67,7 +67,7 @@ class PathNode extends PositionedNode {
      *
      * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @returns {Generator<{origin: "start" | "finish", node:
      * PositionedNode} | {origin: null, node: PathNode}>}
      */
@@ -92,7 +92,7 @@ class PathNode extends PositionedNode {
      *
      * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @returns {number}
      */
     static getOwner(existingNode, grid_map, position) {
@@ -142,7 +142,7 @@ class PathNode extends PositionedNode {
     /**
      *
      * @param {GridMap} grid_map
-     * @param {{x: number, y: number}} position
+     * @param {position} position
      * @param {CanvasRenderingContext2D} ctx
      * @param {string} colour
      */
