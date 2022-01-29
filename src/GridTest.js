@@ -1,150 +1,226 @@
-"use strict"
 class GridTest {
     /**
-     * @type {?HTMLCanvasElement}
+     * @type {CanvasRenderingContext2D}
      */
-    #canvasElement
+    #ctx
 
     /**
-     * @type {?GridTestRunner}
+     * @type {testSignature}
      */
-    #runner
+    #currentTest
 
-    get canvasElement() {
-        if(!this.#canvasElement) {
-            /**
-             * @type {?HTMLCanvasElement}
-             */
-            const c = document.querySelector("canvas#grid")
-            if(c) {
-                c.width = c.clientWidth * window.devicePixelRatio
-                c.height = c.clientHeight * window.devicePixelRatio
-            }
-            this.#canvasElement = c
+    /**
+     * @type {position}
+     */
+    #finishPosition
+
+    /**
+     * @type {GridMap}
+     */
+    #gridMap
+
+    /**
+     * @type {?number}
+     */
+    #innerRuntime = null
+
+    /**
+     * @type {?Route}
+     */
+    #lastRoute = null
+
+    /**
+     * @type {number}
+     */
+    #nodeWidth
+
+    /**
+     * @type {position[]}
+     */
+    #obstructions = []
+
+    /**
+     * @type {RouteStepper}
+     */
+    #routeFinish
+
+     /**
+      * @type {RouteStepper}
+      */
+    #routeStart
+
+    /**
+     * @type {position}
+     */
+    #startPosition
+
+    /**
+     * @type {?number}
+     */
+    #testNumber
+
+    /**
+     * True if updates are going to be turned off
+     */
+    blind = false
+
+    /**
+     * Information about the test
+     */
+    get generatedState() {
+        return {
+            start: this.#startPosition,
+            finish: this.#finishPosition,
+            obstructions: this.#obstructions,
+            passed: null,
+            correctLength: null,
+            size: this.#nodeWidth,
         }
-        return this.#canvasElement
     }
 
-    constructor() {
-        this.blind = false
-        this.tests = []
-        this.nextTestNumber = 0
-        this.paused = false
-    }
-    dumpGeneratedState() {
-        console.log(JSON.stringify(this.#runner?.generatedState))
-    }
-    displayResults() {
-        const results = this.#runner?.results
-        if(!results) {
-            throw new Error("No results found")
+    /**
+     * Information about how the test went
+     */
+    get results() {
+        if (!this.#lastRoute) {
+            throw new Error("No route described")
         }
-        const tr = document.createElement("tr")
-        let td = document.createElement("td")
-        td.textContent = results.testNumber === null ?
-            "Random test" :
-            `Test ${results.testNumber}`
-        tr.appendChild(td)
 
-        td = document.createElement("td")
-        td.textContent = results.cost === Infinity ?
-            "miss" :
-            "" + results.cost
-        tr.appendChild(td)
-
-        td = document.createElement("td")
-        td.textContent = "" + results.innerRuntime
-        tr.appendChild(td)
-
-        td = document.createElement("td")
-        td.textContent = results.currentTest ?
-            "" + results.currentTest.correctLength :
-            "N/A"
-
-        tr.appendChild(td)
-
-        if (results.currentTest && results.currentTest.correctLength != results.cost) {
-            tr.style.color = "red"
-        }
-        const testResultsElement = document.querySelector("#test-results")
-        if (testResultsElement) {
-            testResultsElement.appendChild(tr)
+        return {
+            cost: this.#lastRoute.getCost(this.#gridMap),
+            currentTest: this.#currentTest ? {
+                correctLength: this.#currentTest?.correctLength,
+            } : null,
+            innerRuntime: this.#innerRuntime,
+            testNumber: this.#testNumber,
         }
     }
+
     /**
      *
-     * @param {Partial<testSignature>} test
-     */
-    initForRandomInstance(test) {
-        if(!this.canvasElement) {
-            throw new Error("Could not find canvas")
-        }
-        const ctx = this.canvasElement.getContext("2d")
-        if (!ctx)
-            throw new Error("canvas context is null")
-
-        this.#runner = new GridTestRunner(ctx, test, this.canvasElement.width)
-        return this.#runner
-    }
-    /**
-     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {GridMap} gridMap
      * @param {testSignature} test
-     * @param {?number} testNumber
+     * @param {?number} [testNumber]
      */
-    initForTest(test, testNumber = null) {
-        const runner = this.initForRandomInstance(test)
+    constructor(ctx, gridMap, test, testNumber = null) {
+        this.#ctx = ctx
+        this.#gridMap = gridMap
+        this.#nodeWidth = test.size || 10
 
-        runner.postInitForTest(test, testNumber)
+        this.#gridMap.start = this.#startPosition = test.start
+        this.#routeStart = new RouteStepper(1, test.start)
 
-        const input = document.querySelector("input#test-number")
-        if (input instanceof HTMLInputElement) {
-            input.value = (testNumber === null) ? "" : ("" + testNumber)
+        this.#gridMap.finish = this.#finishPosition = test.finish
+        this.#routeFinish = new RouteStepper(2, test.finish)
+
+        const node = new PositionedNode(OBSTRUCTION_NODE)
+        node.display(this.#gridMap, this.#finishPosition, this.#ctx, "blue")
+        node.display(this.#gridMap, this.#startPosition, this.#ctx, "green")
+
+        for (const o of test.obstructions) {
+            this.#gridMap.obstruct(o)
+            const node = this.#gridMap.nodeAt(o.x, o.y)
+            if (!node)
+                throw new Error("node is null??")
+            node.display(this.#gridMap, o, this.#ctx, "red")
         }
-        return runner
+        this.obstructions = test.obstructions
+
+        this.#testNumber = testNumber
     }
-    nextTest() {
-        const runner = this.initForTest(this.tests[this.nextTestNumber], this.nextTestNumber)
-        if (!this.paused) {
-            runner.run()
-            this.displayResults()
-        }
-        this.nextTestNumber = (this.nextTestNumber + 1) % this.tests.length
-    }
+
     /**
+     * Runs the test. Where interval_ms is nonzero, that's the usual wait
+     * between frame updates (default 10ms). You can think of this as operating
+     * in a "vsync" mode.
      *
-     * @param {number} [times]
-     * @param {number} [s]
+     * @param {number} interval_ms
      */
-    async randomTest(times = 10, s = 10) {
-        const runner = this.initForRandomInstance({size: s})
-        for (let i = 0; i < times; i++) {
-            await runner.reinitForRandomInstance()
-            if (!this.paused) {
-                if (this.blind) {
-                    const start = new Date().valueOf()
-                    await runner.run(0)
-                    const end = new Date().valueOf()
-                    console.log(`Took ${end - start} ms`)
-                } else {
-                    await runner.run()
+     async run(interval_ms = 10) {
+        this.#innerRuntime = null
+        let running = true
+        const maxTries = 1000
+        let tries
+        if (interval_ms) {
+            let t = new Date().valueOf()
+            let steps = 0
+            let calibrated_steps = 0
+            let inner_ms = 0
+            tries = 0
+            while (running) {
+                tries++
+                if(tries > maxTries) {
+                    throw new Error("Max tries exceeded")
                 }
-                this.displayResults()
+                running = this.step()
+                steps++
+                if (steps < calibrated_steps)
+                    continue
+                const tp = new Date().valueOf()
+                if (tp - t >= interval_ms) {
+                    calibrated_steps = steps * 0.75
+                    inner_ms += tp - t
+                    await new Promise(
+                        resolve => setTimeout(
+                            resolve,
+                            0
+                        )
+                    )
+                    steps = 0
+                    t = new Date().valueOf()
+                }
             }
+            this.#innerRuntime = inner_ms + new Date().valueOf() - t
+        } else {
+            const t = new Date().valueOf()
+            tries = 0
+            while (running) {
+                tries++
+                if(tries > maxTries) {
+                    throw new Error("Max tries exceeded")
+                }
+                running = this.step()
+            }
+            this.#innerRuntime = new Date().valueOf() - t
         }
-        runner.deinit()
     }
-    async runAll() {
-        for (const [i, test] of Object.entries(this.tests)) {
-            const runner = this.initForTest(test, +i)
-            await runner.run(10)
-            this.displayResults()
-        }
-    }
-    selectTest(n) {
-        const runner = this.initForTest(this.tests[n], n)
-        if (!this.paused) {
-            runner.run()
-            this.displayResults()
+
+    step() {
+        /**
+         * @type {Route[]}
+         */
+        //@ts-ignore
+        const possible_routes = [
+            this.#routeStart.stepOut(this.#finishPosition, true, this.#gridMap),
+            this.#routeFinish.stepOut(this.#startPosition, true, this.#gridMap),
+            this.#routeStart.stepOut(this.#finishPosition, false, this.#gridMap),
+            this.#routeFinish.stepOut(this.#startPosition, false, this.#gridMap),
+        ].filter(route => route)
+
+        if (possible_routes.length) {
+            const route = possible_routes.sort((a, b) => a.getCost(this.#gridMap) - b.getCost(this.#gridMap))[0]
+            if (route.left) {
+                route.display(this.#gridMap, this.#ctx)
+                route.burn(this.#gridMap)
+            } else {
+                console.log("No route found")
+            }
+            this.#lastRoute = route
+            console.log("done", this.#lastRoute)
+            return false
+        } else {
+            const costs = [4, 6]
+            const routes = [this.#routeStart, this.#routeFinish]
+            for (const cost of costs) {
+                for (const route of routes) {
+                    route.linkRoutes(this.#gridMap, this.#ctx, this.blind, cost)
+                }
+            }
+            for (const route of routes) {
+                route.stepRoutes(this.#gridMap, this.#ctx, this.blind)
+            }
+            return true
         }
     }
 }

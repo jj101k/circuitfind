@@ -34,8 +34,9 @@
         <script src="constants.js"></script>
         <script src="types.js"></script>
         <script src="src/GridMap.js"></script>
-        <script src="src/GridTest.js"></script>
+        <script src="src/GridTester.js"></script>
         <script src="src/GridTestRunner.js"></script>
+        <script src="src/GridTest.js"></script>
         <script src="src/PositionedNode.js"></script>
         <script src="src/PathNode.js"></script>
         <script src="src/Route.js"></script>
@@ -45,7 +46,7 @@
         <script src="test.js"></script>
         <script src="self-test.js"></script>
         <script>
-            let t = new GridTest()
+            let t = new GridTester()
             let size = document.querySelector("#test-size").value
             t.tests = PathTests
             t.randomTest(10, size)
