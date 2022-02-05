@@ -59,15 +59,9 @@ class GridMap {
      * @param {number} node_width
      */
     constructor(pixel_width, node_width) {
-        /**
-         * @type {?position}
-         */
         this.finish = null
         this.nodeWidth = node_width
         this.#source = GridMapSource.build(node_width)
-        /**
-         * @type {?position}
-         */
         this.start = null
         this.pixelWidth = pixel_width
     }
@@ -164,7 +158,7 @@ class GridMap {
     }
     /**
      *
-     * @param {() => position} f
+     * @param {() => Position} f
      */
     searchEmptyNode(f) {
         let point

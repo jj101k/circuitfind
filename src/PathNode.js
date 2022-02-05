@@ -67,18 +67,22 @@ class PathNode extends PositionedNode {
      *
      * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
-     * @param {position} position
+     * @param {Position} position
      * @returns {Generator<{origin: "start" | "finish", node:
      * PositionedNode} | {origin: null, node: PathNode}>}
      */
     static *getPathNodes(existingNode, grid_map, position) {
         let c
-        for (c = existingNode; c; position = PathNode.getFromPosition(position.x, position.y, c.content),
-            c = grid_map.nodeAt(position.x, position.y)) {
+        for (
+            c = existingNode;
+            c;
+            position = Position.fromSimple(PathNode.getFromPosition(position.x, position.y, c.content)),
+                c = grid_map.nodeAt(position.x, position.y)
+        ) {
             if(!(c instanceof PathNode)) {
-                if (grid_map.start && position.x == grid_map.start.x && position.y == grid_map.start.y) {
+                if (grid_map.start && position.equals(grid_map.start)) {
                     yield {origin: "start", node: c}
-                } else if(grid_map.finish && position.x == grid_map.finish.x && position.y == grid_map.finish.y) {
+                } else if(grid_map.finish && position.equals(grid_map.finish)) {
                     yield {origin: "finish", node: c}
                 } else {
                     throw new Error("Bad path??")
@@ -92,7 +96,7 @@ class PathNode extends PositionedNode {
      *
      * @param {PositionedNode} existingNode
      * @param {GridMap} grid_map
-     * @param {position} position
+     * @param {Position} position
      * @returns {number}
      */
     static getOwner(existingNode, grid_map, position) {

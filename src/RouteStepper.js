@@ -1,18 +1,19 @@
 "use strict"
+
 class RouteStepper {
     /**
      *
      * @param {number} side
-     * @param {position} position
+     * @param {Position} position
      */
     constructor(side, position) {
         this.side = side
-        /** @type {{[cost: number]: {from: position, to: position}[]}} */
+        /** @type {{[cost: number]: newRoute[]}} */
         this.newRoutes = {
             4: [],
             6: [],
         }
-        /** @type {{[cost: number]: position[]}} */
+        /** @type {{[cost: number]: Position[]}} */
         this.routes = {
             0: [position],
             2: [],
@@ -45,11 +46,9 @@ class RouteStepper {
                     const existingNode = grid_map.nodeAt(step.x, step.y)
                     if (!existingNode) {
                         this.addNewRoute(cost, { from: position, to: step })
-                    } else if ((
+                    } else if (
                         // Directly reach the target (it happens)
-                        step.x == target_position.x &&
-                        step.y == target_position.y
-                    ) || (
+                        step.equals(target_position) || (
                             // Reach one of the target's path nodes
                             existingNode instanceof PathNode &&
                             grid_map.isLeafNode(step) &&
@@ -96,7 +95,7 @@ class RouteStepper {
     /**
      *
      * @param {number} n
-     * @param {{from: position, to: position}} r
+     * @param {newRoute} r
      */
     addNewRoute(n, r) {
         this.newRoutes[n].push(r)

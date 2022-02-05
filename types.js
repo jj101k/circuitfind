@@ -8,10 +8,16 @@
 
 /**
  * @typedef testSignature
- * @property {position} start
- * @property {position} finish
+ * @property {Position} start
+ * @property {Position} finish
  * @property {position[]} obstructions
  * @property {?boolean} passed
  * @property {?number} correctLength
  * @property {?number} size
+ */
+
+/**
+ * @typedef newRoute
+ * @property {Position} from
+ * @property {Position} to
  */

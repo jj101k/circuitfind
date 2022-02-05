@@ -30,7 +30,7 @@ class Route {
      * @param {CanvasRenderingContext2D} ctx
      */
     display(grid_map, ctx) {
-        this.getNodes(grid_map).forEach(n => {
+        for(const n of this.getNodes(grid_map)) {
             const m = grid_map.nodeAt(n.x, n.y)
             if (!this.left)
                 throw new Error("this.left is null")
@@ -77,7 +77,7 @@ class Route {
     /**
      *
      * @param {GridMap} grid_map
-     * @return {position[]}
+     * @returns
      */
     getNodes(grid_map) {
         if (!this.left)

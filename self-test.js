@@ -112,19 +112,19 @@ function selfTest(continue_on_failure = false) {
         })),
         nextSteps: [
             {
-                f: () => GeneralNode.nextSteps({x: 0, y: 0}, "cheap"),
+                f: () => GeneralNode.nextSteps(new Position(0, 0), "cheap"),
                 v: [{x: -1, y: 0}, {x: 0, y: -1}, {x: 1, y: 0}, {x: 0, y: 1}],
             },
             {
-                f: () => GeneralNode.nextSteps({x: 0, y: 0}, "expensive"),
+                f: () => GeneralNode.nextSteps(new Position(0, 0), "expensive"),
                 v: [{x: -1, y: -1}, {x: -1, y: 1}, {x: 1, y: -1}, {x: 1, y: 1}],
             },
             {
-                f: () => GeneralNode.nextSteps({x: 30, y: 30}, "expensive"),
+                f: () => GeneralNode.nextSteps(new Position(30, 30), "expensive"),
                 v: [{x: 29, y: 29}, {x: 29, y: 31}, {x: 31, y: 29}, {x: 31, y: 31}],
             },
             {
-                f: () => GeneralNode.nextSteps({x: 30, y: 30}, "cheap"),
+                f: () => GeneralNode.nextSteps(new Position(30, 30), "cheap"),
                 v: [{x: 29, y: 30}, {x: 30, y: 29}, {x: 31, y: 30}, {x: 30, y: 31}],
             },
         ],

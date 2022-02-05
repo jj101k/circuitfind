@@ -24,17 +24,17 @@ function load_webassembly(m_exports) {
     GeneralNode.nextSteps =
     /**
      *
-     * @param {position} position
+     * @param {Position} position
      * @param {"cheap" | "expensive"} step_type
-     * @returns {position[]}
+     * @returns {Position[]}
      */
     (position, step_type) => {
         const p = m_exports.nextSteps(position.x, position.y, +(step_type == "expensive"))
         return [
-            {x: h[p + 0], y: h[p + 1]},
-            {x: h[p + 2], y: h[p + 3]},
-            {x: h[p + 4], y: h[p + 5]},
-            {x: h[p + 6], y: h[p + 7]},
+            new Position(h[p + 0], h[p + 1]),
+            new Position(h[p + 2], h[p + 3]),
+            new Position(h[p + 4], h[p + 5]),
+            new Position(h[p + 6], h[p + 7]),
         ]
     }
     PathNode.getFromPosition = (x, y, content) => {

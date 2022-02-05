@@ -7,10 +7,10 @@ class TestBuilder {
     #finish
 
     #findFreePosition() {
-        const position = this.#gridMap.searchEmptyNode(() => ({
-            x: Math.floor(Math.random() * this.#gridMap.nodeWidth),
-            y: Math.floor(Math.random() * this.#gridMap.nodeWidth),
-        }))
+        const position = this.#gridMap.searchEmptyNode(() => new Position(
+            Math.floor(Math.random() * this.#gridMap.nodeWidth),
+            Math.floor(Math.random() * this.#gridMap.nodeWidth),
+        ))
         return position
     }
 

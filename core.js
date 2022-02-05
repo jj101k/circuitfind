@@ -62,21 +62,22 @@ class GridMapSource {
     /**
      * True if `position` is a leaf node, ie a non-target.
      *
-     * @param {position} position
+     * @param {Position} position
      * @returns {boolean}
      */
     isLeafNode(position) {
         for(let x = -1; x <= 1; x++) {
             for(let y = -1; y <= 1; y++) {
                 if(x || y) {
-                    const c = this.contentAt(position.x + x, position.y + y)
+                    const position2 = position.add(new Position(x, y))
+                    const c = this.contentAt(position2.x, position2.y)
                     if(PathNode.isPath(c)) {
                         const pos = PathNode.getFromPosition(
-                            position.x + x,
-                            position.y + y,
+                            position2.x,
+                            position2.y,
                             c
                         )
-                        if(pos.x == position.x && pos.y == position.y) return false
+                        if(position.equals(pos)) return false
                     }
                 }
             }
@@ -88,24 +89,28 @@ class GridMapSource {
 class GeneralNode {
     /**
      *
-     * @param {position} position
+     * @param {Position} position
      * @param {"cheap" | "expensive"} step_type
-     * @returns {position[]}
+     * @returns {Position[]}
      */
     static nextSteps(position, step_type) {
-        /** @type {position[]} */
+        /** @type {Position[]} */
         const steps = []
         if(step_type == "cheap") {
-            steps.push({x: position.x - 1, y: position.y}) // -1  0
-            steps.push({x: position.x, y: position.y + 1}) //  0 +1
-            steps.push({x: position.x + 1, y: position.y}) // +1  0
-            steps.push({x: position.x, y: position.y - 1}) //  0 -1
+            steps.push(...[
+                {x: -1, y:  0},
+                {x:  0, y: +1},
+                {x: +1, y:  0},
+                {x:  0, y: -1},
+            ].map(p => position.add(p)))
         } else {
             // This is ordered to get a circular order
-            steps.push({x: position.x - 1, y: position.y - 1}) // -1 -1
-            steps.push({x: position.x - 1, y: position.y + 1}) // -1 +1
-            steps.push({x: position.x + 1, y: position.y + 1}) // +1 +1
-            steps.push({x: position.x + 1, y: position.y - 1}) // +1 -1
+            steps.push(...[
+                {x: -1, y: -1},
+                {x: -1, y: +1},
+                {x: +1, y: +1},
+                {x: +1, y: -1},
+            ].map(p => position.add(p)))
         }
         return steps
     }
